@@ -1,0 +1,43 @@
+-
+  name: 'Self'
+  uriPattern: 'api/v1/{resource}/{identifier}/relationships/{relationship}'
+  defaults:
+    '@package': 'Ttree.JsonApi'
+    '@controller': 'JsonApi'
+    '@action':     'index'
+    '@format':     'json'
+  httpMethods: ['HEAD', 'GET']
+  appendExceedingArguments: TRUE
+
+-
+  name: 'Related'
+  uriPattern: 'api/v1/{resource}/{identifier}/{relationship}'
+  defaults:
+    '@package': 'Ttree.JsonApi'
+    '@controller': 'JsonApi'
+    '@action':     'index'
+    '@format':     'json'
+  httpMethods: ['HEAD', 'GET']
+  appendExceedingArguments: TRUE
+
+-
+  name: 'Resource'
+  uriPattern: 'api/v1/{resource}/{identifier}'
+  defaults:
+    '@package': 'Ttree.JsonApi'
+    '@controller': 'JsonApi'
+    '@action':     'index'
+    '@format':     'json'
+  httpMethods: ['HEAD', 'GET']
+  appendExceedingArguments: TRUE
+
+-
+  name: 'Resources'
+  uriPattern: 'api/v1/{resource}'
+  defaults:
+    '@package': 'Ttree.JsonApi'
+    '@controller': 'JsonApi'
+    '@action':     'index'
+    '@format':     'json'
+  httpMethods: ['HEAD', 'GET']
+  appendExceedingArguments: TRUE

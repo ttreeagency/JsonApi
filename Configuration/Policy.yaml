@@ -1,0 +1,11 @@
+resources:
+
+  methods:
+    Ttree_JsonApi_JsonApiControllerActions:
+      'method(Ttree\JsonApi\Controller\JsonApiController->(index|show)Action())'
+
+acls:
+
+  Everybody:
+    methods:
+      Ttree_JsonApi_JsonApiControllerActions:    GRANT

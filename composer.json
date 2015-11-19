@@ -1,0 +1,13 @@
+{
+    "name": "ttree/jsonapi",
+    "type": "typo3-flow-package",
+    "description": "Fast and simple way to build JSON-API webservice with Flow Framework",
+    "require": {
+        "typo3/flow": "*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Ttree\\JsonApi": "Classes"
+        }
+    }
+}
