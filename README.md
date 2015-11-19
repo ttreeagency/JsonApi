@@ -32,7 +32,7 @@ Flow Framework distribution. When you are done with the routing, you can start c
   JsonApi:
     endpoints:
       'default':
-        baseUrl: '/api/v1/'
+        baseUrl: 'api/v1/'
         version: '0.9.0'
         resources:
           'movies':

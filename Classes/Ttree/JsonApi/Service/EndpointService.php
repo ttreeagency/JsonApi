@@ -100,7 +100,7 @@ class EndpointService implements EndpointServiceInterface
      * @return string
      */
     public function getBaseUrl() {
-        return isset($this->configuration['baseUrl']) ? $this->configuration['baseUrl'] : '/';
+        return isset($this->settings['baseUrl']) ? $this->settings['baseUrl'] : '/';
     }
 
     /**
