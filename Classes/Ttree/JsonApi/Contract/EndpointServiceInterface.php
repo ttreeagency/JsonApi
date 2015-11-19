@@ -26,6 +26,11 @@ interface EndpointServiceInterface
     public function getEncoder($urlPrefix = null, $depth = 512);
 
     /**
+     * @return string
+     */
+    public function getResource();
+
+    /**
      * @param string $identifier
      * @return object
      */

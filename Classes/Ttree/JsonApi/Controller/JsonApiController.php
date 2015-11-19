@@ -11,6 +11,7 @@ namespace Ttree\JsonApi\Controller;
  * source code.
  */
 
+use Neomerx\JsonApi\Schema\Link;
 use Ttree\JsonApi\Service\EndpointService;
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Flow\Mvc\Controller\ActionController;
@@ -70,7 +71,7 @@ class JsonApiController extends ActionController
                 case 'POST':
                 case 'PUT':
                 case 'DELETE':
-                    throw new NoSuchActionException('Not implemented', 1447800455);
+                    throw new NoSuchActionException('Not implemented currently', 1447800455);
                     break;
             }
             $this->request->setControllerActionName($actionName);
@@ -83,9 +84,15 @@ class JsonApiController extends ActionController
      */
     public function indexAction()
     {
+        $links = [
+            Link::SELF  => new Link(sprintf('/%s', $this->endpoint->getResource())),
+        ];
+
         $data = $this->endpoint->findAll()->toArray();
 
-        $encoder = $this->endpoint->getEncoder($this->getUrlPrefix());
+        $encoder = $this->endpoint
+            ->getEncoder($this->getUrlPrefix())
+            ->withLinks($links);
 
         $this->view->setEncoder($encoder);
         $this->view->setData($data);

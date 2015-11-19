@@ -78,6 +78,13 @@ class EndpointService implements EndpointServiceInterface
     }
 
     /**
+     * @return string
+     */
+    public function getResource() {
+        return $this->resource;
+    }
+
+    /**
      * @param integer $offset
      * @param integer $limit
      * @return \TYPO3\Flow\Persistence\QueryResultInterface
