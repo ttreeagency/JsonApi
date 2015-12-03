@@ -11,6 +11,7 @@ namespace Ttree\JsonApi\Controller;
  * source code.
  */
 
+use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
 use Neomerx\JsonApi\Factories\Factory;
 use Neomerx\JsonApi\Schema\Link;
 use Neomerx\JsonApi\Schema\SchemaProvider;
@@ -24,6 +25,7 @@ use TYPO3\Flow\Mvc\Controller\ActionController;
 use TYPO3\Flow\Mvc\Exception\UnsupportedRequestTypeException;
 use TYPO3\Flow\Mvc\RequestInterface;
 use TYPO3\Flow\Mvc\ResponseInterface;
+use TYPO3\Flow\Mvc\View\ViewInterface;
 
 class JsonApiController extends ActionController
 {
@@ -59,6 +61,11 @@ class JsonApiController extends ActionController
      */
     protected $endpoint;
 
+    /**
+     * @var EncoderInterface
+     */
+    protected $encoder;
+
     protected function initializeAction()
     {
         parent::initializeAction();
@@ -87,7 +94,18 @@ class JsonApiController extends ActionController
         $this->container->registerArray($resourceSettingsDefinition->getSchemas());
 
         $this->endpoint = new EndpointService($resource);
+
+        $urlPrefix = $this->getUrlPrefix($request);
+        $this->encoder = $this->endpoint->getEncoder($urlPrefix);
     }
+
+    protected function initializeView(ViewInterface $view)
+    {
+        /** @var JsonApiView $view */
+        parent::initializeView($view);
+        $view->setEncoder($this->encoder);
+    }
+
 
     /**
      * @return void
@@ -100,11 +118,9 @@ class JsonApiController extends ActionController
 
         $data = $this->endpoint->findAll()->toArray();
 
-        $encoder = $this->endpoint
-            ->getEncoder($this->getUrlPrefix())
+        $this->encoder
             ->withLinks($links);
 
-        $this->view->setEncoder($encoder);
         $this->view->setData($data);
     }
 
@@ -115,10 +131,6 @@ class JsonApiController extends ActionController
     public function showAction($identifier)
     {
         $data = $this->endpoint->findByIdentifier($identifier);
-
-        $encoder = $this->endpoint->getEncoder($this->getUrlPrefix());
-
-        $this->view->setEncoder($encoder);
         $this->view->setData($data);
     }
 
@@ -136,16 +148,16 @@ class JsonApiController extends ActionController
         if (!isset($relationships[$relationship])) {
             // todo handle invalid relation ship
         }
-        $encoder = $this->endpoint->getEncoder($this->getUrlPrefix());
-        $this->view->setEncoder($encoder);
         $this->view->setData($relationships[$relationship]['data']);
     }
 
     /**
+     * @param RequestInterface $request
      * @return string
      */
-    protected function getUrlPrefix() {
-        return rtrim($this->request->getMainRequest()->getHttpRequest()->getBaseUri() . $this->endpoint->getBaseUrl(), '/');
+    protected function getUrlPrefix(RequestInterface $request)
+    {
+        return rtrim($request->getMainRequest()->getHttpRequest()->getBaseUri() . $this->endpoint->getBaseUrl(), '/');
     }
 
 }
