@@ -12,10 +12,14 @@ namespace Ttree\JsonApi\Controller;
  */
 
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
+use Neomerx\JsonApi\Contracts\Parameters\ParametersInterface;
 use Neomerx\JsonApi\Factories\Factory;
+use Neomerx\JsonApi\Parameters\ParametersParser;
 use Neomerx\JsonApi\Schema\Link;
 use Neomerx\JsonApi\Schema\SchemaProvider;
 use Ttree\JsonApi\Domain\Model\ResourceSettingsDefinition;
+use Ttree\JsonApi\Integration\CurrentRequest;
+use Ttree\JsonApi\Integration\ExceptionThrower;
 use Ttree\JsonApi\Schema\Container;
 use Ttree\JsonApi\Service\EndpointService;
 use Ttree\JsonApi\View\JsonApiView;
@@ -62,6 +66,11 @@ class JsonApiController extends ActionController
     protected $endpoint;
 
     /**
+     * @var ParametersInterface
+     */
+    protected $parameters;
+
+    /**
      * @var EncoderInterface
      */
     protected $encoder;
@@ -70,6 +79,11 @@ class JsonApiController extends ActionController
     {
         parent::initializeAction();
         $this->response->setHeader('Content-Type', 'application/vnd.api+json');
+
+        $exceptionThrower = new ExceptionThrower();
+        $currentRequest = new CurrentRequest($this->request);
+        $parameterParser = $this->factory->createParametersParser();
+        $this->parameters = $parameterParser->parse($currentRequest, $exceptionThrower);
     }
 
     /**
@@ -146,7 +160,7 @@ class JsonApiController extends ActionController
         $schema = $this->container->getSchema($data);
         $relationships = $schema->getRelationships($data);
         if (!isset($relationships[$relationship])) {
-            // todo handle invalid relation ship
+            $this->throwStatus(404, sprintf('Relationship "%s" not found', $relationship));
         }
         $this->view->setData($relationships[$relationship]['data']);
     }
