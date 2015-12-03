@@ -11,11 +11,19 @@ namespace Ttree\JsonApi\Controller;
  * source code.
  */
 
+use Neomerx\JsonApi\Factories\Factory;
 use Neomerx\JsonApi\Schema\Link;
+use Neomerx\JsonApi\Schema\SchemaProvider;
+use Ttree\JsonApi\Domain\Model\ResourceSettingsDefinition;
+use Ttree\JsonApi\Schema\Container;
 use Ttree\JsonApi\Service\EndpointService;
+use Ttree\JsonApi\View\JsonApiView;
 use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Flow\Mvc\ActionRequest;
 use TYPO3\Flow\Mvc\Controller\ActionController;
-use TYPO3\Flow\Mvc\Exception\NoSuchActionException;
+use TYPO3\Flow\Mvc\Exception\UnsupportedRequestTypeException;
+use TYPO3\Flow\Mvc\RequestInterface;
+use TYPO3\Flow\Mvc\ResponseInterface;
 
 class JsonApiController extends ActionController
 {
@@ -30,9 +38,21 @@ class JsonApiController extends ActionController
     protected $supportedMediaTypes = array('application/vnd.api+json');
 
     /**
-     * @var \Ttree\JsonApi\View\JsonApiView
+     * @var JsonApiView
      */
     protected $view;
+
+    /**
+     * @var Container
+     * @Flow\Inject(lazy=false)
+     */
+    protected $container;
+
+    /**
+     * @var Factory
+     * @Flow\Inject(lazy=false)
+     */
+    protected $factory;
 
     /**
      * @var EndpointService
@@ -46,37 +66,27 @@ class JsonApiController extends ActionController
     }
 
     /**
-     * Determines the action method and assures that the method exists.
+     * Initializes the controller
      *
-     * @return string The action method name
-     * @throws NoSuchActionException if the action specified in the request object does not exist (and if there's no default action either).
+     * This method should be called by the concrete processRequest() method.
+     *
+     * @param RequestInterface $request
+     * @param ResponseInterface $response
+     * @throws UnsupportedRequestTypeException
      */
-    protected function resolveActionMethodName()
+    protected function initializeController(RequestInterface $request, ResponseInterface $response)
     {
-        if ($this->request->hasArgument('resource') === false) {
+        parent::initializeController($request, $response);
+
+        /** @var ActionRequest $request */
+        if ($request->hasArgument('resource') === false) {
             $this->throwStatus(400);
         }
-        $this->endpoint = new EndpointService($this->request->getArgument('resource'));
-        if ($this->request->getControllerActionName() === 'index') {
-            $actionName = 'index';
-            switch ($this->request->getHttpRequest()->getMethod()) {
-                case 'HEAD':
-                case 'GET':
-                    if ($this->request->hasArgument('resource') && $this->request->hasArgument('identifier')) {
-                        $actionName = 'show';
-                    } else {
-                        $actionName = 'index';
-                    }
-                    break;
-                case 'POST':
-                case 'PUT':
-                case 'DELETE':
-                    throw new NoSuchActionException('Not implemented currently', 1447800455);
-                    break;
-            }
-            $this->request->setControllerActionName($actionName);
-        }
-        return parent::resolveActionMethodName();
+        $resource = $request->getArgument('resource');
+        $resourceSettingsDefinition = new ResourceSettingsDefinition($resource);
+        $this->container->registerArray($resourceSettingsDefinition->getSchemas());
+
+        $this->endpoint = new EndpointService($resource);
     }
 
     /**
@@ -110,6 +120,25 @@ class JsonApiController extends ActionController
 
         $this->view->setEncoder($encoder);
         $this->view->setData($data);
+    }
+
+    /**
+     * @param string $identifier
+     * @param string $relationship
+     * @return void
+     */
+    public function relatedAction($identifier, $relationship)
+    {
+        $data = $this->endpoint->findByIdentifier($identifier);
+        /** @var SchemaProvider $schema */
+        $schema = $this->container->getSchema($data);
+        $relationships = $schema->getRelationships($data);
+        if (!isset($relationships[$relationship])) {
+            // todo handle invalid relation ship
+        }
+        $encoder = $this->endpoint->getEncoder($this->getUrlPrefix());
+        $this->view->setEncoder($encoder);
+        $this->view->setData($relationships[$relationship]['data']);
     }
 
     /**

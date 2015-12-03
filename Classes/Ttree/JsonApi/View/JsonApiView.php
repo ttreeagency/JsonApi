@@ -27,7 +27,7 @@ class JsonApiView extends AbstractView
     /**
      * @var array
      */
-    protected $data;
+    protected $data = [];
 
     /**
      * {@inheritdoc}

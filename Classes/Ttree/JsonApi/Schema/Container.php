@@ -1,5 +1,5 @@
 <?php
-namespace Ttree\JsonApi;
+namespace Ttree\JsonApi\Schema;
 
 /*
  * This file is part of the Ttree.JsonApi package.
@@ -14,11 +14,10 @@ namespace Ttree\JsonApi;
 use TYPO3\Flow\Annotations as Flow;
 
 /**
- * Exception
+ * Factory
  *
  * @Flow\Scope("singleton")
- * @api
  */
-class Exception extends \TYPO3\Flow\Exception
+class Container extends \Neomerx\JsonApi\Schema\Container
 {
 }

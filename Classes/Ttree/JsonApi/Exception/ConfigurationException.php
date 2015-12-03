@@ -1,5 +1,5 @@
 <?php
-namespace Ttree\JsonApi;
+namespace Ttree\JsonApi\Exception;
 
 /*
  * This file is part of the Ttree.JsonApi package.
@@ -11,6 +11,7 @@ namespace Ttree\JsonApi;
  * source code.
  */
 
+use Ttree\JsonApi\Exception;
 use TYPO3\Flow\Annotations as Flow;
 
 /**
@@ -19,6 +20,6 @@ use TYPO3\Flow\Annotations as Flow;
  * @Flow\Scope("singleton")
  * @api
  */
-class Exception extends \TYPO3\Flow\Exception
+class ConfigurationException extends Exception
 {
 }

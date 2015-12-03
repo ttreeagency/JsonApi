@@ -64,7 +64,7 @@ class EndpointService implements EndpointServiceInterface
      */
     protected function initializeObject()
     {
-        $this->configuration = $this->initializeConfiguration();
+        $this->initializeConfiguration();
     }
 
     /**
@@ -80,7 +80,8 @@ class EndpointService implements EndpointServiceInterface
     /**
      * @return string
      */
-    public function getResource() {
+    public function getResource()
+    {
         return $this->resource;
     }
 
@@ -106,7 +107,8 @@ class EndpointService implements EndpointServiceInterface
     /**
      * @return string
      */
-    public function getBaseUrl() {
+    public function getBaseUrl()
+    {
         return isset($this->settings['baseUrl']) ? $this->settings['baseUrl'] : '/';
     }
 
@@ -120,7 +122,7 @@ class EndpointService implements EndpointServiceInterface
         if (!is_array($configuration)) {
             throw new Exception(sprintf('Resource "%s" not configured', $this->resource), 1447947509);
         }
-        return $configuration;
+        $this->configuration = $configuration;
     }
 
     /**

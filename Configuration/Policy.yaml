@@ -2,7 +2,7 @@ resources:
 
   methods:
     Ttree_JsonApi_JsonApiControllerActions:
-      'method(Ttree\JsonApi\Controller\JsonApiController->(index|show)Action())'
+      'method(Ttree\JsonApi\Controller\JsonApiController->(index|show|related)Action())'
 
 acls:
 

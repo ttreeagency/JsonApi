@@ -63,7 +63,8 @@ Features
 
 - [x] Fetching Resources
 - [x] Fetching Resource
-- [ ] Fetching Relationships
+- [x] Fetching Relationships
+- [x] Compound Documents
 - [ ] Sorting
 - [ ] Sparse Fieldsets
 - [ ] Pagination
