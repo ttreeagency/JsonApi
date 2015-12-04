@@ -122,7 +122,7 @@ class JsonApiController extends ActionController
             Link::SELF => new Link(sprintf('/%s', $this->endpoint->getResource())),
         ];
 
-        $data = $this->endpoint->findAll()->toArray();
+        $data = $this->endpoint->findAll();
 
         $this->encoder
             ->withLinks($links);

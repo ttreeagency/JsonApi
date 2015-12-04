@@ -11,6 +11,7 @@ namespace Ttree\JsonApi\Factory;
  * source code.
  */
 
+use Ttree\JsonApi\Parameters\SortParameter;
 use Ttree\JsonApi\Schema\Container;
 use TYPO3\Flow\Annotations as Flow;
 
@@ -23,5 +24,4 @@ class Factory extends \Neomerx\JsonApi\Factories\Factory
     {
         return new Container($this, $providers);
     }
-
 }

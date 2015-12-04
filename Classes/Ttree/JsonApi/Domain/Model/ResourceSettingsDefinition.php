@@ -10,6 +10,7 @@ namespace Ttree\JsonApi\Domain\Model;
  * information, please view the LICENSE file which was distributed with this
  * source code.
  */
+use InvalidArgumentException;
 use Ttree\JsonApi\Exception\ConfigurationException;
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Flow\Utility\Arrays;
@@ -81,5 +82,26 @@ class ResourceSettingsDefinition
     public function getSchemas()
     {
         return $this->getPath('schemas');
+    }
+
+    /**
+     * @return array
+     */
+    public function getSortableAttributes()
+    {
+        return $this->getPath('sortableAttributes');
+    }
+
+    /**
+     * @param string $attributeName
+     * @return string
+     */
+    public function convertSortableAttributes($attributeName)
+    {
+        $attributes = $this->getPath('sortableAttributes');
+        if (!isset($attributes[$attributeName])) {
+            throw new InvalidArgumentException(sprintf('Attribute "%s" not found', $attributeName), 1449251926);
+        }
+        return trim($attributes[$attributeName]);
     }
 }

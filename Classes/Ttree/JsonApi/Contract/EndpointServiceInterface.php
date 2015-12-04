@@ -37,9 +37,7 @@ interface EndpointServiceInterface
     public function findByIdentifier($identifier);
 
     /**
-     * @param integer $offset
-     * @param integer $limit
      * @return \TYPO3\Flow\Persistence\QueryResultInterface
      */
-    public function findAll($offset = 0, $limit = 25);
+    public function findAll();
 }

@@ -48,8 +48,8 @@ open your ```Settings.yaml``` and start some definition:
 - ```baseUrl```: The relative base URL of the current preset, must match your Routing
 - ```version```: Version of the API, currently not used
 - ```resources```: List of Resource to expose in the API
-- ```repository```: Provide a Repository, must implement the ```JsonApiPaginateInterface``` interface, you can use the
-```PaginateTrait``` to remove part of the pain
+- ```repository```: Provide a Repository, must implement the ```JsonApiRepositoryInterface``` interface, you can use the
+```JsonApiRepositoryTrait``` to remove part of the pain
 - ```schemas```: Mapping between your models and a schema class, check the [Schema] documentation for more informations
 
 With the given configuration you can open your browser to: http://www.domain.com/api/v1/movies to show the list of 
@@ -110,6 +110,7 @@ JsonApi:
       resources:
         'movies':
           repository: 'Your\Package\Domain\Repository\MovieRepository'
+          
           schemas:
             'Your\Package\Domain\Model\Movie': 'Ttree\JsonApi\Schema\DynamicEntitySchema'
             'Your\Package\Domain\Model\GenericPerson': 'Your\Package\Schema\GenericPersonSchema'
@@ -121,6 +122,32 @@ JsonApi:
 You can use this schema build to expose TYPO3CR entities.
 
 [currently not supported, check feature list]
+
+Sorting
+-------
+
+By default sorting is disabled, you need to configure explicitly the attributes where sorting is allowed. This 
+configuration can be done for each endpoints. In the exemple bellow only the attribute ```title``` is allowed in the
+```sort``` request parameter.
+
+```yaml
+JsonApi:
+  endpoints:
+    'default':
+      baseUrl: 'api/v1/'
+      version: '0.9.0'
+      resources:
+        'movies':
+          repository: 'Your\Package\Domain\Repository\MovieRepository'
+          
+          sortableAttributes:
+            'title': 'title'
+            
+          schemas:
+            'Your\Package\Domain\Model\Movie': 'Ttree\JsonApi\Schema\DynamicEntitySchema'
+            'Your\Package\Domain\Model\GenericPerson': 'Your\Package\Schema\GenericPersonSchema'
+            'Your\Package\Domain\Model\Category': 'Your\Package\Schema\CategorySchema'
+```
 
 Features
 --------
@@ -134,8 +161,9 @@ Features
 - [x] Sparse Fieldsets
 - [x] Schema generation based on YAML definition for Doctrine entites
   - [ ] Property post processors based on EEL during Schema generation
-- [ ] Sorting
+- [x] Sorting
 - [ ] Pagination
+- [ ] Error Handling
 
 # 2.0
 

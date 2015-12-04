@@ -9,16 +9,17 @@
  */
 namespace Ttree\JsonApi\Contract;
 
-use Ttree\JsonApi\Domain\Model\PaginateOptions;
+use Neomerx\JsonApi\Contracts\Parameters\ParametersInterface;
+use Ttree\JsonApi\Domain\Model\ResourceSettingsDefinition;
 
 /**
  * JsonApiPaginate Interface
  *
  * @api
  */
-interface JsonApiPaginateInterface
+interface JsonApiRepositoryInterface
 {
-    public function paginate(PaginateOptions $options);
+    public function findByJsonApiParameters(ParametersInterface $parameters, ResourceSettingsDefinition $resourceSettingsDefinition);
 
     public function findByIdentifier($identifier);
 }

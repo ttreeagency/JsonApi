@@ -12,10 +12,11 @@ namespace Ttree\JsonApi\Service;
  */
 
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
+use Neomerx\JsonApi\Contracts\Parameters\ParametersInterface;
 use Neomerx\JsonApi\Encoder\EncoderOptions;
 use Ttree\JsonApi\Contract\EndpointServiceInterface;
-use Ttree\JsonApi\Contract\JsonApiPaginateInterface;
-use Ttree\JsonApi\Domain\Model\PaginateOptions;
+use Ttree\JsonApi\Contract\JsonApiRepositoryInterface;
+use Ttree\JsonApi\Domain\Model\ResourceSettingsDefinition;
 use Ttree\JsonApi\Encoder\Encoder;
 use Ttree\JsonApi\Exception;
 use TYPO3\Flow\Annotations as Flow;
@@ -47,16 +48,23 @@ class EndpointService implements EndpointServiceInterface
     protected $resource;
 
     /**
+     * @var ParametersInterface
+     */
+    protected $parameters;
+
+    /**
      * @var array
      */
     protected $configuration;
 
     /**
      * @param string $resource
+     * @param ParametersInterface $parameters
      */
-    public function __construct($resource)
+    public function __construct($resource, ParametersInterface $parameters)
     {
         $this->resource = $resource;
+        $this->parameters = $parameters;
     }
 
     /**
@@ -86,13 +94,12 @@ class EndpointService implements EndpointServiceInterface
     }
 
     /**
-     * @param integer $offset
-     * @param integer $limit
      * @return \TYPO3\Flow\Persistence\QueryResultInterface
      */
-    public function findAll($offset = 0, $limit = 25)
+    public function findAll()
     {
-        return $this->getRepository()->paginate(new PaginateOptions($offset, $limit));
+        $resourceSettingsDefinition = new ResourceSettingsDefinition($this->resource);
+        return $this->getRepository()->findByJsonApiParameters($this->parameters, $resourceSettingsDefinition);
     }
 
     /**
@@ -126,7 +133,7 @@ class EndpointService implements EndpointServiceInterface
     }
 
     /**
-     * @return JsonApiPaginateInterface
+     * @return JsonApiRepositoryInterface
      */
     protected function getRepository()
     {
