@@ -1,2 +1,11 @@
 Neomerx\JsonApi\Contracts\Schema\ContainerInterface:
-  className: 'Neomerx\JsonApi\Schema\Container'
+  scope: singleton
+  className: 'Ttree\JsonApi\Schema\Container'
+
+Neomerx\JsonApi\Contracts\Factories\FactoryInterface:
+  scope: singleton
+  className: 'Ttree\JsonApi\Factory\Factory'
+
+Neomerx\JsonApi\Contracts\Schema\SchemaFactoryInterface:
+  scope: singleton
+  className: 'Ttree\JsonApi\Factory\Factory'

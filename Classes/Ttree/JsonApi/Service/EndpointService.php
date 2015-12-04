@@ -12,11 +12,11 @@ namespace Ttree\JsonApi\Service;
  */
 
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
-use Neomerx\JsonApi\Encoder\Encoder;
 use Neomerx\JsonApi\Encoder\EncoderOptions;
 use Ttree\JsonApi\Contract\EndpointServiceInterface;
 use Ttree\JsonApi\Contract\JsonApiPaginateInterface;
 use Ttree\JsonApi\Domain\Model\PaginateOptions;
+use Ttree\JsonApi\Encoder\Encoder;
 use Ttree\JsonApi\Exception;
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Flow\Object\ObjectManagerInterface;

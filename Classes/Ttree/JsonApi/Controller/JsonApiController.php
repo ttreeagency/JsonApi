@@ -12,10 +12,8 @@ namespace Ttree\JsonApi\Controller;
  */
 
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
-use Neomerx\JsonApi\Contracts\Schema\ContainerInterface;
 use Neomerx\JsonApi\Schema\Link;
 use Neomerx\JsonApi\Schema\SchemaProvider;
-use Ttree\JsonApi\Domain\Model\ResourceSettingsDefinition;
 use Ttree\JsonApi\Service\EndpointService;
 use Ttree\JsonApi\View\JsonApiView;
 use TYPO3\Flow\Annotations as Flow;
@@ -42,12 +40,6 @@ class JsonApiController extends ActionController
      * @var JsonApiView
      */
     protected $view;
-
-    /**
-     * @var ContainerInterface
-     * @Flow\Inject(lazy=false)
-     */
-    protected $container;
 
     /**
      * @var EndpointService
@@ -82,9 +74,8 @@ class JsonApiController extends ActionController
         if ($request->hasArgument('resource') === false) {
             $this->throwStatus(400);
         }
+        // todo return error is the resource is not found or invalid
         $resource = $request->getArgument('resource');
-        $resourceSettingsDefinition = new ResourceSettingsDefinition($resource);
-        $this->container->registerArray($resourceSettingsDefinition->getSchemas());
 
         $this->endpoint = new EndpointService($resource);
 
@@ -96,6 +87,7 @@ class JsonApiController extends ActionController
     {
         /** @var JsonApiView $view */
         parent::initializeView($view);
+        $view->setResource($this->request->getArgument('resource'));
         $view->setEncoder($this->encoder);
     }
 
@@ -136,7 +128,7 @@ class JsonApiController extends ActionController
     {
         $data = $this->endpoint->findByIdentifier($identifier);
         /** @var SchemaProvider $schema */
-        $schema = $this->container->getSchema($data);
+        $schema = $this->view->getSchema($data);
         $relationships = $schema->getRelationships($data);
         if (!isset($relationships[$relationship])) {
             $this->throwStatus(404, sprintf('Relationship "%s" not found', $relationship));
