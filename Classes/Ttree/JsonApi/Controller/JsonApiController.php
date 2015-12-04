@@ -12,8 +12,12 @@ namespace Ttree\JsonApi\Controller;
  */
 
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
+use Neomerx\JsonApi\Contracts\Factories\FactoryInterface;
+use Neomerx\JsonApi\Contracts\Parameters\ParametersInterface;
 use Neomerx\JsonApi\Schema\Link;
 use Neomerx\JsonApi\Schema\SchemaProvider;
+use Ttree\JsonApi\Integration\CurrentRequest;
+use Ttree\JsonApi\Integration\ExceptionThrower;
 use Ttree\JsonApi\Service\EndpointService;
 use Ttree\JsonApi\View\JsonApiView;
 use TYPO3\Flow\Annotations as Flow;
@@ -51,6 +55,17 @@ class JsonApiController extends ActionController
      */
     protected $encoder;
 
+    /**
+     * @var FactoryInterface
+     * @Flow\Inject(lazy=false)
+     */
+    protected $factory;
+
+    /**
+     * @var ParametersInterface
+     */
+    protected $parameters;
+
     protected function initializeAction()
     {
         parent::initializeAction();
@@ -77,7 +92,12 @@ class JsonApiController extends ActionController
         // todo return error is the resource is not found or invalid
         $resource = $request->getArgument('resource');
 
-        $this->endpoint = new EndpointService($resource);
+        $exceptionThrower = new ExceptionThrower();
+        $currentRequest = new CurrentRequest($request);
+        $parameterParser = $this->factory->createParametersParser();
+        $this->parameters = $parameterParser->parse($currentRequest, $exceptionThrower);
+
+        $this->endpoint = new EndpointService($resource, $this->parameters);
 
         $urlPrefix = $this->getUrlPrefix($request);
         $this->encoder = $this->endpoint->getEncoder($urlPrefix);
@@ -89,6 +109,7 @@ class JsonApiController extends ActionController
         parent::initializeView($view);
         $view->setResource($this->request->getArgument('resource'));
         $view->setEncoder($this->encoder);
+        $view->setParameters($this->parameters);
     }
 
 

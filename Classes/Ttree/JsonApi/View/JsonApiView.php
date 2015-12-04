@@ -12,13 +12,11 @@ namespace Ttree\JsonApi\View;
  */
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
 use Neomerx\JsonApi\Contracts\Factories\FactoryInterface;
+use Neomerx\JsonApi\Contracts\Parameters\ParametersInterface;
 use Neomerx\JsonApi\Contracts\Schema\ContainerInterface;
 use Neomerx\JsonApi\Contracts\Schema\SchemaProviderInterface;
 use Ttree\JsonApi\Domain\Model\ResourceSettingsDefinition;
-use Ttree\JsonApi\Integration\CurrentRequest;
-use Ttree\JsonApi\Integration\ExceptionThrower;
 use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Mvc\ActionRequest;
 use TYPO3\Flow\Mvc\View\AbstractView;
 
 /**
@@ -53,22 +51,16 @@ class JsonApiView extends AbstractView
     protected $resource;
 
     /**
+     * @var ParametersInterface
+     */
+    protected $parameters;
+
+    /**
      * {@inheritdoc}
      */
     public function render()
     {
-
-        $request = $this->controllerContext->getRequest();
-        if ($request instanceof ActionRequest) {
-            // todo throw excetion for invalid request
-        }
-
-        $exceptionThrower = new ExceptionThrower();
-        $currentRequest = new CurrentRequest($request);
-        $parameterParser = $this->factory->createParametersParser();
-        $parameters = $parameterParser->parse($currentRequest, $exceptionThrower);
-
-        return $this->encoder->encodeData($this->data, $parameters);
+        return $this->encoder->encodeData($this->data, $this->parameters);
     }
 
     /**
@@ -78,6 +70,14 @@ class JsonApiView extends AbstractView
     public function getSchema($resource)
     {
         return $this->container->getSchema($resource);
+    }
+
+    /**
+     * @param ParametersInterface $parameters
+     */
+    public function setParameters($parameters)
+    {
+        $this->parameters = $parameters;
     }
 
     /**
