@@ -110,7 +110,7 @@ class DynamicEntitySchema extends SchemaProvider
     {
         $attributes = [];
         if (!isset($this->currentSchema['attributes'])) {
-            throw new InvalidArgumentException(sprintf('Attributes is not configuration for class type ""', $this->classType), 1449241670);
+            throw new InvalidArgumentException(sprintf('Attributes is not configuration for class type "%s"', $this->classType), 1449241670);
         }
         foreach ($this->currentSchema['attributes'] as $name => $configuration) {
             $value = ObjectAccess::getPropertyPath($resource, $configuration['property']);
