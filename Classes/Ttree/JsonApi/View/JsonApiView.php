@@ -11,7 +11,12 @@ namespace Ttree\JsonApi\View;
  * source code.
  */
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
+use Neomerx\JsonApi\Contracts\Parameters\ParametersInterface;
+use Neomerx\JsonApi\Factories\Factory;
+use Ttree\JsonApi\Integration\CurrentRequest;
+use Ttree\JsonApi\Integration\ExceptionThrower;
 use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Flow\Mvc\ActionRequest;
 use TYPO3\Flow\Mvc\View\AbstractView;
 
 /**
@@ -25,6 +30,12 @@ class JsonApiView extends AbstractView
     protected $encoder;
 
     /**
+     * @var Factory
+     * @Flow\Inject(lazy=false)
+     */
+    protected $factory;
+
+    /**
      * @var array
      */
     protected $data = [];
@@ -34,17 +45,28 @@ class JsonApiView extends AbstractView
      */
     public function render()
     {
-        return $this->encoder->encodeData($this->data);
+        $request = $this->controllerContext->getRequest();
+        if ($request instanceof ActionRequest) {
+            // todo throw excetion for invalid request
+        }
+        $exceptionThrower = new ExceptionThrower();
+        $currentRequest = new CurrentRequest($request);
+        $parameterParser = $this->factory->createParametersParser();
+        $parameters = $parameterParser->parse($currentRequest, $exceptionThrower);
+
+        return $this->encoder->encodeData($this->data, $parameters);
     }
 
-    public function setEncoder(EncoderInterface $encoder) {
+    public function setEncoder(EncoderInterface $encoder)
+    {
         $this->encoder = $encoder;
     }
 
     /**
      * @param mixed $data
      */
-    public function setData($data) {
+    public function setData($data)
+    {
         $this->data = $data;
     }
 

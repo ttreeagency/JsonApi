@@ -66,7 +66,7 @@ Features
 - [x] Fetching Relationships
 - [x] Compound Documents
 - [ ] Sorting
-- [ ] Sparse Fieldsets
+- [x] Sparse Fieldsets
 - [ ] Pagination
 - [ ] Filtering
 - [ ] Support multiple preset
