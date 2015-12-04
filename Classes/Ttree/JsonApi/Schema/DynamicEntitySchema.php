@@ -111,10 +111,10 @@ class DynamicEntitySchema extends SchemaProvider
     public function getAttributes($resource)
     {
         $attributes = [];
+        if (!isset($this->currentSchema['attributes'])) {
+            throw new InvalidArgumentException(sprintf('Attributes is not configuration for class type ""', $this->classType), 1449241670);
+        }
         foreach ($this->currentSchema['attributes'] as $name => $configuration) {
-            if ($name === '*') {
-                continue;
-            }
             $value = ObjectAccess::getPropertyPath($resource, $configuration['property']);
             if (empty($value)) {
                 continue;
@@ -129,15 +129,20 @@ class DynamicEntitySchema extends SchemaProvider
      * @param object $resource
      * @param array $includeRelationships
      * @return array
+     * @throws InvalidArgumentException
      */
     public function getRelationships($resource, array $includeRelationships = [])
     {
         $relationships = [];
+        if (!isset($this->currentSchema['relationships'])) {
+            return parent::getRelationships($resource, $includeRelationships);
+        }
         foreach ($this->currentSchema['relationships'] as $name => $configuration) {
-            if ($name === '*') {
-                continue;
+            $property = $configuration['data']['property'];
+            if (!ObjectAccess::isPropertyGettable($resource, $property)) {
+                throw new InvalidArgumentException(sprintf('The path "%s" is not gettable in the current resource of type "%s"', $property, $this->classType), 1449241448);
             }
-            $value = ObjectAccess::getPropertyPath($resource, $configuration['data']['property']);
+            $value = ObjectAccess::getPropertyPath($resource, $property);
             if ($value instanceof Collection) {
                 $value = $value->toArray();
             }
