@@ -23,9 +23,7 @@ use TYPO3\Flow\Reflection\ObjectAccess;
 use TYPO3\Flow\Utility\Arrays;
 
 /**
- * Factory
- *
- * @Flow\Scope("singleton")
+ * Dynamic Entity Schema
  */
 class DynamicEntitySchema extends SchemaProvider
 {
