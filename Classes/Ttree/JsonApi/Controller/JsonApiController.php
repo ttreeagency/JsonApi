@@ -12,10 +12,10 @@ namespace Ttree\JsonApi\Controller;
  */
 
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
+use Neomerx\JsonApi\Contracts\Schema\ContainerInterface;
 use Neomerx\JsonApi\Schema\Link;
 use Neomerx\JsonApi\Schema\SchemaProvider;
 use Ttree\JsonApi\Domain\Model\ResourceSettingsDefinition;
-use Ttree\JsonApi\Schema\Container;
 use Ttree\JsonApi\Service\EndpointService;
 use Ttree\JsonApi\View\JsonApiView;
 use TYPO3\Flow\Annotations as Flow;
@@ -44,7 +44,7 @@ class JsonApiController extends ActionController
     protected $view;
 
     /**
-     * @var Container
+     * @var ContainerInterface
      * @Flow\Inject(lazy=false)
      */
     protected $container;
