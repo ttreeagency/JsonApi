@@ -10,11 +10,8 @@ namespace Ttree\JsonApi\Domain\Model;
  * information, please view the LICENSE file which was distributed with this
  * source code.
  */
-use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
 use Ttree\JsonApi\Exception\ConfigurationException;
 use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Exception;
-use TYPO3\Flow\Mvc\View\AbstractView;
 use TYPO3\Flow\Utility\Arrays;
 
 /**

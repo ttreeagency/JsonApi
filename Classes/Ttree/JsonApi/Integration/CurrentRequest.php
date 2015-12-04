@@ -12,7 +12,6 @@ namespace Ttree\JsonApi\Integration;
  */
 
 use Neomerx\JsonApi\Contracts\Integration\CurrentRequestInterface;
-use Neomerx\JsonApi\Contracts\Integration\ExceptionThrowerInterface;
 use Ttree\JsonApi\Exception;
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Flow\Mvc\ActionRequest;
