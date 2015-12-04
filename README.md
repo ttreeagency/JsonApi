@@ -24,9 +24,10 @@ a custom RoutePartHandler for more flexibility.
 How to start you own JSON-API Web Service
 -----------------------------------------
 
-First, check the Routing to adapt to your needs, or include the provided [Routes.yaml](Configuration/Routes.yaml) in your
-Flow Framework distribution. When you are done with the routing, you can start configuring your service, open your
-```Settings.yaml``` and start some definition:
+## Based on Custom Schema class
+
+You can define a Schema Class to convert your object to a JSON API schema. You can start configuring your service, 
+open your ```Settings.yaml``` and start some definition:
 
 ```yaml
   JsonApi:
@@ -58,18 +59,88 @@ The Schema class allow you to control the structure of the JSON, create Links, i
 
 Easy ? No ?
 
+## Based on DynamicEntitySchema
+
+You can use this schema build to expose Doctrine entities. The ```DynamicEntitySchema``` use the schema 
+definitions stored in your ```JsonApiSchema.yaml```. You can split your definitions in multiple file, 
+like ```JsonApiSchema.Movie.yaml```. A basic definition look like this:
+
+```yaml
+'Your\Package\Domain\Model\Movie':
+  resourceType: 'movies'
+  selfSubUrl: '/movies/'
+
+  attributes:
+    short_hash:
+      property: shortHash
+    collection_title:
+      property: title.collectionTitle
+    local_title:
+      property: title.localTitle
+    original_title:
+      property: title.originalTitle
+    teaser:
+      property: teaser
+    description:
+      property: description
+
+  relationships:
+    actors:
+      data:
+        property: directors
+        showRelated: TRUE
+    directors:
+      data:
+        property: directors
+        showRelated: TRUE
+
+  includePaths:
+    directors: TRUE
+    actors: TRUE
+```
+
+When your Schema definition in YAML is done done, you can configure your endpoint like this:
+
+```yaml
+JsonApi:
+  endpoints:
+    'default':
+      baseUrl: 'api/v1/'
+      version: '0.9.0'
+      resources:
+        'movies':
+          repository: 'Your\Package\Domain\Repository\MovieRepository'
+          schemas:
+            'Your\Package\Domain\Model\Movie': 'Ttree\JsonApi\Schema\DynamicEntitySchema'
+            'Your\Package\Domain\Model\GenericPerson': 'Your\Package\Schema\GenericPersonSchema'
+            'Your\Package\Domain\Model\Category': 'Your\Package\Schema\CategorySchema'
+```
+
+## Based on DynamicNodeSchema
+
+You can use this schema build to expose TYPO3CR entities.
+
+[currently not supported, check feature list]
+
 Features
 --------
+
+# 1.0
 
 - [x] Fetching Resources
 - [x] Fetching Resource
 - [x] Fetching Relationships
 - [x] Compound Documents
-- [ ] Sorting
 - [x] Sparse Fieldsets
+- [x] Schema generation based on YAML definition for Doctrine entites
+  - [ ] Property post processors based on EEL during Schema generation
+- [ ] Sorting
 - [ ] Pagination
+
+# 2.0
+
 - [ ] Filtering
-- [ ] Support multiple preset
+- [ ] Schema generation based on YAML definition for TYPO3CR nodes
 - [ ] Caching
 
 Acknowledgments
