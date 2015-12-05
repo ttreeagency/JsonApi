@@ -157,7 +157,10 @@ class JsonApiController extends ActionController
         }
 
         $this->encoder
-            ->withLinks($links);
+            ->withLinks($links)
+            ->withMeta([
+                'total' => $count
+            ]);
 
         $this->view->setData($data);
     }
