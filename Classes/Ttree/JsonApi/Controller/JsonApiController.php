@@ -16,6 +16,7 @@ use Neomerx\JsonApi\Contracts\Factories\FactoryInterface;
 use Neomerx\JsonApi\Contracts\Parameters\ParametersInterface;
 use Neomerx\JsonApi\Schema\Link;
 use Neomerx\JsonApi\Schema\SchemaProvider;
+use Ttree\JsonApi\Domain\Model\PaginationParameters;
 use Ttree\JsonApi\Integration\CurrentRequest;
 use Ttree\JsonApi\Integration\ExceptionThrower;
 use Ttree\JsonApi\Service\EndpointService;
@@ -27,6 +28,7 @@ use TYPO3\Flow\Mvc\Exception\UnsupportedRequestTypeException;
 use TYPO3\Flow\Mvc\RequestInterface;
 use TYPO3\Flow\Mvc\ResponseInterface;
 use TYPO3\Flow\Mvc\View\ViewInterface;
+use TYPO3\Flow\Utility\Arrays;
 
 class JsonApiController extends ActionController
 {
@@ -118,11 +120,41 @@ class JsonApiController extends ActionController
      */
     public function indexAction()
     {
+        $data = $this->endpoint->findAll();
+        $count = $this->endpoint->countAll();
+
+        $parameters = new PaginationParameters($this->parameters->getPaginationParameters() ?: []);
+        $arguments = $this->request->getHttpRequest()->getArguments();
+
         $links = [
-            Link::SELF => new Link(sprintf('/%s', $this->endpoint->getResource())),
+            Link::SELF => new Link(sprintf('/%s', $this->endpoint->getResource()))
         ];
 
-        $data = $this->endpoint->findAll();
+        if ($count > $parameters->getLimit()) {
+            $prev = $parameters->prev();
+            if ($prev !== null) {
+                $query = http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $prev));
+                $links[Link::PREV] = new Link(sprintf('/%s?%s', $this->endpoint->getResource(), $query));
+            }
+
+            $next = $parameters->next($count);
+            if ($next !== null) {
+                $query = http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $next));
+                $links[Link::NEXT] = new Link(sprintf('/%s?%s', $this->endpoint->getResource(), $query));
+            }
+
+            $first = $parameters->first();
+            if ($first !== null) {
+                $query = http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $first));
+                $links[Link::FIRST] = new Link(sprintf('/%s?%s', $this->endpoint->getResource(), $query));
+            }
+
+            $last = $parameters->last($count);
+            if ($last !== null) {
+                $query = http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $last));
+                $links[Link::LAST] = new Link(sprintf('/%s?%s', $this->endpoint->getResource(), $query));
+            }
+        }
 
         $this->encoder
             ->withLinks($links);
@@ -137,6 +169,7 @@ class JsonApiController extends ActionController
     public function showAction($identifier)
     {
         $data = $this->endpoint->findByIdentifier($identifier);
+
         $this->view->setData($data);
     }
 

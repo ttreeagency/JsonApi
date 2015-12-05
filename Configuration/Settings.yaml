@@ -1,0 +1,5 @@
+Ttree:
+  JsonApi:
+    pagination:
+      defaultPageSize: 30
+      maximumPageSize: 100

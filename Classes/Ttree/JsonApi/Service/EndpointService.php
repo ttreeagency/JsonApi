@@ -103,6 +103,13 @@ class EndpointService implements EndpointServiceInterface
     }
 
     /**
+     * @return integer
+     */
+    public function countAll() {
+        return $this->getRepository()->countAll();
+    }
+
+    /**
      * @param string $identifier
      * @return object
      */

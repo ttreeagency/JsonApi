@@ -12,7 +12,7 @@ namespace Ttree\JsonApi\Domain\Repository;
  */
 use Neomerx\JsonApi\Contracts\Parameters\ParametersInterface;
 use Neomerx\JsonApi\Contracts\Parameters\SortParameterInterface;
-use Ttree\JsonApi\Domain\Model\PaginateOptions;
+use Ttree\JsonApi\Domain\Model\PaginationParameters;
 use Ttree\JsonApi\Domain\Model\ResourceSettingsDefinition;
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Flow\Persistence\QueryInterface;
@@ -33,13 +33,14 @@ trait JsonApiRepositoryTrait
         /** @var QueryInterface $query */
         $query = $this->createQuery();
 
-        $query->setLimit(50);
         if ($parameters->isEmpty()) {
             return $query->execute();
         }
 
-        if ($parameters->getPaginationParameters()) {
-
+        $paginationParameters = new PaginationParameters($parameters->getPaginationParameters() ?: []);
+        $query->setLimit($paginationParameters->getLimit());
+        if ($paginationParameters->hasPagination()) {
+            $query->setOffset($paginationParameters->getOffset());
         }
 
         if ($parameters->getSortParameters()) {

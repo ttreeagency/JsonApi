@@ -22,4 +22,6 @@ interface JsonApiRepositoryInterface
     public function findByJsonApiParameters(ParametersInterface $parameters, ResourceSettingsDefinition $resourceSettingsDefinition);
 
     public function findByIdentifier($identifier);
+
+    public function countAll();
 }

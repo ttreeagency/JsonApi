@@ -162,13 +162,14 @@ Features
 - [x] Schema generation based on YAML definition for Doctrine entites
   - [ ] Property post processors based on EEL during Schema generation
 - [x] Sorting
-- [ ] Pagination
+- [x] Pagination (page[number] / page[size] and page[offset] / page[limit])
+  - [ ] Configure defautl pagination strategy, currently hardcode to page[number] & page[size]
 - [ ] Error Handling
 
 # 2.0
 
-- [ ] Filtering
 - [ ] Schema generation based on YAML definition for TYPO3CR nodes
+- [ ] Filtering
 - [ ] Caching
 
 Acknowledgments
