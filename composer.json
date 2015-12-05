@@ -3,7 +3,8 @@
     "type": "typo3-flow-package",
     "description": "Fast and simple way to build JSON-API webservice with Flow Framework",
     "require": {
-        "typo3/flow": "*"
+        "typo3/flow": "*",
+        "neomerx/json-api": "~0.6"
     },
     "autoload": {
         "psr-0": {
