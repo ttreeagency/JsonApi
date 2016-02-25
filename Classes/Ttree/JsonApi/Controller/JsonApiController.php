@@ -94,6 +94,15 @@ class JsonApiController extends ActionController
         // todo return error is the resource is not found or invalid
         $resource = $request->getArgument('resource');
 
+        if ($request->hasArgument('page') === false) {
+            $request->setArgument('page', [
+               'number' => 1,
+               'size' => $this->settings['pagination']['defaultPageSize']
+            ]);
+        } else {
+            // todo return error if page size exceed maximumPageSize
+        }
+
         $exceptionThrower = new ExceptionThrower();
         $currentRequest = new CurrentRequest($request);
         $parameterParser = $this->factory->createParametersParser();
