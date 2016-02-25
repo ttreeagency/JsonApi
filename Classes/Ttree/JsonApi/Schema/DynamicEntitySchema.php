@@ -44,10 +44,11 @@ class DynamicEntitySchema extends SchemaProvider
      */
     public function __construct(SchemaFactoryInterface $factory, ContainerInterface $container, $classType)
     {
-        $this->factory = $factory;
-        $this->container = $container;
-
+        $this->resourceType = $classType;
         $this->schemaDefinition = new JsonApiSchemaDefinition($classType);
+        $this->selfSubUrl = $this->schemaDefinition->getSelfSubUrl();
+
+        parent::__construct($factory, $container);
     }
 
     /**
