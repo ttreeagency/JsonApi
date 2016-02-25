@@ -135,8 +135,14 @@ class JsonApiController extends ActionController
         $parameters = new PaginationParameters($this->parameters->getPaginationParameters() ?: []);
         $arguments = $this->request->getHttpRequest()->getArguments();
 
+        if ($arguments !== []) {
+            $query = http_build_query($arguments);
+            $self = new Link(sprintf('/%s?%s', $this->endpoint->getResource(), $query));
+        } else {
+            $self = new Link(sprintf('/%s', $this->endpoint->getResource()));
+        }
         $links = [
-            Link::SELF => new Link(sprintf('/%s', $this->endpoint->getResource()))
+            Link::SELF => $self
         ];
 
         if ($count > $parameters->getLimit()) {
