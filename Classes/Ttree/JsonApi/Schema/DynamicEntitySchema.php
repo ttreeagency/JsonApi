@@ -20,6 +20,8 @@ use Ttree\JsonApi\Domain\Model\JsonApiSchemaDefinition;
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Flow\Persistence\PersistenceManagerInterface;
 use TYPO3\Flow\Reflection\ObjectAccess;
+use TYPO3\Flow\Resource\Publishing\ResourcePublisher;
+use TYPO3\Media\Domain\Model\AssetInterface;
 
 /**
  * Dynamic Entity Schema
@@ -36,6 +38,12 @@ class DynamicEntitySchema extends SchemaProvider
      * @Flow\Inject
      */
     protected $persistenceManager;
+
+    /**
+     * @var ResourcePublisher
+     * @Flow\Inject
+     */
+    protected $resourcePublisher;
 
     /**
      * @param SchemaFactoryInterface $factory
@@ -88,6 +96,9 @@ class DynamicEntitySchema extends SchemaProvider
         $attributes = [];
         foreach ($this->schemaDefinition->getAttributes() as $name => $configuration) {
             $value = ObjectAccess::getPropertyPath($resource, $configuration['property']);
+            if ($value instanceof AssetInterface) {
+                $value = $this->resourcePublisher->getPersistentResourceWebUri($value->getResource());
+            }
             if (empty($value)) {
                 continue;
             }
