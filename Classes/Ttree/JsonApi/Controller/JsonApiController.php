@@ -1,35 +1,30 @@
 <?php
 namespace Ttree\JsonApi\Controller;
 
-/*
- * This file is part of the Ttree.JsonApi package.
- *
- * (c) ttree - www.ttree.ch
- *
- * This package is Open Source Software. For the full copyright and license
- * information, please view the LICENSE file which was distributed with this
- * source code.
- */
-
+use Neomerx\JsonApi\Contracts\Http\Query\QueryParametersParserInterface;
+use Neos\Flow\Annotations as Flow;
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
 use Neomerx\JsonApi\Contracts\Factories\FactoryInterface;
-use Neomerx\JsonApi\Contracts\Parameters\ParametersInterface;
-use Neomerx\JsonApi\Schema\Link;
+use Neomerx\JsonApi\Contracts\Encoder\Parameters\EncodingParametersInterface;
+use Neomerx\JsonApi\Document\Link;
 use Neomerx\JsonApi\Schema\SchemaProvider;
 use Ttree\JsonApi\Domain\Model\PaginationParameters;
 use Ttree\JsonApi\Integration\CurrentRequest;
 use Ttree\JsonApi\Integration\ExceptionThrower;
 use Ttree\JsonApi\Service\EndpointService;
 use Ttree\JsonApi\View\JsonApiView;
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Mvc\ActionRequest;
-use TYPO3\Flow\Mvc\Controller\ActionController;
-use TYPO3\Flow\Mvc\Exception\UnsupportedRequestTypeException;
-use TYPO3\Flow\Mvc\RequestInterface;
-use TYPO3\Flow\Mvc\ResponseInterface;
-use TYPO3\Flow\Mvc\View\ViewInterface;
-use TYPO3\Flow\Utility\Arrays;
+use Neos\Flow\Mvc\ActionRequest;
+use Neos\Flow\Mvc\Controller\ActionController;
+use Neos\Flow\Mvc\Exception\UnsupportedRequestTypeException;
+use Neos\Flow\Mvc\RequestInterface;
+use Neos\Flow\Mvc\ResponseInterface;
+use Neos\Flow\Mvc\View\ViewInterface;
+use Neos\Utility\Arrays;
 
+/**
+ * Class JsonApiController
+ * @package Ttree\JsonApi\Controller
+ */
 class JsonApiController extends ActionController
 {
     /**
@@ -64,7 +59,7 @@ class JsonApiController extends ActionController
     protected $factory;
 
     /**
-     * @var ParametersInterface
+     * @var EncodingParametersInterface
      */
     protected $parameters;
 
@@ -82,6 +77,10 @@ class JsonApiController extends ActionController
      * @param RequestInterface $request
      * @param ResponseInterface $response
      * @throws UnsupportedRequestTypeException
+     * @throws \Neos\Flow\Mvc\Exception\InvalidArgumentNameException
+     * @throws \Neos\Flow\Mvc\Exception\InvalidArgumentTypeException
+     * @throws \Neos\Flow\Mvc\Exception\NoSuchArgumentException
+     * @throws \Neos\Flow\Mvc\Exception\StopActionException
      */
     protected function initializeController(RequestInterface $request, ResponseInterface $response)
     {
@@ -103,10 +102,11 @@ class JsonApiController extends ActionController
             // todo return error if page size exceed maximumPageSize
         }
 
-        $exceptionThrower = new ExceptionThrower();
+//        $exceptionThrower = new ExceptionThrower();
         $currentRequest = new CurrentRequest($request);
-        $parameterParser = $this->factory->createParametersParser();
-        $this->parameters = $parameterParser->parse($currentRequest, $exceptionThrower);
+        /** @var QueryParametersParserInterface $parameterParser */
+        $parameterParser = $this->factory->createQueryParametersParser();
+        $this->parameters = $parameterParser->parse($currentRequest);
 
         $this->endpoint = new EndpointService($resource, $this->parameters);
 
@@ -114,6 +114,10 @@ class JsonApiController extends ActionController
         $this->encoder = $this->endpoint->getEncoder($urlPrefix);
     }
 
+    /**
+     * @param ViewInterface $view
+     * @throws \Neos\Flow\Mvc\Exception\NoSuchArgumentException
+     */
     protected function initializeView(ViewInterface $view)
     {
         /** @var JsonApiView $view */
@@ -123,8 +127,8 @@ class JsonApiController extends ActionController
         $view->setParameters($this->parameters);
     }
 
-
     /**
+     * @throws \Neos\Flow\Exception
      * @return void
      */
     public function indexAction()
@@ -192,8 +196,10 @@ class JsonApiController extends ActionController
     }
 
     /**
-     * @param string $identifier
-     * @param string $relationship
+     * @param $identifier
+     * @param $relationship
+     * @throws UnsupportedRequestTypeException
+     * @throws \Neos\Flow\Mvc\Exception\StopActionException
      * @return void
      */
     public function relatedAction($identifier, $relationship)

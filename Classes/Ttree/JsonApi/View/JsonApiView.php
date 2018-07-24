@@ -1,26 +1,18 @@
 <?php
 namespace Ttree\JsonApi\View;
 
-/*
- * This file is part of the Ttree.JsonApi package.
- *
- * (c) ttree - www.ttree.ch
- *
- * This package is Open Source Software. For the full copyright and license
- * information, please view the LICENSE file which was distributed with this
- * source code.
- */
+use Neos\Flow\Annotations as Flow;
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
 use Neomerx\JsonApi\Contracts\Factories\FactoryInterface;
-use Neomerx\JsonApi\Contracts\Parameters\ParametersInterface;
+use Neomerx\JsonApi\Contracts\Encoder\Parameters\EncodingParametersInterface;
 use Neomerx\JsonApi\Contracts\Schema\ContainerInterface;
 use Neomerx\JsonApi\Contracts\Schema\SchemaProviderInterface;
 use Ttree\JsonApi\Domain\Model\ResourceSettingsDefinition;
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Mvc\View\AbstractView;
+use Neos\Flow\Mvc\View\AbstractView;
 
 /**
- * Basic REST controller for the Ttree.Medialib package
+ * Class JsonApiView
+ * @package Ttree\JsonApi\View
  */
 class JsonApiView extends AbstractView
 {
@@ -51,7 +43,7 @@ class JsonApiView extends AbstractView
     protected $resource;
 
     /**
-     * @var ParametersInterface
+     * @var EncodingParametersInterface
      */
     protected $parameters;
 
@@ -73,7 +65,7 @@ class JsonApiView extends AbstractView
     }
 
     /**
-     * @param ParametersInterface $parameters
+     * @param EncodingParametersInterface $parameters
      */
     public function setParameters($parameters)
     {
@@ -81,7 +73,8 @@ class JsonApiView extends AbstractView
     }
 
     /**
-     * @param string $resource
+     * @param $resource
+     * @throws \Ttree\JsonApi\Exception\ConfigurationException
      */
     public function setResource($resource)
     {
@@ -90,6 +83,9 @@ class JsonApiView extends AbstractView
         $this->container = $this->factory->createContainer($resourceSettingsDefinition->getSchemas());
     }
 
+    /**
+     * @param EncoderInterface $encoder
+     */
     public function setEncoder(EncoderInterface $encoder)
     {
         $this->encoder = $encoder;

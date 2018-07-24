@@ -1,19 +1,10 @@
 <?php
 namespace Ttree\JsonApi\Domain\Model;
 
-/*
- * This file is part of the Ttree.JsonApi package.
- *
- * (c) ttree - www.ttree.ch
- *
- * This package is Open Source Software. For the full copyright and license
- * information, please view the LICENSE file which was distributed with this
- * source code.
- */
+use Neos\Flow\Annotations as Flow;
 use InvalidArgumentException;
 use Ttree\JsonApi\Exception\ConfigurationException;
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Utility\Arrays;
+use Neos\Utility\Arrays;
 
 /**
  * Paginate Options
@@ -21,10 +12,10 @@ use TYPO3\Flow\Utility\Arrays;
 class ResourceSettingsDefinition
 {
     /**
+     * @Flow\InjectConfiguration(path="endpoints.default.resources")
      * @var array
-     * @Flow\Inject(setting="endpoints.default.resources")
      */
-    protected $settings;
+    protected $settings = array();
 
     /**
      * @var string
@@ -41,6 +32,7 @@ class ResourceSettingsDefinition
 
     /**
      * Validate resource settings
+     * @throws ConfigurationException
      */
     public function validate()
     {
@@ -55,8 +47,9 @@ class ResourceSettingsDefinition
     }
 
     /**
-     * @param mixed $path
+     * @param $path
      * @return mixed
+     * @throws ConfigurationException
      */
     protected function getPath($path)
     {
@@ -69,7 +62,8 @@ class ResourceSettingsDefinition
     }
 
     /**
-     * @return string
+     * @return mixed
+     * @throws ConfigurationException
      */
     public function getRepository()
     {
@@ -77,7 +71,8 @@ class ResourceSettingsDefinition
     }
 
     /**
-     * @return array
+     * @return mixed
+     * @throws ConfigurationException
      */
     public function getSchemas()
     {
@@ -85,7 +80,8 @@ class ResourceSettingsDefinition
     }
 
     /**
-     * @return array
+     * @return mixed
+     * @throws ConfigurationException
      */
     public function getSortableAttributes()
     {
@@ -93,10 +89,11 @@ class ResourceSettingsDefinition
     }
 
     /**
-     * @param string $attributeName
+     * @param $attributeName
      * @return string
+     * @throws ConfigurationException
      */
-    public function convertSortableAttributes($attributeName)
+    public function convertSortableAttributes($attributeName): string
     {
         $attributes = $this->getPath('sortableAttributes');
         if (!isset($attributes[$attributeName])) {

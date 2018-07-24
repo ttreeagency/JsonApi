@@ -1,22 +1,13 @@
 <?php
 namespace Ttree\JsonApi\Domain\Repository;
 
-/*
- * This file is part of the Ttree.JsonApi package.
- *
- * (c) ttree - www.ttree.ch
- *
- * This package is Open Source Software. For the full copyright and license
- * information, please view the LICENSE file which was distributed with this
- * source code.
- */
-use Neomerx\JsonApi\Contracts\Parameters\ParametersInterface;
-use Neomerx\JsonApi\Contracts\Parameters\SortParameterInterface;
+use Neos\Flow\Annotations as Flow;
+use Neomerx\JsonApi\Contracts\Encoder\Parameters\SortParameterInterface;
+use Neomerx\JsonApi\Contracts\Encoder\Parameters\EncodingParametersInterface;
 use Ttree\JsonApi\Domain\Model\PaginationParameters;
 use Ttree\JsonApi\Domain\Model\ResourceSettingsDefinition;
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Persistence\QueryInterface;
-use TYPO3\Flow\Persistence\QueryResultInterface;
+use Neos\Flow\Persistence\QueryInterface;
+use Neos\Flow\Persistence\QueryResultInterface;
 
 /**
  * Paginate Options
@@ -24,11 +15,13 @@ use TYPO3\Flow\Persistence\QueryResultInterface;
 trait JsonApiRepositoryTrait
 {
     /**
-     * @param ParametersInterface $parameters
+     * @param EncodingParametersInterface $parameters
      * @param ResourceSettingsDefinition $resourceSettingsDefinition
      * @return QueryResultInterface
+     * @throws \Neos\Flow\Exception
+     * @throws \Ttree\JsonApi\Exception\ConfigurationException
      */
-    public function findByJsonApiParameters(ParametersInterface $parameters, ResourceSettingsDefinition $resourceSettingsDefinition)
+    public function findByJsonApiParameters(EncodingParametersInterface $parameters, ResourceSettingsDefinition $resourceSettingsDefinition)
     {
         /** @var QueryInterface $query */
         $query = $this->createQuery();
@@ -53,7 +46,6 @@ trait JsonApiRepositoryTrait
             }
             $query->setOrderings($ordering);
         }
-
         return $query->execute();
     }
 }

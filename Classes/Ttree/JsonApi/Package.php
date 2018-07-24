@@ -1,23 +1,15 @@
 <?php
 namespace Ttree\JsonApi;
 
-/*
- * This file is part of the Ttree.JsonApi package.
- *
- * (c) ttree - www.ttree.ch
- *
- * This package is Open Source Software. For the full copyright and license
- * information, please view the LICENSE file which was distributed with this
- * source code.
- */
-use TYPO3\Flow\Configuration\ConfigurationManager;
-use TYPO3\Flow\Core\Bootstrap;
-use TYPO3\Flow\Monitor\FileMonitor;
-use TYPO3\Flow\Package\Package as BasePackage;
+use Neos\Flow\Configuration\ConfigurationManager;
+use Neos\Flow\Core\Bootstrap;
+use Neos\Flow\Monitor\FileMonitor;
+use Neos\Flow\Package\FlowPackageInterface;
+use Neos\Flow\Package\Package as BasePackage;
 
 /**
- * The Ttree Event Package
- *
+ * Class Package
+ * @package Ttree\JsonApi
  */
 class Package extends BasePackage
 {
@@ -36,7 +28,7 @@ class Package extends BasePackage
     public function boot(Bootstrap $bootstrap)
     {
         $dispatcher = $bootstrap->getSignalSlotDispatcher();
-        $dispatcher->connect('TYPO3\Flow\Configuration\ConfigurationManager', 'configurationManagerReady',
+        $dispatcher->connect('Neos\Flow\Configuration\ConfigurationManager', 'configurationManagerReady',
             function ($configurationManager) {
                 $configurationManager->registerConfigurationType(
                     'JsonApiSchema',
@@ -48,11 +40,15 @@ class Package extends BasePackage
 
         $context = $bootstrap->getContext();
         if (!$context->isProduction()) {
-            $dispatcher->connect('TYPO3\Flow\Core\Booting\Sequence', 'afterInvokeStep', function ($step) use ($bootstrap) {
-                if ($step->getIdentifier() === 'typo3.flow:systemfilemonitor') {
+            $dispatcher->connect('Neos\Flow\Core\Booting\Sequence', 'afterInvokeStep', function ($step) use ($bootstrap) {
+                if ($step->getIdentifier() === 'neos.flow:systemfilemonitor') {
                     $nodeTypeConfigurationFileMonitor = FileMonitor::createFileMonitorAtBoot('TtreeJsonApi_JsonApiSchemaConfiguration', $bootstrap);
-                    $packageManager = $bootstrap->getEarlyInstance('TYPO3\Flow\Package\PackageManagerInterface');
-                    foreach ($packageManager->getActivePackages() as $packageKey => $package) {
+                    $packageManager = $bootstrap->getEarlyInstance('Neos\Flow\Package\PackageManagerInterface');
+                    /**
+                     * @var string $packageKey
+                     * @var FlowPackageInterface $package
+                     */
+                    foreach ($packageManager->getFlowPackages() as $packageKey => $package) {
                         if ($packageManager->isPackageFrozen($packageKey)) {
                             continue;
                         }

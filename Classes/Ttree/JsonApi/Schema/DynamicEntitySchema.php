@@ -1,27 +1,17 @@
 <?php
 namespace Ttree\JsonApi\Schema;
 
-/*
- * This file is part of the Ttree.JsonApi package.
- *
- * (c) ttree - www.ttree.ch
- *
- * This package is Open Source Software. For the full copyright and license
- * information, please view the LICENSE file which was distributed with this
- * source code.
- */
-
+use Neos\Flow\Annotations as Flow;
 use Doctrine\Common\Collections\Collection;
 use InvalidArgumentException;
 use Neomerx\JsonApi\Contracts\Schema\ContainerInterface;
 use Neomerx\JsonApi\Contracts\Schema\SchemaFactoryInterface;
 use Neomerx\JsonApi\Schema\SchemaProvider;
 use Ttree\JsonApi\Domain\Model\JsonApiSchemaDefinition;
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Persistence\PersistenceManagerInterface;
-use TYPO3\Flow\Reflection\ObjectAccess;
-use TYPO3\Flow\Resource\Publishing\ResourcePublisher;
-use TYPO3\Media\Domain\Model\AssetInterface;
+use Neos\Flow\Persistence\PersistenceManagerInterface;
+use Neos\Utility\ObjectAccess;
+use Neos\Flow\ResourceManagement\PersistentResource;
+use Neos\Media\Domain\Model\AssetInterface;
 
 /**
  * Dynamic Entity Schema
@@ -40,7 +30,7 @@ class DynamicEntitySchema extends SchemaProvider
     protected $persistenceManager;
 
     /**
-     * @var ResourcePublisher
+     * @var PersistentResource
      * @Flow\Inject
      */
     protected $resourcePublisher;
@@ -56,7 +46,7 @@ class DynamicEntitySchema extends SchemaProvider
         $this->schemaDefinition = new JsonApiSchemaDefinition($classType);
         $this->selfSubUrl = $this->schemaDefinition->getSelfSubUrl();
 
-        parent::__construct($factory, $container);
+        parent::__construct($factory);
     }
 
     /**
@@ -69,9 +59,10 @@ class DynamicEntitySchema extends SchemaProvider
     }
 
     /**
+     * @param null $resource
      * @return string
      */
-    public function getSelfSubUrl()
+    public function getSelfSubUrl($resource = null)
     {
         return $this->schemaDefinition->getSelfSubUrl();
     }
@@ -110,11 +101,11 @@ class DynamicEntitySchema extends SchemaProvider
 
     /**
      * @param object $resource
+     * @param bool $isPrimary
      * @param array $includeRelationships
      * @return array
-     * @throws InvalidArgumentException
      */
-    public function getRelationships($resource, array $includeRelationships = [])
+    public function getRelationships($resource, $isPrimary, array $includeRelationships)
     {
         $relationships = [];
         foreach ($this->schemaDefinition->getRelationships() as $name => $configuration) {

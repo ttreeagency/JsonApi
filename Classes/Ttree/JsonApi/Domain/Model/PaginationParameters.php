@@ -1,20 +1,8 @@
 <?php
 namespace Ttree\JsonApi\Domain\Model;
 
-/*
- * This file is part of the Ttree.JsonApi package.
- *
- * (c) ttree - www.ttree.ch
- *
- * This package is Open Source Software. For the full copyright and license
- * information, please view the LICENSE file which was distributed with this
- * source code.
- */
-use InvalidArgumentException;
-use Ttree\JsonApi\Exception\ConfigurationException;
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Exception;
-use TYPO3\Flow\Utility\Arrays;
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Exception;
 
 /**
  * Paginate Options
@@ -27,7 +15,7 @@ class PaginationParameters
 
     /**
      * @var array
-     * @Flow\Inject(setting="pagination")
+     * @Flow\InjectConfiguration(setting="pagination")
      */
     protected $settings;
 

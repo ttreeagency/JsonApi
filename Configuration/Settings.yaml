@@ -3,3 +3,8 @@ Ttree:
     pagination:
       defaultPageSize: 30
       maximumPageSize: 100
+    endpoints:
+      'default':
+        baseUrl: 'api/v1/'
+        version: '0.9.0'
+        resources: []

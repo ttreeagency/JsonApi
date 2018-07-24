@@ -1,19 +1,9 @@
 <?php
 namespace Ttree\JsonApi\Integration;
 
-/*
- * This file is part of the Ttree.JsonApi package.
- *
- * (c) ttree - www.ttree.ch
- *
- * This package is Open Source Software. For the full copyright and license
- * information, please view the LICENSE file which was distributed with this
- * source code.
- */
-
-use Neomerx\JsonApi\Contracts\Integration\ExceptionThrowerInterface;
+//use Neomerx\JsonApi\Contracts\Integration\ExceptionThrowerInterface;
 use Ttree\JsonApi\Exception;
-use TYPO3\Flow\Annotations as Flow;
+use Neos\Flow\Annotations as Flow;
 
 /**
  * Exception
@@ -21,7 +11,7 @@ use TYPO3\Flow\Annotations as Flow;
  * @Flow\Scope("singleton")
  * @api
  */
-class ExceptionThrower implements ExceptionThrowerInterface
+class ExceptionThrower
 {
     /**
      * Throw 'Bad request' exception (HTTP code 400).

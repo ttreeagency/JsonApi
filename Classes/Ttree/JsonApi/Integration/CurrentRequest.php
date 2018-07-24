@@ -1,27 +1,17 @@
 <?php
 namespace Ttree\JsonApi\Integration;
 
-/*
- * This file is part of the Ttree.JsonApi package.
- *
- * (c) ttree - www.ttree.ch
- *
- * This package is Open Source Software. For the full copyright and license
- * information, please view the LICENSE file which was distributed with this
- * source code.
- */
-
-use Neomerx\JsonApi\Contracts\Integration\CurrentRequestInterface;
+//use Neomerx\JsonApi\Contracts\Integration\CurrentRequestInterface;
 use Ttree\JsonApi\Exception;
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Mvc\ActionRequest;
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Mvc\ActionRequest;
 
 /**
  * Exception
  *
  * @api
  */
-class CurrentRequest implements CurrentRequestInterface
+class CurrentRequest
 {
 
     /**

@@ -1,12 +1,4 @@
 <?php
-/**
- * This script belongs to the TYPO3 Flow package "medialib.tv"
- *
- * Check the LICENSE.txt for more informations about the license
- * used for this project
- *
- * Hand crafted with love to each detail by ttree.ch
- */
 namespace Ttree\JsonApi\Contract;
 
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
@@ -37,7 +29,7 @@ interface EndpointServiceInterface
     public function findByIdentifier($identifier);
 
     /**
-     * @return \TYPO3\Flow\Persistence\QueryResultInterface
+     * @return \Neos\Flow\Persistence\QueryResultInterface
      */
     public function findAll();
 }

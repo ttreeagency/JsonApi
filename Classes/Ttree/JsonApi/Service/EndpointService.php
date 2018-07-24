@@ -1,27 +1,17 @@
 <?php
 namespace Ttree\JsonApi\Service;
 
-/*
- * This file is part of the Ttree.JsonApi package.
- *
- * (c) ttree - www.ttree.ch
- *
- * This package is Open Source Software. For the full copyright and license
- * information, please view the LICENSE file which was distributed with this
- * source code.
- */
-
+use Neos\Flow\Annotations as Flow;
+use Neomerx\JsonApi\Contracts\Encoder\Parameters\EncodingParametersInterface;
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
-use Neomerx\JsonApi\Contracts\Parameters\ParametersInterface;
 use Neomerx\JsonApi\Encoder\EncoderOptions;
 use Ttree\JsonApi\Contract\EndpointServiceInterface;
 use Ttree\JsonApi\Contract\JsonApiRepositoryInterface;
 use Ttree\JsonApi\Domain\Model\ResourceSettingsDefinition;
 use Ttree\JsonApi\Encoder\Encoder;
 use Ttree\JsonApi\Exception;
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Object\ObjectManagerInterface;
-use TYPO3\Flow\Utility\Arrays;
+use Neos\Flow\ObjectManagement\ObjectManagerInterface;
+use Neos\Utility\Arrays;
 
 /**
  * Class EndpointService
@@ -38,7 +28,6 @@ class EndpointService implements EndpointServiceInterface
 
     /**
      * @var array
-     * @Flow\Inject(setting="endpoints.default")
      */
     protected $settings;
 
@@ -48,7 +37,7 @@ class EndpointService implements EndpointServiceInterface
     protected $resource;
 
     /**
-     * @var ParametersInterface
+     * @var EncodingParametersInterface
      */
     protected $parameters;
 
@@ -59,9 +48,9 @@ class EndpointService implements EndpointServiceInterface
 
     /**
      * @param string $resource
-     * @param ParametersInterface $parameters
+     * @param EncodingParametersInterface $parameters
      */
-    public function __construct($resource, ParametersInterface $parameters)
+    public function __construct($resource, EncodingParametersInterface $parameters)
     {
         $this->resource = $resource;
         $this->parameters = $parameters;
@@ -94,7 +83,7 @@ class EndpointService implements EndpointServiceInterface
     }
 
     /**
-     * @return \TYPO3\Flow\Persistence\QueryResultInterface
+     * @return \Neos\Flow\Persistence\QueryResultInterface
      */
     public function findAll()
     {
