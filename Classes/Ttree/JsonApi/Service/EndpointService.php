@@ -1,4 +1,5 @@
 <?php
+
 namespace Ttree\JsonApi\Service;
 
 use Neos\Flow\Annotations as Flow;
@@ -28,6 +29,7 @@ class EndpointService implements EndpointServiceInterface
 
     /**
      * @var array
+     * @Flow\InjectConfiguration(path="endpoints.default")
      */
     protected $settings;
 
@@ -94,7 +96,8 @@ class EndpointService implements EndpointServiceInterface
     /**
      * @return integer
      */
-    public function countAll() {
+    public function countAll()
+    {
         return $this->getRepository()->countAll();
     }
 
@@ -129,10 +132,22 @@ class EndpointService implements EndpointServiceInterface
     }
 
     /**
-     * @return JsonApiRepositoryInterface
+     * @return object|JsonApiRepositoryInterface
+     * @throws Exception
      */
     protected function getRepository()
     {
+        if (!isset($this->configuration['repository'])) {
+            $repository = $this->objectManager->get('Ttree\JsonApi\Domain\Repository\DefaultRepository');
+
+            if (!isset($this->configuration['entity'])) {
+                throw new Exception(sprintf('Resource "%s" no "entity" configured', $this->resource), 1447947510);
+            }
+            $repository->setEntityClassName($this->configuration['entity']);
+
+            return $repository;
+        }
+
         return $this->objectManager->get($this->configuration['repository']);
     }
 

@@ -8,3 +8,9 @@ Ttree:
         baseUrl: 'api/v1/'
         version: '0.9.0'
         resources: []
+
+Neos:
+  Flow:
+    mvc:
+      routes:
+        'Ttree.JsonApi': TRUE

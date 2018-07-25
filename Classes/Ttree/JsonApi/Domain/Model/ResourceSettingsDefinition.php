@@ -53,12 +53,12 @@ class ResourceSettingsDefinition
      */
     protected function getPath($path)
     {
-        static $ressourceSetting;
-        if ($ressourceSetting === null) {
+        static $resourceSetting;
+        if ($resourceSetting === null) {
             $this->validate();
-            $ressourceSetting = Arrays::getValueByPath($this->settings, $this->resource);
+            $resourceSetting = Arrays::getValueByPath($this->settings, $this->resource);
         }
-        return Arrays::getValueByPath($ressourceSetting, $path);
+        return Arrays::getValueByPath($resourceSetting, $path);
     }
 
     /**

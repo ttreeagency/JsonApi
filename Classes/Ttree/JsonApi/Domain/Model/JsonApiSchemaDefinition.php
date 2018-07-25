@@ -54,6 +54,9 @@ class JsonApiSchemaDefinition
         $this->classType = $classType;
     }
 
+    /**
+     * @throws \Neos\Flow\Configuration\Exception\InvalidConfigurationTypeException
+     */
     public function initializeObject()
     {
         $this->schemas = $this->configurationManager->getConfiguration('JsonApiSchema');

@@ -15,7 +15,7 @@ class PaginationParameters
 
     /**
      * @var array
-     * @Flow\InjectConfiguration(setting="pagination")
+     * @Flow\InjectConfiguration(path="pagination")
      */
     protected $settings;
 

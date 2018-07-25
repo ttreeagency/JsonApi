@@ -2,8 +2,8 @@
 namespace Ttree\JsonApi\Integration;
 
 //use Neomerx\JsonApi\Contracts\Integration\CurrentRequestInterface;
-use Ttree\JsonApi\Exception;
 use Neos\Flow\Annotations as Flow;
+use Ttree\JsonApi\Exception;
 use Neos\Flow\Mvc\ActionRequest;
 
 /**

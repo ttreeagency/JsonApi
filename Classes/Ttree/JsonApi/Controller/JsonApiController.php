@@ -1,8 +1,9 @@
 <?php
 namespace Ttree\JsonApi\Controller;
 
-use Neomerx\JsonApi\Contracts\Http\Query\QueryParametersParserInterface;
+use Neomerx\JsonApi\Exceptions\JsonApiException;
 use Neos\Flow\Annotations as Flow;
+use Ttree\JsonApi\Mvc\Controller\QueryParametersParser;
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
 use Neomerx\JsonApi\Contracts\Factories\FactoryInterface;
 use Neomerx\JsonApi\Contracts\Encoder\Parameters\EncodingParametersInterface;
@@ -10,7 +11,6 @@ use Neomerx\JsonApi\Document\Link;
 use Neomerx\JsonApi\Schema\SchemaProvider;
 use Ttree\JsonApi\Domain\Model\PaginationParameters;
 use Ttree\JsonApi\Integration\CurrentRequest;
-use Ttree\JsonApi\Integration\ExceptionThrower;
 use Ttree\JsonApi\Service\EndpointService;
 use Ttree\JsonApi\View\JsonApiView;
 use Neos\Flow\Mvc\ActionRequest;
@@ -24,6 +24,7 @@ use Neos\Utility\Arrays;
 /**
  * Class JsonApiController
  * @package Ttree\JsonApi\Controller
+ * @Flow\Scope("singleton")
  */
 class JsonApiController extends ActionController
 {
@@ -63,6 +64,15 @@ class JsonApiController extends ActionController
      */
     protected $parameters;
 
+    /**
+     * @Flow\InjectConfiguration(path="endpoints.default.resources")
+     * @var array
+     */
+    protected $availableResources;
+
+    /**
+     * Initialize Action
+     */
     protected function initializeAction()
     {
         parent::initializeAction();
@@ -77,8 +87,6 @@ class JsonApiController extends ActionController
      * @param RequestInterface $request
      * @param ResponseInterface $response
      * @throws UnsupportedRequestTypeException
-     * @throws \Neos\Flow\Mvc\Exception\InvalidArgumentNameException
-     * @throws \Neos\Flow\Mvc\Exception\InvalidArgumentTypeException
      * @throws \Neos\Flow\Mvc\Exception\NoSuchArgumentException
      * @throws \Neos\Flow\Mvc\Exception\StopActionException
      */
@@ -90,22 +98,15 @@ class JsonApiController extends ActionController
         if ($request->hasArgument('resource') === false) {
             $this->throwStatus(400);
         }
-        // todo return error is the resource is not found or invalid
-        $resource = $request->getArgument('resource');
 
-        if ($request->hasArgument('page') === false) {
-            $request->setArgument('page', [
-               'number' => 1,
-               'size' => $this->settings['pagination']['defaultPageSize']
-            ]);
-        } else {
-            // todo return error if page size exceed maximumPageSize
+        $resource = $request->getArgument('resource');
+        if (!\array_key_exists($resource, $this->availableResources)) {
+            $this->throwStatus(404);
         }
 
-//        $exceptionThrower = new ExceptionThrower();
         $currentRequest = new CurrentRequest($request);
-        /** @var QueryParametersParserInterface $parameterParser */
-        $parameterParser = $this->factory->createQueryParametersParser();
+        /** @var QueryParametersParser $parameterParser */
+        $parameterParser = new QueryParametersParser($this->factory);
         $this->parameters = $parameterParser->parse($currentRequest);
 
         $this->endpoint = new EndpointService($resource, $this->parameters);
@@ -117,6 +118,7 @@ class JsonApiController extends ActionController
     /**
      * @param ViewInterface $view
      * @throws \Neos\Flow\Mvc\Exception\NoSuchArgumentException
+     * @throws \Ttree\JsonApi\Exception\ConfigurationException
      */
     protected function initializeView(ViewInterface $view)
     {
@@ -133,6 +135,13 @@ class JsonApiController extends ActionController
      */
     public function indexAction()
     {
+        if ($this->request->hasArgument('page') === false) {
+            $this->request->setArgument('page', [
+                'number' => 1,
+                'size' => $this->settings['pagination']['defaultPageSize']
+            ]);
+        }
+
         $data = $this->endpoint->findAll();
         $count = $this->endpoint->countAll();
 
@@ -175,11 +184,9 @@ class JsonApiController extends ActionController
             }
         }
 
-        $this->encoder
-            ->withLinks($links)
-            ->withMeta([
-                'total' => $count
-            ]);
+        $this->encoder->withLinks($links)->withMeta([
+            'total' => $count
+        ]);
 
         $this->view->setData($data);
     }
@@ -207,7 +214,7 @@ class JsonApiController extends ActionController
         $data = $this->endpoint->findByIdentifier($identifier);
         /** @var SchemaProvider $schema */
         $schema = $this->view->getSchema($data);
-        $relationships = $schema->getRelationships($data);
+        $relationships = $schema->getRelationships($data, false, []);
         if (!isset($relationships[$relationship])) {
             $this->throwStatus(404, sprintf('Relationship "%s" not found', $relationship));
         }
@@ -221,6 +228,78 @@ class JsonApiController extends ActionController
     protected function getUrlPrefix(RequestInterface $request)
     {
         return rtrim($request->getMainRequest()->getHttpRequest()->getBaseUri() . $this->endpoint->getBaseUrl(), '/');
+    }
+
+    /**
+     * @param $model
+     */
+    public function createAction($model)
+    {
+        $this->endpoint->add($model);
+        $this->persistenceManager->persistAll();
+        $this->response->setStatus(201);
+        $this->view->setData($model);
+    }
+
+    /**
+     * @param $identifier
+     * @param $data
+     */
+    public function updateAction($identifier, $data)
+    {
+        $model = $this->endpoint->findByIdentifier($identifier);
+
+        // DO UPDATE STUFF
+        $this->endpoint->update($model);
+
+        $this->persistenceManager->persistAll();
+        $this->response->setStatus(200);
+        $this->view->setData($model);
+    }
+
+    /**
+     * @param $identifier
+     * @return string
+     */
+    public function deleteAction($identifier)
+    {
+        $model = $this->endpoint->findByIdentifier($identifier);
+        $this->endpoint->remove($model);
+
+        $this->persistenceManager->persistAll();
+        $this->response->setStatus(204);
+        return '';
+    }
+
+    /**
+     * Returns the supported request methods for a single and set the "Allow" header accordingly
+     *
+     * @return string An empty string in order to prevent the view from rendering the action
+     * @throws \Neos\Flow\Mvc\Exception\NoSuchArgumentException
+     */
+    public function optionsAction() {
+
+        $allowedMethods = array(
+            'GET',
+            'POST',
+            'PATCH',
+            'DELETE'
+        );
+        $resource = $this->request->getArgument('resource');
+
+        if (isset($this->availableResources[$resource]['allowedMethods'])) {
+            $allowedMethods = $this->availableResources[$resource]['allowedMethods'];
+        };
+
+        if (isset($this->availableResources[$resource]['disallowedMethods'])) {
+            foreach ($this->availableResources[$resource]['disallowedMethods'] as $method) {
+                unset($allowedMethods[$method]);
+            }
+        };
+
+        $this->response->setHeader('Access-Control-Allow-Methods', implode(', ', array_unique($allowedMethods)));
+        $this->response->setStatus(204);
+        return '';
     }
 
 }
