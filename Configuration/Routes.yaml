@@ -1,123 +1,45 @@
--
-  name: 'Self'
-  uriPattern: 'api/v1/{resource}/{identifier}/relationships/{relationship}'
+- name: 'Resource(s)'
+  uriPattern: '{@endpoint}/{@version}/{resource}(/{identifier})'
   defaults:
-    '@package': 'Ttree.JsonApi'
+    '@package':    'Ttree.JsonApi'
     '@controller': 'JsonApi'
-    '@action':     'related'
+    '@action':     'index'
     '@format':     'json'
-  httpMethods: ['GET']
+    'identifier':  ''
+  httpMethods: ['GET', 'POST', 'PATCH', 'UPDATE', 'DELETE', 'OPTIONS']
   appendExceedingArguments: TRUE
+  routeParts:
+    '@endpoint':
+      handler: 'Ttree\JsonApi\Mvc\Routing\EndpointRoutePartHandler'
+    '@version':
+      handler: 'Ttree\JsonApi\Mvc\Routing\VersionRoutePartHandler'
 
--
-  name: 'Related'
-  uriPattern: 'api/v1/{resource}/{identifier}/{relationship}'
+- name: 'Related'
+  uriPattern: '{@endpoint}/{@version}/{resource}/{identifier}/{relationship}'
   defaults:
-    '@package': 'Ttree.JsonApi'
+    '@package':    'Ttree.JsonApi'
     '@controller': 'JsonApi'
-    '@action':     'related'
+    '@action':     'index'
     '@format':     'json'
-  httpMethods: ['GET']
+  httpMethods: ['GET', 'OPTIONS']
   appendExceedingArguments: TRUE
+  routeParts:
+    '@endpoint':
+      handler: 'Ttree\JsonApi\Mvc\Routing\EndpointRoutePartHandler'
+    '@version':
+      handler: 'Ttree\JsonApi\Mvc\Routing\VersionRoutePartHandler'
 
--
-  name: 'Resource'
-  uriPattern: 'api/v1/{resource}/{identifier}'
-  defaults:
-    '@package': 'Ttree.JsonApi'
-    '@controller': 'JsonApi'
-    '@action':     'show'
-    '@format':     'json'
-  httpMethods: ['GET']
-  appendExceedingArguments: TRUE
-
--
-  name: 'Resources'
-  uriPattern: 'api/v1/{resource}'
+- name: 'Self'
+  uriPattern: '{@endpoint}/{@version}/{resource}/{identifier}/relationships/{relationship}'
   defaults:
     '@package': 'Ttree.JsonApi'
     '@controller': 'JsonApi'
     '@action':     'index'
     '@format':     'json'
-  httpMethods: ['GET']
+  httpMethods: ['GET', 'OPTIONS']
   appendExceedingArguments: TRUE
-
--
-  name: 'Create Resource'
-  uriPattern: 'api/v1/{resource}'
-  defaults:
-    '@package': 'Ttree.JsonApi'
-    '@controller': 'JsonApi'
-    '@action': 'create'
-    '@format': 'json'
-  httpMethods: ['POST']
-  appendExceedingArguments: TRUE
-
--
-  name: 'Update Resource'
-  uriPattern: 'api/v1/{resource}/{identifier}'
-  defaults:
-    '@package': 'Ttree.JsonApi'
-    '@controller': 'JsonApi'
-    '@action': 'update'
-    '@format': 'json'
-  httpMethods: ['PUT', 'PATCH']
-  appendExceedingArguments: TRUE
-
--
-  name: 'Delete Resource'
-  uriPattern: 'api/v1/{resource}/{identifier}'
-  defaults:
-    '@package': 'Ttree.JsonApi'
-    '@controller': 'JsonApi'
-    '@action': 'delete'
-    '@format': 'json'
-  httpMethods: ['DELETE']
-  appendExceedingArguments: TRUE
-
-#
-# OPTIONS ACTION - Todo create a fallback uriPattern to make a single entry possible
-#
--
-  name: 'Self - OPTIONS'
-  uriPattern: 'api/v1/{resource}/{identifier}/relationships/{relationship}'
-  defaults:
-    '@package': 'Ttree.JsonApi'
-    '@controller': 'JsonApi'
-    '@action':     'options'
-    '@format':     'json'
-  httpMethods: ['OPTIONS']
-  appendExceedingArguments: TRUE
-
--
-  name: 'Related - OPTIONS'
-  uriPattern: 'api/v1/{resource}/{identifier}/{relationship}'
-  defaults:
-    '@package': 'Ttree.JsonApi'
-    '@controller': 'JsonApi'
-    '@action':     'options'
-    '@format':     'json'
-  httpMethods: ['OPTIONS']
-  appendExceedingArguments: TRUE
-
--
-  name: 'Resource - OPTIONS'
-  uriPattern: 'api/v1/{resource}/{identifier}'
-  defaults:
-    '@package': 'Ttree.JsonApi'
-    '@controller': 'JsonApi'
-    '@action':     'options'
-    '@format':     'json'
-  httpMethods: ['OPTIONS']
-  appendExceedingArguments: TRUE
-
--
-  name: 'Resources - OPTIONS'
-  uriPattern: 'api/v1/{resource}'
-  defaults:
-    '@package': 'Ttree.JsonApi'
-    '@controller': 'JsonApi'
-    '@action':     'options'
-    '@format':     'json'
-  httpMethods: ['OPTIONS']
-  appendExceedingArguments: TRUE
+  routeParts:
+    '@endpoint':
+      handler: 'Ttree\JsonApi\Mvc\Routing\EndpointRoutePartHandler'
+    '@version':
+      handler: 'Ttree\JsonApi\Mvc\Routing\VersionRoutePartHandler'

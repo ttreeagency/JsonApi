@@ -1,14 +1,13 @@
 <?php
 namespace Ttree\JsonApi\Mvc\Controller;
 
+use Neos\Flow\Mvc\RequestInterface;
 use \Psr\Log\LoggerAwareTrait;
 use \Psr\Log\LoggerAwareInterface;
-use \Psr\Http\Message\ServerRequestInterface;
 use \Neomerx\JsonApi\Exceptions\JsonApiException as E;
 use \Neomerx\JsonApi\Contracts\Http\HttpFactoryInterface;
 use \Neomerx\JsonApi\Contracts\Encoder\Parameters\SortParameterInterface;
 use \Neomerx\JsonApi\Contracts\Http\Query\QueryParametersParserInterface;
-use Ttree\JsonApi\Integration\CurrentRequest;
 
 /**
  * Class QueryParametersParser
@@ -49,9 +48,10 @@ class QueryParametersParser implements LoggerAwareInterface
     /**
      * @inheritdoc
      */
-    public function parse(CurrentRequest $request)
+    public function parse(RequestInterface $request)
     {
-        $parameters = $request->getQueryParameters();
+        $parameters = $request->getArguments();
+        unset($parameters['resource'], $parameters['identifier'], $parameters['relationship']);
 
         return $this->factory->createQueryParameters(
             $this->getIncludePaths($parameters),

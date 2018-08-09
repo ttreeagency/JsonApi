@@ -1,0 +1,341 @@
+<?php
+
+namespace Ttree\JsonApi\Mvc;
+
+use Ttree\JsonApi\Object\Document;
+use Ttree\JsonApi\Object\ResourceIdentifier;
+use Ttree\JsonApi\Exception\RuntimeException;
+use Ttree\JsonApi\Exception\InvalidJsonException;
+
+use Neomerx\JsonApi\Contracts\Encoder\Parameters\EncodingParametersInterface;
+use Neomerx\JsonApi\Contracts\Http\HttpFactoryInterface;
+use Neos\Flow\Http\Request as HttpRequest;
+use Neos\Flow\Mvc\ActionRequest;
+use Neos\Flow\Mvc\RequestInterface;
+
+/**
+ * Class ValidatedRequest
+ *
+ * @package Ttree\JsonApi
+ */
+class ValidatedRequest
+{
+    /**
+     * @var RequestInterface
+     */
+    protected $serverRequest;
+
+    /**
+     * @var HttpFactoryInterface
+     */
+    protected $factory;
+
+
+    /**
+     * @var string|null
+     */
+    protected $resourceId;
+
+    /**
+     * @var object|bool|null
+     */
+    protected $document;
+
+    /**
+     * @var EncodingParametersInterface|null
+     */
+    protected $parameters;
+
+    /**
+     * ValidatedRequest constructor.
+     *
+     * @param RequestInterface $serverRequest
+     */
+    public function __construct(RequestInterface $serverRequest)
+    {
+
+        if (!$serverRequest instanceof HttpRequest && !$serverRequest instanceof ActionRequest) {
+            throw new \InvalidArgumentException('The parent request passed to ActionRequest::__construct() must be either an HTTP request or another ActionRequest', 1327846149);
+        }
+        $this->serverRequest = $serverRequest;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getType()
+    {
+        if ($resource = $this->getResource()) {
+            return \get_class($resource);
+        }
+
+        $resourceType = $this->getResourceType();
+
+        if (!$type = $this->resolver->getType($resourceType)) {
+            throw new RuntimeException("JSON API resource type {$resourceType} is not registered.");
+        }
+
+        return $type;
+    }
+
+    /**
+     * @todo
+     * @inheritdoc
+     */
+    public function getResourceType()
+    {
+        return $this->serverRequest->getArgument('resource');
+    }
+
+    /**
+     * @todo
+     * @inheritdoc
+     */
+    public function getResourceId()
+    {
+        /** Cache the resource id because binding substitutions will override it. */
+        if (is_null($this->resourceId)) {
+            $this->resourceId = $this->serverRequest->getArgument('identifier') ?: false;
+        }
+
+        return $this->resourceId ?: null;
+    }
+
+    /**
+     * @todo
+     * @inheritdoc
+     */
+    public function getResourceIdentifier()
+    {
+        if (!$resourceId = $this->getResourceId()) {
+            return null;
+        }
+
+        return ResourceIdentifier::create($this->getResourceType(), $resourceId);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getResource()
+    {
+        $resource = $this->serverRequest->getArgument('resource');
+
+        return is_object($resource) ? $resource : null;
+    }
+
+    /**
+     * @todo
+     * @inheritdoc
+     */
+    public function getRelationshipName()
+    {
+        return $this->request->route(ResourceRegistrar::PARAM_RELATIONSHIP_NAME);
+    }
+
+    /**
+     * @todo
+     * @inheritdoc
+     */
+    public function getInverseResourceType()
+    {
+        return $this->request->route(ResourceRegistrar::PARAM_RELATIONSHIP_INVERSE_TYPE);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getParameters()
+    {
+        if ($this->parameters) {
+            return $this->parameters;
+        }
+
+        return $this->parameters = $this->parseParameters();
+    }
+
+    /**
+     * @return null|object
+     * @throws InvalidJsonException
+     */
+    public function getDocument()
+    {
+        if (is_null($this->document)) {
+            $this->document = new Document($this->decodeDocument());
+        }
+
+        return $this->document ?? null;
+    }
+
+    /**
+     * @todo
+     * @inheritdoc
+     */
+    public function isIndex()
+    {
+        return $this->isMethod('get') && !$this->isResource();
+    }
+
+    /**
+     * @todo
+     * @inheritdoc
+     */
+    public function isCreateResource()
+    {
+        return $this->isMethod('post') && !$this->isResource();
+    }
+
+    /**
+     * @todo
+     * @inheritdoc
+     */
+    public function isReadResource()
+    {
+        return $this->isMethod('get') && $this->isResource() && !$this->isRelationship();
+    }
+
+    /**
+     * @todo
+     * @inheritdoc
+     */
+    public function isUpdateResource()
+    {
+        return $this->isMethod('patch') && $this->isResource() && !$this->isRelationship();
+    }
+
+    /**
+     * @todo
+     * @inheritdoc
+     */
+    public function isDeleteResource()
+    {
+        return $this->isMethod('delete') && $this->isResource() && !$this->isRelationship();
+    }
+
+    /**
+     * @todo
+     * @inheritdoc
+     */
+    public function isReadRelatedResource()
+    {
+        return $this->isRelationship() && !$this->hasRelationships();
+    }
+
+    /**
+     * @todo
+     * @inheritdoc
+     */
+    public function hasRelationships()
+    {
+        return $this->request->is('*/relationships/*');
+    }
+
+    /**
+     * @todo
+     * @inheritdoc
+     */
+    public function isReadRelationship()
+    {
+        return $this->isMethod('get') && $this->hasRelationships();
+    }
+
+    /**
+     * @todo
+     * @inheritdoc
+     */
+    public function isModifyRelationship()
+    {
+        return $this->isReplaceRelationship() ||
+            $this->isAddToRelationship() ||
+            $this->isRemoveFromRelationship();
+    }
+
+    /**
+     * @todo
+     * @inheritdoc
+     */
+    public function isReplaceRelationship()
+    {
+        return $this->isMethod('patch') && $this->hasRelationships();
+    }
+
+    /**
+     * @todo
+     * @inheritdoc
+     */
+    public function isAddToRelationship()
+    {
+        return $this->isMethod('post') && $this->hasRelationships();
+    }
+
+    /**
+     * @todo
+     * @inheritdoc
+     */
+    public function isRemoveFromRelationship()
+    {
+        return $this->isMethod('delete') && $this->hasRelationships();
+    }
+
+    /**
+     * @todo
+     * @return bool
+     */
+    protected function isResource()
+    {
+        return !empty($this->getResourceId());
+    }
+
+    /**
+     * @todo
+     * @return bool
+     */
+    protected function isRelationship()
+    {
+        return !empty($this->getRelationshipName());
+    }
+
+    /**
+     * @todo
+     * Is the HTTP request method the one provided?
+     *
+     * @param string $method
+     *      the expected method - case insensitive.
+     * @return bool
+     */
+    protected function isMethod($method)
+    {
+        return \strtoupper($this->serverRequest->getHttpRequest()->getMethod()) === \strtoupper($method);
+    }
+
+    /**
+     * Extract the JSON API document from the request.
+     *
+     * @param bool $assoc
+     * @return mixed|null
+     * @throws InvalidJsonException
+     * @throws \Neos\Flow\Http\Exception
+     */
+    protected function decodeDocument($assoc = false)
+    {
+        if (!$this->serverRequest->getHttpRequest()->getContent()) {
+            return null;
+        }
+
+        $decoded = \json_decode((string)$this->serverRequest->getHttpRequest()->getContent(), $assoc, 512, 0);
+
+        if (JSON_ERROR_NONE !== \json_last_error()) {
+            throw InvalidJsonException::create();
+        }
+
+        if (!$assoc && !is_object($decoded)) {
+            throw new InvalidJsonException(null, 'JSON is not an object.');
+        }
+
+        if ($assoc && !is_array($decoded)) {
+            throw new InvalidJsonException(null, 'JSON is not an object or array.');
+        }
+
+        return $decoded;
+    }
+}

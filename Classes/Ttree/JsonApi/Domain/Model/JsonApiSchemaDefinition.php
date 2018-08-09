@@ -77,9 +77,9 @@ class JsonApiSchemaDefinition
         }
         $this->selfSubUrl = $this->currentSchema['selfSubUrl'];
 
-        if (!isset($this->currentSchema['attributes']) || !is_array($this->currentSchema['attributes'])) {
-            throw new InvalidArgumentException(sprintf('Attributes is not configuration for class type "%s"', $this->classType), 1449241670);
-        }
+//        if (!isset($this->currentSchema['attributes']) || !is_array($this->currentSchema['attributes'])) {
+//            throw new InvalidArgumentException(sprintf('Attributes is not configuration for class type "%s"', $this->classType), 1449241670);
+//        }
     }
 
     /**

@@ -1,14 +1,17 @@
 {
-    "name": "ttree/jsonapi",
-    "type": "neos-package",
-    "description": "Fast and simple way to build JSON-API webservice with Flow Framework",
-    "require": {
-        "neos/flow": "~5.0.0",
-        "neomerx/json-api": "~2.0.0"
-    },
-    "autoload": {
-        "psr-0": {
-            "Ttree\\JsonApi": "Classes"
-        }
+  "name": "ttree/jsonapi",
+  "type": "neos-package",
+  "description": "Fast and simple way to build JSON-API webservice with Flow Framework",
+  "require": {
+    "neos/flow": "~5.0.0",
+    "neomerx/json-api": "~2.0.0",
+    "php": ">=7.0.0",
+    "ext-json": "*",
+    "ext-http": "*"
+  },
+  "autoload": {
+    "psr-0": {
+      "Ttree\\JsonApi": "Classes"
     }
+  }
 }
