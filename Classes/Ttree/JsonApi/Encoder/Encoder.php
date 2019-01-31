@@ -14,7 +14,7 @@ class Encoder extends \Neomerx\JsonApi\Encoder\Encoder
     /**
      * @return Factory
      */
-    protected static function getFactory()
+    protected function getFactory()
     {
         return new Factory();
     }
