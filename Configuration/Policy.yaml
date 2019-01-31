@@ -1,10 +1,11 @@
-resources:
-  methods:
-    Ttree_JsonApi_JsonApiControllerActions:
-      'method(Ttree\JsonApi\Controller\JsonApiController->(index|show|related)Action())'
+roles:
+  'Ttree.JsonApi:Everybody':
+    abstract: true
 
-acls:
+  'Ttree.JsonApi:Anonymous':
+    abstract: true
 
-  Everybody:
-    methods:
-      Ttree_JsonApi_JsonApiControllerActions:    GRANT
+  'Ttree.JsonApi:AuthenticatedUser':
+    abstract: true
+
+privilegeTargets: []
