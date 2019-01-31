@@ -1,4 +1,5 @@
 <?php
+
 namespace Ttree\JsonApi\Mvc\Controller;
 
 use Neos\Flow\Mvc\RequestInterface;
@@ -35,7 +36,7 @@ class QueryParametersParser implements LoggerAwareInterface
     /**
      * @var HttpFactoryInterface
      */
-    private $factory;
+    protected $factory;
 
     /**
      * @param HttpFactoryInterface $factory
@@ -68,9 +69,9 @@ class QueryParametersParser implements LoggerAwareInterface
      *
      * @return array|null
      */
-    private function getIncludePaths(array $parameters)
+    protected function getIncludePaths(array $parameters)
     {
-        $paths  = $this->getStringParamOrNull($parameters, self::PARAM_INCLUDE);
+        $paths = $this->getStringParamOrNull($parameters, self::PARAM_INCLUDE);
         $result = empty($paths) === false ? explode(',', rtrim($paths, ',')) : null;
 
         return $result;
@@ -81,9 +82,9 @@ class QueryParametersParser implements LoggerAwareInterface
      *
      * @return array|null
      */
-    private function getFieldSets(array $parameters)
+    protected function getFieldSets(array $parameters)
     {
-        $result    = [];
+        $result = [];
         $fieldSets = $this->getParamOrNull($parameters, self::PARAM_FIELDS);
         if (empty($fieldSets) === false && is_array($fieldSets)) {
             foreach ($fieldSets as $type => $fields) {
@@ -106,7 +107,7 @@ class QueryParametersParser implements LoggerAwareInterface
     protected function getSortParameters(array $parameters)
     {
         $sortParams = null;
-        $sortParam  = $this->getStringParamOrNull($parameters, self::PARAM_SORT);
+        $sortParam = $this->getStringParamOrNull($parameters, self::PARAM_SORT);
         if ($sortParam !== null) {
             foreach (explode(',', $sortParam) as $param) {
                 $isDesc = false;
@@ -125,7 +126,7 @@ class QueryParametersParser implements LoggerAwareInterface
      *
      * @return array|null
      */
-    private function getPagingParameters(array $parameters)
+    protected function getPagingParameters(array $parameters)
     {
         return $this->getArrayParamOrNull($parameters, self::PARAM_PAGE);
     }
@@ -135,7 +136,7 @@ class QueryParametersParser implements LoggerAwareInterface
      *
      * @return array|null
      */
-    private function getFilteringParameters(array $parameters)
+    protected function getFilteringParameters(array $parameters)
     {
         return $this->getArrayParamOrNull($parameters, self::PARAM_FILTER);
     }
@@ -145,14 +146,14 @@ class QueryParametersParser implements LoggerAwareInterface
      *
      * @return array|null
      */
-    private function getUnrecognizedParameters(array $parameters)
+    protected function getUnrecognizedParameters(array $parameters)
     {
         $supported = [
             self::PARAM_INCLUDE => 0,
-            self::PARAM_FIELDS  => 0,
-            self::PARAM_PAGE    => 0,
-            self::PARAM_FILTER  => 0,
-            self::PARAM_SORT    => 0,
+            self::PARAM_FIELDS => 0,
+            self::PARAM_PAGE => 0,
+            self::PARAM_FILTER => 0,
+            self::PARAM_SORT => 0,
         ];
         $unrecognized = array_diff_key($parameters, $supported);
         return empty($unrecognized) === true ? null : $unrecognized;
@@ -164,7 +165,7 @@ class QueryParametersParser implements LoggerAwareInterface
      *
      * @return array|null
      */
-    private function getArrayParamOrNull(array $parameters, $name)
+    protected function getArrayParamOrNull(array $parameters, $name)
     {
         $value = $this->getParamOrNull($parameters, $name);
 
@@ -180,7 +181,7 @@ class QueryParametersParser implements LoggerAwareInterface
      *
      * @return string|null
      */
-    private function getStringParamOrNull(array $parameters, $name)
+    protected function getStringParamOrNull(array $parameters, $name)
     {
         $value = $this->getParamOrNull($parameters, $name);
 
@@ -191,12 +192,12 @@ class QueryParametersParser implements LoggerAwareInterface
     }
 
     /**
-     * @param array  $parameters
+     * @param array $parameters
      * @param string $name
      *
      * @return mixed
      */
-    private function getParamOrNull(array $parameters, $name)
+    protected function getParamOrNull(array $parameters, $name)
     {
         return isset($parameters[$name]) === true ? $parameters[$name] : null;
     }

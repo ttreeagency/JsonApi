@@ -48,6 +48,9 @@ class PaginationParameters
         $this->parameters = $parameters;
     }
 
+    /**
+     * @throws Exception
+     */
     public function initializeObject()
     {
         $parameters = $this->parameters;

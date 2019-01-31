@@ -9,9 +9,9 @@ namespace Ttree\JsonApi\Adapter;
 //use CloudCreativity\LaravelJsonApi\Contracts\Pagination\PageInterface;
 //use CloudCreativity\LaravelJsonApi\Contracts\Pagination\PagingStrategyInterface;
 //use Illuminate\Support\Collection;
+use Neos\Flow\Annotations as Flow;
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
 use Neomerx\JsonApi\Encoder\EncoderOptions;
-use Neos\Flow\Annotations as Flow;
 use Neomerx\JsonApi\Contracts\Encoder\Parameters\EncodingParametersInterface;
 use Neomerx\JsonApi\Contracts\Encoder\Parameters\SortParameterInterface;
 use Neomerx\JsonApi\Encoder\Parameters\EncodingParameters;
@@ -28,6 +28,7 @@ use Ttree\JsonApi\Contract\Object\StandardObjectInterface;
 use Ttree\JsonApi\Encoder\Encoder;
 use Ttree\JsonApi\Exception;
 use Ttree\JsonApi\Exception\RuntimeException;
+use Ttree\JsonApi\Utility\StringUtility as Str;
 
 /**
  * Class AbstractAdapter
@@ -39,6 +40,11 @@ use Ttree\JsonApi\Exception\RuntimeException;
 abstract class AbstractAdapter extends AbstractResourceAdapter
 {
     use DeserializesAttributeTrait;
+
+    /**
+     * @var string
+     */
+    protected $endpoint;
 
     /**
      * @var string
@@ -70,9 +76,14 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
 
     /**
      * @var array
-     * @Flow\InjectConfiguration(path="endpoints.default")
+     * @Flow\InjectConfiguration(path="endpoints")
      */
     protected $settings;
+
+    /**
+     * @var array
+     */
+    protected $endPointSettings;
 
     /**
      * @var array
@@ -141,11 +152,13 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     protected $sortColumns = [];
 
     /**
+     * @param string $endpoint
      * @param string $resource
      * @param EncodingParametersInterface $parameters
      */
-    public function __construct($resource, EncodingParametersInterface $parameters)
+    public function __construct($endpoint, $resource, EncodingParametersInterface $parameters)
     {
+        $this->endpoint = $endpoint;
         $this->resource = $resource;
         $this->parameters = $parameters;
     }
@@ -165,7 +178,9 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     protected function initializeConfiguration()
     {
-        $configuration = Arrays::getValueByPath($this->settings, ['resources', $this->resource]);
+        $this->endPointSettings = $this->settings[$this->endpoint];
+
+        $configuration = Arrays::getValueByPath($this->endPointSettings, ['resources', $this->resource]);
         if (!\is_array($configuration)) {
             throw new Exception(\sprintf('Resource "%s" not configured', $this->resource), 1447947509);
         }
@@ -187,7 +202,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     public function getBaseUrl()
     {
-        return isset($this->settings['baseUrl']) ? $this->settings['baseUrl'] : '/';
+        return isset($this->endPointSettings['baseUrl']) && isset($this->endPointSettings['version']) ? $this->endPointSettings['baseUrl'] . '/' . $this->endPointSettings['version'] : '/';
     }
 
     /**
@@ -213,11 +228,11 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     /**
      * Apply the supplied filters to the builder instance.
      *
-     * @param Builder $query
-     * @param Collection $filters
+     * @param QueryInterface $query
+     * @param array|null $filters
      * @return void
      */
-    abstract protected function filter($query, Collection $filters);
+    abstract protected function filter($query, $filters);
 
     /**
      * @param EncodingParametersInterface $parameters
@@ -237,15 +252,10 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
 //            return $this->findByIds($query, $filters);
 //        }
 //
-//        /** Filter and sort */
-//        $this->filter($query, $filters);
-//
-//        $this->sort($query, (array) $parameters->getSortParameters());
-//
-//        /** Return a single record if this is a search for one resource. */
-//        if ($this->isSearchOne($filters)) {
-//            return $this->first($query);
-//        }
+        /** Filter and sort */
+        $this->filter($query, $filters);
+
+        $this->sort($query, $parameters->getSortParameters());
 
         /** Paginate results if needed. */
         $pagination = $this->extractPagination($parameters);
@@ -261,6 +271,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
+     * @todo need to figure out what to do with this does not currently support default pagination as it causes a problem with polymorphic relations
      * Query the resource when it appears in a relation of a parent model.
      *
      * For example, a request to `/posts/1/comments` will invoke this method on the
@@ -269,25 +280,24 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      * @param Relations\BelongsToMany|Relations\HasMany|Relations\HasManyThrough $relation
      * @param EncodingParametersInterface $parameters
      * @return mixed
-     * @todo this does not currently support default pagination as it causes a problem with polymorphic relations
      */
     public function queryRelation($relation, EncodingParametersInterface $parameters)
     {
         $query = $relation->newQuery();
 
-        /** Apply eager loading */
-        $this->with($query, $this->extractIncludePaths($parameters));
+//        /** Apply eager loading */
+//        $this->with($query, $this->extractIncludePaths($parameters));
 
         /** Filter and sort */
         $this->filter($query, $this->extractFilters($parameters));
         $this->sort($query, (array)$parameters->getSortParameters());
 
         /** Paginate results if needed. */
-        $pagination = collect($parameters->getPaginationParameters());
+        $pagination = $parameters->getPaginationParameters();
 
-        if (!$pagination->isEmpty() && !$this->hasPaging()) {
-            throw new RuntimeException('Paging parameters exist but paging is not supported.');
-        }
+//        if (!$pagination->isEmpty() && !$this->hasPaging()) {
+//            throw new RuntimeException('Paging parameters exist but paging is not supported.');
+//        }
 
         return $pagination->isEmpty() ?
             $this->all($query) :
@@ -311,8 +321,9 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     public function update($record, ResourceObjectInterface $resource, EncodingParametersInterface $parameters)
     {
-        /** @var Model $record */
+        /** @var object $record */
         $record = parent::update($record, $resource, $parameters);
+
         $this->load($record, $parameters);
 
         return $record;
@@ -367,10 +378,11 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
+     * @todo Determine if necessary
      * Add eager loading to the query.
      *
-     * @param Builder $query
-     * @param Collection $includePaths
+     * @param QueryInterface $query
+     * @param array $includePaths
      *      the paths for resources that will be included.
      * @return void
      */
@@ -405,39 +417,29 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
+     * @todo
      * @inheritDoc
      */
     protected function hydrateAttributes($record, StandardObjectInterface $attributes)
     {
         $data = [];
-
-        foreach ($attributes as $field => $value) {
+        foreach ($attributes as $attribute => $value) {
             /** Skip any JSON API fields that are not to be filled. */
             // TODO: Check if fields are prohibitated
 //            if ($this->isNotFillable($field, $record)) {
 //                continue;
 //            }
 
+            $property = $this->attributeToProperty($attribute);
 
-            $key = $this->keyForAttribute($field, $record);
-            ObjectAccess::setProperty($record, $key, $this->deserializeAttribute($value, $field, $attributes), true);
+            if (method_exists($record, $methodName ='set'. \ucfirst($property))) {
+                $record->$methodName($this->deserializeAttribute($value, $property, $attributes));
+            }
         }
     }
 
     /**
-     * Convert a JSON API attribute key into a model attribute key.
-     *
-     * @param $resourceKey
-     * @param $model
-     * @return string
-     * @deprecated use `modelKeyForField`
-     */
-    protected function keyForAttribute($resourceKey, $model)
-    {
-        return $this->modelKeyForField($resourceKey, $model);
-    }
-
-    /**
+     * @todo
      * @inheritdoc
      */
     protected function fillRelationship(
@@ -455,9 +457,10 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
+     * @todo
      * Hydrate related models after the primary record has been persisted.
      *
-     * @param Model $record
+     * @param object $record
      * @param ResourceObjectInterface $resource
      * @param EncodingParametersInterface $parameters
      */
@@ -470,32 +473,36 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         $relationships = $resource->getRelationships();
         $changed = false;
 
-        foreach ($relationships->getAll() as $field => $value) {
-            /** Skip any fields that are not fillable. */
-            if ($this->isNotFillable($field, $record)) {
-                continue;
-            }
+        if ($relationships !== null) {
+            foreach ($relationships->getAll() as $field => $value) {
+//            /** Skip any fields that are not fillable. */
+//            if ($this->isNotFillable($field, $record)) {
+//                continue;
+//            }
 
-            /** Skip any fields that are not relations */
-            if (!$this->isRelation($field)) {
-                continue;
-            }
+//            /** Skip any fields that are not relations */
+//            if (!$this->isRelation($field)) {
+//                continue;
+//            }
 
-            $relation = $this->related($field);
-
-            if ($this->requiresPrimaryRecordPersistence($relation)) {
-                $relation->update($record, $relationships->getRelationship($field), $parameters);
-                $changed = true;
+//            $relation = $this->related($field);
+//
+//            if ($this->requiresPrimaryRecordPersistence($relation)) {
+//                $relation->update($record, $relationships->getRelationship($field), $parameters);
+//                $changed = true;
+//            }
             }
         }
 
-        /** If there are changes, we need to refresh the model in-case the relationship has been cached. */
+
+//        /** If there are changes, we need to refresh the model in-case the relationship has been cached. */
         if ($changed) {
-            $record->refresh();
+            $this->persist($record);
         }
     }
 
     /**
+     * @todo
      * Does the relationship need to be hydrated after the primary record has been persisted?
      *
      * @param RelationshipAdapterInterface $relation
@@ -523,7 +530,8 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
-     * @param Builder $query
+     * @todo
+     * @param QueryInterface $query
      * @param Collection $filters
      * @return mixed
      */
@@ -542,7 +550,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     protected function first($query)
     {
-        return $query->first();
+        return $query->execute()->getFirst();
     }
 
     /**
@@ -554,17 +562,6 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     protected function all($query)
     {
         return $query->execute();
-    }
-
-    /**
-     * Is this a search for a singleton resource?
-     *
-     * @param Collection $filters
-     * @return bool
-     */
-    protected function isSearchOne($filters)
-    {
-        return false;
     }
 
     /**
@@ -581,6 +578,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
+     * @todo
      * Get the key that is used for the resource ID.
      *
      * @return string
@@ -591,40 +589,41 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
+     * @todo
      * @return string
      */
     protected function getQualifiedKeyName()
     {
-        return sprintf('%s.%s', $this->model->getTable(), $this->getKeyName());
+        return \sprintf('%s.%s', $this->model->getTable(), $this->getKeyName());
     }
 
     /**
      * @param EncodingParametersInterface $parameters
-     * @return Collection
+     * @return array
      */
     protected function extractIncludePaths(EncodingParametersInterface $parameters)
     {
-//        return collect($parameters->getIncludePaths());
+        return $parameters->getIncludePaths();
     }
 
     /**
      * @param EncodingParametersInterface $parameters
-     * @return Collection
+     * @return array
      */
     protected function extractFilters(EncodingParametersInterface $parameters)
     {
-//        return collect($parameters->getFilteringParameters());
+        return $parameters->getFilteringParameters();
     }
 
     /**
      * @param EncodingParametersInterface $parameters
-     * @return Collection
+     * @return array
      */
     protected function extractPagination(EncodingParametersInterface $parameters)
     {
         $pagination = (array)$parameters->getPaginationParameters();
 
-//        return collect($pagination ?: $this->defaultPagination());
+        return $pagination ?: $this->defaultPagination();
     }
 
     /**
@@ -646,21 +645,24 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     /**
      * Apply sort parameters to the query.
      *
-     * @param Builder $query
-     * @param SortParameterInterface[] $sortBy
+     * @param QueryInterface $query
+     * @param array $sortBy
      * @return void
      */
-    protected function sort($query, array $sortBy)
+    protected function sort($query, $sortBy)
     {
         if (empty($sortBy)) {
             $this->defaultSort($query);
             return;
         }
 
+        $ordering = [];
         /** @var SortParameterInterface $param */
         foreach ($sortBy as $param) {
-            $this->sortBy($query, $param);
+            $ordering = \array_merge($ordering, $this->sortBy($query, $param));
         }
+
+        $query->setOrderings($ordering);
     }
 
     /**
@@ -669,7 +671,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      * Child classes can override this method if they want to implement their
      * own default sort order.
      *
-     * @param Builder $query
+     * @param QueryInterface $query
      * @return void
      */
     protected function defaultSort($query)
@@ -677,128 +679,109 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
-     * @param Builder $query
+     * @param QueryInterface $query
      * @param SortParameterInterface $param
+     * @return array
      */
     protected function sortBy($query, SortParameterInterface $param)
     {
         $column = $this->getQualifiedSortColumn($query, $param->getField());
-        $order = $param->isAscending() ? 'asc' : 'desc';
 
-        $query->orderBy($column, $order);
+        return [$column => $param->isAscending() ? QueryInterface::ORDER_ASCENDING : QueryInterface::ORDER_DESCENDING];
     }
 
     /**
-     * @param Builder $query
+     * @param QueryInterface $query
      * @param string $field
      * @return string
      */
     protected function getQualifiedSortColumn($query, $field)
     {
-        $key = $this->columnForField($field, $query->getModel());
-
-//        if (!\str_contains($key, '.')) {
-//            $key = sprintf('%s.%s', $query->getModel()->getTable(), $key);
-//        }
+        $key = $this->columnForField($field, $query->getType());
 
         return $key;
     }
 
     /**
+     * @todo
      * Get the table column to use for the specified search field.
      *
      * @param string $field
-     * @param Model $model
+     * @param string $entity
      * @return string
      */
-    protected function columnForField($field, Model $model)
+    protected function columnForField($field, $entity)
     {
         /** If there is a custom mapping, return that */
         if (isset($this->sortColumns[$field])) {
             return $this->sortColumns[$field];
         }
 
-        if (\strpos($field, '.')) {
-            $relation = \strtok($field, '.');
+//        if (\strpos($field, '.')) {
+//            $relation = \strtok($field, '.');
+//
+//            if (\method_exists($entity, $relation)) {
+//                /** @var Relations\Relation $relationShip */
+//                $relationShip = $model->$relation();
+//                $table = $relationShip->getRelated()->getTable();
+//
+//                if (($position = \strpos($field, '.')) !== false) {
+//                    $tableWithField = $table . \substr($field, $position);
+//                    return $model::$snakeAttributes ? Str::underscore($tableWithField) : Str::camelize($tableWithField);
+//                }
+//            }
+//        }
 
-            if (\method_exists($model, $relation)) {
-                /** @var Relations\Relation $relationShip */
-                $relationShip = $model->$relation();
-                $table = $relationShip->getRelated()->getTable();
-
-                if (($position = \strpos($field, '.')) !== false) {
-                    $tableWithField = $table . \substr($field, $position);
-                    return $model::$snakeAttributes ? Str::underscore($tableWithField) : Str::camelize($tableWithField);
-                }
-            }
-        }
-
-        return $model::$snakeAttributes ? Str::underscore($field) : Str::camelize($field);
+        return Str::camelize($field);
     }
-
-    /**
-     * @param string|null $modelKey
-     * @return BelongsTo
-     */
-    protected function belongsTo($modelKey = null)
-    {
-        return new BelongsTo($this->model, $modelKey ?: $this->guessRelation());
-    }
-
-    /**
-     * @param string|null $modelKey
-     * @return HasOne
-     */
-    protected function hasOne($modelKey = null)
-    {
-        return new HasOne($this->model, $modelKey ?: $this->guessRelation());
-    }
-
-    /**
-     * @param string|null $modelKey
-     * @return HasMany
-     */
-    protected function hasMany($modelKey = null)
-    {
-        return new HasMany($this->model, $modelKey ?: $this->guessRelation());
-    }
-
-    /**
-     * @param string|null $modelKey
-     * @return HasManyThrough
-     */
-    protected function hasManyThrough($modelKey = null)
-    {
-        return new HasManyThrough($this->model, $modelKey ?: $this->guessRelation());
-    }
-
-    /**
-     * @param HasManyAdapterInterface ...$adapters
-     * @return MorphHasMany
-     */
-    protected function morphMany(HasManyAdapterInterface ...$adapters)
-    {
-        return new MorphHasMany(...$adapters);
-    }
-
-    /**
-     * Normalize parameters for pagination.
-     *
-     *
-     * @param EncodingParametersInterface $parameters
-     * @param Collection $extractedPagination
-     * @return EncodingParameters
-     */
-    protected function normalizeParameters(EncodingParametersInterface $parameters, Collection $extractedPagination)
-    {
-        return new EncodingParameters(
-            $parameters->getIncludePaths(),
-            $parameters->getFieldSets(),
-            $parameters->getSortParameters(),
-            $extractedPagination->all(),
-            $parameters->getFilteringParameters(),
-            $parameters->getUnrecognizedParameters()
-        );
-    }
-
+//
+//    /**
+//     * @todo
+//     * @param string|null $modelKey
+//     * @return BelongsTo
+//     */
+//    protected function belongsTo($modelKey = null)
+//    {
+//        return new BelongsTo($this->model, $modelKey ?: $this->guessRelation());
+//    }
+//
+//    /**
+//     * @todo
+//     * @param string|null $modelKey
+//     * @return HasOne
+//     */
+//    protected function hasOne($modelKey = null)
+//    {
+//        return new HasOne($this->model, $modelKey ?: $this->guessRelation());
+//    }
+//
+//    /**
+//     * @todo
+//     * @param string|null $modelKey
+//     * @return HasMany
+//     */
+//    protected function hasMany($modelKey = null)
+//    {
+//        return new HasMany($this->model, $modelKey ?: $this->guessRelation());
+//    }
+//
+//    /**
+//     * @todo
+//     * @param string|null $modelKey
+//     * @return HasManyThrough
+//     */
+//    protected function hasManyThrough($modelKey = null)
+//    {
+//        return new HasManyThrough($this->model, $modelKey ?: $this->guessRelation());
+//    }
+//
+//    /**
+//     * @todo
+//     * @param HasManyAdapterInterface ...$adapters
+//     * @return MorphHasMany
+//     */
+//    protected function morphMany(HasManyAdapterInterface ...$adapters)
+//    {
+//        return new MorphHasMany(...$adapters);
+//    }
 }

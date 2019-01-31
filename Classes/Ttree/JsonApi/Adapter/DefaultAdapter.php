@@ -18,9 +18,11 @@ class DefaultAdapter extends AbstractAdapter
      */
     protected $attributesMapping = [];
 
-
-    public function filter($query, Collection $filters)
+    /**
+     * @param \Neos\Flow\Persistence\QueryInterface $query
+     * @param array|null $filters
+     */
+    public function filter($query, $filters)
     {
-        // TODO: Implement filter() method.
     }
 }

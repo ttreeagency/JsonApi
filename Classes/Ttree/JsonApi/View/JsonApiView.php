@@ -1,4 +1,5 @@
 <?php
+
 namespace Ttree\JsonApi\View;
 
 use Neos\Flow\Annotations as Flow;

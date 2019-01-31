@@ -1,4 +1,5 @@
 <?php
+
 namespace Ttree\JsonApi\Factory;
 
 use Ttree\JsonApi\Schema\Container;

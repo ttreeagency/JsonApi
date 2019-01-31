@@ -276,6 +276,6 @@ trait ObjectProxyTrait
      */
     protected function normalizeKeys(array $keys)
     {
-        return ($keys && \is_array($keys[0])) ? (array) $keys[0] : $keys;
+        return ($keys && \is_array($keys[0])) ? (array)$keys[0] : $keys;
     }
 }

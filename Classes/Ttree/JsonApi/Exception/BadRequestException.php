@@ -1,4 +1,5 @@
 <?php
+
 namespace Ttree\JsonApi\Exception;
 
 use Neos\Flow\Annotations as Flow;

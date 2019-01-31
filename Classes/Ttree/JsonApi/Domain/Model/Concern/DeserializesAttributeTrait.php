@@ -2,11 +2,12 @@
 
 namespace Ttree\JsonApi\Domain\Model\Concern;
 
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Reflection\ReflectionService;
 use Ttree\JsonApi\Utility\StringUtility as Str;
 
 /**
  * Trait DeserializesAttribute
- *
  */
 trait DeserializesAttributeTrait
 {
@@ -32,51 +33,56 @@ trait DeserializesAttributeTrait
      *
      * @var array
      */
-    protected $attributes = [];
+    protected $attributeMapping = [];
 
     /**
-     * The resource attributes that are dates.
-     *
-     * A list of JSON API attribute fields that should be cast to dates. If this is
-     * empty, then `Model::getDates()` will be used.
-     *
-     * @var string[]
+     * @Flow\Inject()
+     * @var \Neos\Flow\Reflection\ReflectionService
      */
-    protected $dates = [];
+    protected $reflectionService;
 
     /**
      * Convert a JSON API resource field name to a model key.
      *
-     * @param $field
-     * @param $model
+     * @param string $attribute
      * @return string
      */
-    protected function modelKeyForField($field, $model)
+    protected function attributeToProperty($attribute)
     {
-        if (isset($this->attributes[$field])) {
-            return $this->attributes[$field];
+        if (isset($this->attributeMapping[$attribute])) {
+            return $this->attributeMapping[$attribute];
         }
 
-        $key = Str::camelize($field);
+        $property = Str::camelize($attribute);
 
-        return $this->attributes[$field] = $key;
+        return $this->attributeMapping[$attribute] = $property;
     }
 
     /**
      * Deserialize a value obtained from the resource's attributes.
      *
-     * @param $value
-     *      the value that the client provided.
-     * @param $field
-     *      the attribute key for the value
+     * @param $value the value that the client provided.
+     * @param $field the attribute key for the value
      * @param $record
      * @return null|mixed
      */
     protected function deserializeAttribute($value, $field, $record)
     {
+//        \Neos\Flow\var_dump($this->reflectionService->getClassPropertyNames(\get_class($record)));
+//        \Neos\Flow\var_dump($this->reflectionService->getPropertyTagsValues(\get_class($record), $field));
+//        \Neos\Flow\var_dump($this->reflectionService->getPropertyNamesByTag(\get_class($record), 'var'));
+//        exit();
+//
+//        if (method_exists($record))
+//        \Neos\Flow\var_dump($this->reflectionService->getMethodTagsValues(\get_class($record), 'set'. ucfirst($field)), 'test');
+//        exit();
+//
+//
+//
 //        if ($this->isDateAttribute($field, $record)) {
 //            return $this->deserializeDate($value, $field, $record);
 //        }
+        // TODO do someting with property mapping
 
         $method = 'deserialize' . Str::classify($field) . 'Field';
 
@@ -88,6 +94,7 @@ trait DeserializesAttributeTrait
     }
 
     /**
+     * @todo
      * Convert a JSON date into a PHP date time object.
      *
      * @param $value
@@ -102,21 +109,4 @@ trait DeserializesAttributeTrait
     {
         return !is_null($value) ? new Carbon($value) : null;
     }
-
-    /**
-     * Is this resource key a date attribute?
-     *
-     * @param $field
-     * @param Model $record
-     * @return bool
-     */
-    protected function isDateAttribute($field, $record)
-    {
-        if (empty($this->dates)) {
-            return in_array($this->modelKeyForField($field, $record), $record->getDates(), true);
-        }
-
-        return in_array($field, $this->dates, true);
-    }
-
 }

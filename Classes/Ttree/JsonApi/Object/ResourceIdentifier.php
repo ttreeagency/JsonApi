@@ -36,7 +36,7 @@ class ResourceIdentifier extends StandardObject implements ResourceIdentifierInt
      */
     public function isType($typeOrTypes)
     {
-        return in_array($this->get(self::TYPE), (array) $typeOrTypes, true);
+        return in_array($this->get(self::TYPE), (array)$typeOrTypes, true);
     }
 
     /**

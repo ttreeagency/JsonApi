@@ -1,4 +1,5 @@
 <?php
+
 namespace Ttree\JsonApi\Exception;
 
 use Ttree\JsonApi\Exception;

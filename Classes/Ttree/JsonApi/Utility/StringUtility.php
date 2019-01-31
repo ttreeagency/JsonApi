@@ -34,7 +34,7 @@ class StringUtility
      */
     public static function camelize($string)
     {
-        return preg_replace_callback('/_([a-z])/', function ($string) {
+        return preg_replace_callback('/-([a-z])/', function ($string) {
             return strtoupper($string[1]);
         }, $string);
     }

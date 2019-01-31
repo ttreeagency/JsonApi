@@ -1,4 +1,5 @@
 <?php
+
 namespace Ttree\JsonApi;
 
 use Neos\Flow\Configuration\ConfigurationManager;

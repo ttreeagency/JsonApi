@@ -29,6 +29,7 @@ class DefaultRepository extends Repository
      * by the repository.
      *
      * @api
+     * @param string $entityClassName
      */
     public function setEntityClassName($entityClassName)
     {

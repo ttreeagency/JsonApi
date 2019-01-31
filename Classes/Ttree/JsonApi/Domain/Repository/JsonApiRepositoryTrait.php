@@ -48,4 +48,23 @@ trait JsonApiRepositoryTrait
         }
         return $query->execute();
     }
+
+    /**
+     * @param EncodingParametersInterface $parameters
+     * @param ResourceSettingsDefinition $resourceSettingsDefinition
+     * @return QueryResultInterface
+     * @throws \Neos\Flow\Exception
+     * @throws \Ttree\JsonApi\Exception\ConfigurationException
+     */
+    public function countByJsonApiParameters(EncodingParametersInterface $parameters, ResourceSettingsDefinition $resourceSettingsDefinition)
+    {
+        /** @var QueryInterface $query */
+        $query = $this->createQuery();
+
+        if ($parameters->isEmpty()) {
+            return $query->execute();
+        }
+
+        return $query->execute();
+    }
 }

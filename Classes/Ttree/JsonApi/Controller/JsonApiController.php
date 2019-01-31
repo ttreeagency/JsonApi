@@ -135,7 +135,7 @@ class JsonApiController extends ActionController
         $parameterParser = new QueryParametersParser($this->factory);
         $this->parameters = $parameterParser->parse($request);
         $this->validatedRequest = $validatedRequest;
-        $this->registerAdapter($resource, $this->parameters);
+        $this->registerAdapter($endpoint, $resource, $this->parameters);
 
         $urlPrefix = $this->getUrlPrefix($request);
         $this->encoder = $this->adapter->getEncoder($urlPrefix);
@@ -195,6 +195,7 @@ class JsonApiController extends ActionController
                     $actionName = 'create';
                     break;
                 case 'PUT':
+                case 'PATCH':
                     if (!$this->request->hasArgument('identifier')
                         && $this->request->getArgument('identifier') !== ''
                     ) {
@@ -261,60 +262,53 @@ class JsonApiController extends ActionController
      */
     public function listAction()
     {
-        if ($this->request->hasArgument('page') === false) {
-            $this->request->setArgument('page', [
-                'number' => 1,
-                'size' => $this->settings['pagination']['defaultPageSize']
-            ]);
-        }
-
         $data = $this->adapter->query($this->parameters);
         $count = 0;
-//        $data = $this->endpoint->findAll();
-//        $count = $this->endpoint->countAll();
+////        $data = $this->endpoint->findAll();
+////        $count = $this->endpoint->countAll();
+//
+//        $parameters = new PaginationParameters($this->parameters->getPaginationParameters() ?: []);
+//        $arguments = $this->request->getHttpRequest()->getArguments();
 
-        $parameters = new PaginationParameters($this->parameters->getPaginationParameters() ?: []);
-        $arguments = $this->request->getHttpRequest()->getArguments();
+        if ($arguments !== []) {
+            $query = \http_build_query($arguments);
+            $self = new Link(\sprintf('/%s?%s', $this->adapter->getResource(), $query));
+        } else {
+            $self = new Link(\sprintf('/%s', $this->adapter->getResource()));
+        }
+        $links = [
+            Link::SELF => $self
+        ];
 
-//        if ($arguments !== []) {
-//            $query = \http_build_query($arguments);
-//            $self = new Link(\sprintf('/%s?%s', $this->endpoint->getResource(), $query));
-//        } else {
-//            $self = new Link(\sprintf('/%s', $this->endpoint->getResource()));
-//        }
-//        $links = [
-//            Link::SELF => $self
-//        ];
-//
-//        if ($count > $parameters->getLimit()) {
-//            $prev = $parameters->prev();
-//            if ($prev !== null) {
-//                $query = \http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $prev));
-//                $links[Link::PREV] = new Link(\sprintf('/%s?%s', $this->endpoint->getResource(), $query));
-//            }
-//
-//            $next = $parameters->next($count);
-//            if ($next !== null) {
-//                $query = http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $next));
-//                $links[Link::NEXT] = new Link(sprintf('/%s?%s', $this->endpoint->getResource(), $query));
-//            }
-//
-//            $first = $parameters->first();
-//            if ($first !== null) {
-//                $query = http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $first));
-//                $links[Link::FIRST] = new Link(sprintf('/%s?%s', $this->endpoint->getResource(), $query));
-//            }
-//
-//            $last = $parameters->last($count);
-//            if ($last !== null) {
-//                $query = http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $last));
-//                $links[Link::LAST] = new Link(sprintf('/%s?%s', $this->endpoint->getResource(), $query));
-//            }
-//        }
+        if ($count > $parameters->getLimit()) {
+            $prev = $parameters->prev();
+            if ($prev !== null) {
+                $query = \http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $prev));
+                $links[Link::PREV] = new Link(\sprintf('/%s?%s', $this->adapter->getResource(), $query));
+            }
 
-//        $this->encoder->withLinks($links)->withMeta([
-//            'total' => $count
-//        ]);
+            $next = $parameters->next($count);
+            if ($next !== null) {
+                $query = http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $next));
+                $links[Link::NEXT] = new Link(sprintf('/%s?%s', $this->adapter->getResource(), $query));
+            }
+
+            $first = $parameters->first();
+            if ($first !== null) {
+                $query = http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $first));
+                $links[Link::FIRST] = new Link(sprintf('/%s?%s', $this->adapter->getResource(), $query));
+            }
+
+            $last = $parameters->last($count);
+            if ($last !== null) {
+                $query = http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $last));
+                $links[Link::LAST] = new Link(sprintf('/%s?%s', $this->adapter->getResource(), $query));
+            }
+        }
+
+        $this->encoder->withLinks($links)->withMeta([
+            'total' => $count
+        ]);
 
         $this->view->setData($data);
     }
@@ -345,15 +339,6 @@ class JsonApiController extends ActionController
             $this->throwStatus(404, sprintf('Relationship "%s" not found', $relationship));
         }
         $this->view->setData($relationships[$relationship]['data']);
-    }
-
-    /**
-     * @param RequestInterface $request
-     * @return string
-     */
-    protected function getUrlPrefix(RequestInterface $request)
-    {
-        return rtrim($request->getMainRequest()->getHttpRequest()->getBaseUri() . $this->adapter->getBaseUrl(), '/');
     }
 
     /**
@@ -412,12 +397,13 @@ class JsonApiController extends ActionController
     }
 
     /**
-     * @param $resource
+     * @param string $endpoint
+     * @param string $resource
      * @param EncodingParametersInterface $parameters
      * @return void
      * @throws RuntimeException
      */
-    protected function registerAdapter($resource, $parameters)
+    protected function registerAdapter($endpoint, $resource, $parameters)
     {
         if (isset($this->availableResources[$resource]) && isset($this->availableResources[$resource]['adapter'])) {
             $adapterClass = $this->availableResources[$resource]['adapter'];
@@ -428,6 +414,16 @@ class JsonApiController extends ActionController
             throw new RuntimeException(\sprintf('Adapter %s is not registered', $adapterClass));
         }
 
-        $this->adapter = new DefaultAdapter($resource, $parameters);
+        $this->adapter = new DefaultAdapter($endpoint, $resource, $parameters);
     }
+
+    /**
+     * @param RequestInterface $request
+     * @return string
+     */
+    protected function getUrlPrefix(RequestInterface $request)
+    {
+        return rtrim($request->getMainRequest()->getHttpRequest()->getBaseUri() . $this->adapter->getBaseUrl(), '/');
+    }
+
 }

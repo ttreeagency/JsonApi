@@ -2,12 +2,6 @@
 
 namespace Ttree\JsonApi\Adapter;
 
-//use CloudCreativity\LaravelJsonApi\Contracts\Adapter\RelationshipAdapterInterface;
-//use CloudCreativity\LaravelJsonApi\Contracts\Object\RelationshipInterface;
-//use CloudCreativity\LaravelJsonApi\Contracts\Object\RelationshipsInterface;
-//use CloudCreativity\LaravelJsonApi\Contracts\Store\StoreAwareInterface;
-
-
 use Ttree\JsonApi\Contract\Adapter\ResourceAdapterInterface;
 use Ttree\JsonApi\Contract\Object\ResourceObjectInterface;
 use Ttree\JsonApi\Contract\Object\StandardObjectInterface;
@@ -52,6 +46,7 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
     abstract protected function persist($record);
 
     /**
+     * @todo
      * @inheritdoc
      */
     public function create(ResourceObjectInterface $resource, EncodingParametersInterface $parameters)
@@ -61,9 +56,9 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
 //        $this->hydrateRelationships($record, $resource->getRelationships(), $parameters);
         $record = $this->persist($record) ?: $record;
 
-//        if (method_exists($this, 'hydrateRelated')) {
-//            $record = $this->hydrateRelated($record, $resource, $parameters) ?: $record;
-//        }
+        if (method_exists($this, 'hydrateRelated')) {
+            $record = $this->hydrateRelated($record, $resource, $parameters) ?: $record;
+        }
 
         return $record;
     }
@@ -77,6 +72,7 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
     }
 
     /**
+     * @todo
      * @inheritdoc
      */
     public function update($record, ResourceObjectInterface $resource, EncodingParametersInterface $parameters)
@@ -85,14 +81,15 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
 //        $this->hydrateRelationships($record, $resource->getRelationships(), $parameters);
         $record = $this->persist($record) ?: $record;
 
-//        if (method_exists($this, 'hydrateRelated')) {
-//            $record = $this->hydrateRelated($record, $resource, $parameters) ?: $record;
-//        }
+        if (method_exists($this, 'hydrateRelated')) {
+            $record = $this->hydrateRelated($record, $resource, $parameters) ?: $record;
+        }
 
         return $record;
     }
 
     /**
+     * @todo
      * @inheritDoc
      */
     public function related($field)
@@ -126,6 +123,7 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
     }
 
     /**
+     * @todo
      * @param $field
      * @return string|null
      */
@@ -137,11 +135,11 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
     }
 
     /**
+     * @todo
      * @param $record
      * @param RelationshipsInterface $relationships
      * @param EncodingParametersInterface $parameters
      * @return void
-     * @deprecated 2.0.0 use `fillRelationships` directly.
      */
     protected function hydrateRelationships(
         $record,
@@ -149,35 +147,18 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
         EncodingParametersInterface $parameters
     )
     {
-        $this->fillRelationships($record, $relationships, $parameters);
-    }
-
-    /**
-     * Fill relationships from a resource object.
-     *
-     * @param $record
-     * @param RelationshipsInterface $relationships
-     * @param EncodingParametersInterface $parameters
-     * @return void
-     */
-    protected function fillRelationships(
-        $record,
-        RelationshipsInterface $relationships,
-        EncodingParametersInterface $parameters
-    )
-    {
         foreach ($relationships->getAll() as $field => $relationship) {
-            /** Skip any fields that are not fillable. */
-            if ($this->isNotFillable($field, $record)) {
-                continue;
-            }
+//            /** Skip any fields that are not fillable. */
+//            if ($this->isNotFillable($field, $record)) {
+//                continue;
+//            }
 
-            /** Skip any fields that are not relations */
-            if (!$this->isRelation($field)) {
-                continue;
-            }
+//            /** Skip any fields that are not relations */
+//            if (!$this->isRelation($field)) {
+//                continue;
+//            }
 
-            $this->fillRelationship(
+            $this->hydrateRelationship(
                 $record,
                 $field,
                 $relationships->getRelationship($field),
@@ -187,6 +168,7 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
     }
 
     /**
+     * @todo
      * Fill a relationship from a resource object.
      *
      * @param $record
@@ -194,7 +176,7 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
      * @param RelationshipInterface $relationship
      * @param EncodingParametersInterface $parameters
      */
-    protected function fillRelationship(
+    protected function hydrateRelationship(
         $record,
         $field,
         RelationshipInterface $relationship,
@@ -203,7 +185,7 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
     {
         $relation = $this->related($field);
 
-        $relation->update($record, $relationship, $parameters);
+//        $relation->update($record, $relationship, $parameters);
     }
 
 }

@@ -7,7 +7,8 @@ use Ttree\JsonApi\Exception\ConfigurationException;
 use Neos\Utility\Arrays;
 
 /**
- * Paginate Options
+ * @todo
+ * ResourceSettingsDefinition
  */
 class ResourceSettingsDefinition
 {

@@ -5,6 +5,7 @@ namespace Ttree\JsonApi\Exception;
 use Neos\Flow\Annotations as Flow;
 use Ttree\JsonApi\Exception;
 use Neomerx\JsonApi\Exceptions\JsonApiException;
+use Ttree\JsonApi\Document\Error;
 
 /**
  * Exception
@@ -12,7 +13,7 @@ use Neomerx\JsonApi\Exceptions\JsonApiException;
  * @Flow\Scope("singleton")
  * @api
  */
-class InvalidJsonException extends Exception
+class InvalidJsonException extends JsonApiException
 {
     /**
      * @var int
