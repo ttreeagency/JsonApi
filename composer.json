@@ -6,8 +6,7 @@
     "neos/flow": "~5.0.0",
     "neomerx/json-api": "~2.0.0",
     "php": ">=7.0.0",
-    "ext-json": "*",
-    "ext-http": "*"
+    "ext-json": "*"
   },
   "autoload": {
     "psr-0": {
