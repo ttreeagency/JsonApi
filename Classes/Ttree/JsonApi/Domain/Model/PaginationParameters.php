@@ -170,6 +170,10 @@ class PaginationParameters
      */
     public function next($count)
     {
+        if ($this->limit === null) {
+            return null;
+        }
+
         if (($this->offset / $this->limit) + 1 >= ceil($count / $this->limit)) {
             return null;
         }

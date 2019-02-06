@@ -8,18 +8,15 @@ namespace Ttree\JsonApi\Adapter;
 //use CloudCreativity\LaravelJsonApi\Contracts\Object\ResourceObjectInterface;
 //use CloudCreativity\LaravelJsonApi\Contracts\Pagination\PageInterface;
 //use CloudCreativity\LaravelJsonApi\Contracts\Pagination\PagingStrategyInterface;
-//use Illuminate\Support\Collection;
 use Neos\Flow\Annotations as Flow;
-use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
-use Neomerx\JsonApi\Encoder\EncoderOptions;
-use Neomerx\JsonApi\Contracts\Encoder\Parameters\EncodingParametersInterface;
-use Neomerx\JsonApi\Contracts\Encoder\Parameters\SortParameterInterface;
-use Neomerx\JsonApi\Encoder\Parameters\EncodingParameters;
 use Neos\Flow\ObjectManagement\ObjectManagerInterface;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\Flow\Persistence\QueryInterface;
 use Neos\Utility\Arrays;
-use Neos\Utility\ObjectAccess;
+use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
+use Neomerx\JsonApi\Encoder\EncoderOptions;
+use Neomerx\JsonApi\Contracts\Encoder\Parameters\EncodingParametersInterface;
+use Neomerx\JsonApi\Contracts\Encoder\Parameters\SortParameterInterface;
 use Ttree\JsonApi\Contract\Object\ResourceObjectInterface;
 use Ttree\JsonApi\Contract\Object\RelationshipInterface;
 use Ttree\JsonApi\Domain\Model\Concern\DeserializesAttributeTrait;
@@ -206,6 +203,14 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
+     * @return string
+     */
+    public function getResource()
+    {
+        return $this->resource;
+    }
+
+    /**
      * @return object|JsonApiRepositoryInterface
      * @throws Exception
      */
@@ -268,6 +273,22 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
 //            $this->all($query) :
 //            $this->paginate($query, $this->normalizeParameters($parameters, $pagination));
         return $this->all($query);
+    }
+
+    /**
+     * @param EncodingParametersInterface $parameters
+     * @return mixed
+     * @throws RuntimeException
+     */
+    public function count(EncodingParametersInterface $parameters)
+    {
+        $filters = $this->extractFilters($parameters);
+        $query = $this->newQuery();
+
+        /** Filter and sort */
+        $this->filter($query, $filters);
+
+        return $this->countAll($query);
     }
 
     /**
@@ -562,6 +583,16 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     protected function all($query)
     {
         return $query->execute();
+    }
+
+    /**
+     * Return the count of the query
+     * @param $query
+     * @return mixed
+     */
+    protected function countAll($query)
+    {
+        return $query->execute()->count();
     }
 
     /**

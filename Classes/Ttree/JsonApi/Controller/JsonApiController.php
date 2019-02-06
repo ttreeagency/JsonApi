@@ -1,4 +1,5 @@
 <?php
+
 namespace Ttree\JsonApi\Controller;
 
 use Neos\Flow\Annotations as Flow;
@@ -263,12 +264,10 @@ class JsonApiController extends ActionController
     public function listAction()
     {
         $data = $this->adapter->query($this->parameters);
-        $count = 0;
-////        $data = $this->endpoint->findAll();
-////        $count = $this->endpoint->countAll();
-//
-//        $parameters = new PaginationParameters($this->parameters->getPaginationParameters() ?: []);
-//        $arguments = $this->request->getHttpRequest()->getArguments();
+        $count = $this->adapter->count($this->parameters);
+
+        $parameters = new PaginationParameters($this->parameters->getPaginationParameters() ?: []);
+        $arguments = $this->request->getHttpRequest()->getArguments();
 
         if ($arguments !== []) {
             $query = \http_build_query($arguments);
@@ -276,11 +275,12 @@ class JsonApiController extends ActionController
         } else {
             $self = new Link(\sprintf('/%s', $this->adapter->getResource()));
         }
+
         $links = [
             Link::SELF => $self
         ];
 
-        if ($count > $parameters->getLimit()) {
+        if ($parameters->getLimit() !== null && $count > $parameters->getLimit()) {
             $prev = $parameters->prev();
             if ($prev !== null) {
                 $query = \http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $prev));
@@ -289,20 +289,20 @@ class JsonApiController extends ActionController
 
             $next = $parameters->next($count);
             if ($next !== null) {
-                $query = http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $next));
-                $links[Link::NEXT] = new Link(sprintf('/%s?%s', $this->adapter->getResource(), $query));
+                $query = \http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $next));
+                $links[Link::NEXT] = new Link(\sprintf('/%s?%s', $this->adapter->getResource(), $query));
             }
 
             $first = $parameters->first();
             if ($first !== null) {
-                $query = http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $first));
-                $links[Link::FIRST] = new Link(sprintf('/%s?%s', $this->adapter->getResource(), $query));
+                $query = \http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $first));
+                $links[Link::FIRST] = new Link(\sprintf('/%s?%s', $this->adapter->getResource(), $query));
             }
 
             $last = $parameters->last($count);
             if ($last !== null) {
-                $query = http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $last));
-                $links[Link::LAST] = new Link(sprintf('/%s?%s', $this->adapter->getResource(), $query));
+                $query = \http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $last));
+                $links[Link::LAST] = new Link(\sprintf('/%s?%s', $this->adapter->getResource(), $query));
             }
         }
 
@@ -336,7 +336,7 @@ class JsonApiController extends ActionController
         $schema = $this->view->getSchema($this->record);
         $relationships = $schema->getRelationships($this->record, false, []);
         if (!isset($relationships[$relationship])) {
-            $this->throwStatus(404, sprintf('Relationship "%s" not found', $relationship));
+            $this->throwStatus(404, \sprintf('Relationship "%s" not found', $relationship));
         }
         $this->view->setData($relationships[$relationship]['data']);
     }
@@ -366,6 +366,7 @@ class JsonApiController extends ActionController
 
     /**
      * @return string
+     * @throws \Neos\Flow\Persistence\Exception\IllegalObjectTypeException
      */
     public function deleteAction()
     {
@@ -383,7 +384,8 @@ class JsonApiController extends ActionController
      * @throws \Neos\Flow\Mvc\Exception\NoSuchArgumentException
      * @throws \Neos\Flow\Mvc\Exception\StopActionException
      */
-    public function optionsAction() {
+    public function optionsAction()
+    {
         $allowedMethods = array(
             'GET',
             'POST',
@@ -423,7 +425,7 @@ class JsonApiController extends ActionController
      */
     protected function getUrlPrefix(RequestInterface $request)
     {
-        return rtrim($request->getMainRequest()->getHttpRequest()->getBaseUri() . $this->adapter->getBaseUrl(), '/');
+        return \rtrim($request->getMainRequest()->getHttpRequest()->getBaseUri() . $this->adapter->getBaseUrl(), '/');
     }
 
 }
