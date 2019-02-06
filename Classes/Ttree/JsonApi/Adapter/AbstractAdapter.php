@@ -14,9 +14,6 @@ use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\Flow\Persistence\QueryInterface;
 use Neos\Utility\Arrays;
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
-use Neomerx\JsonApi\Encoder\EncoderOptions;
-use Neomerx\JsonApi\Contracts\Encoder\Parameters\EncodingParametersInterface;
-use Neomerx\JsonApi\Contracts\Encoder\Parameters\SortParameterInterface;
 use Ttree\JsonApi\Contract\Object\ResourceObjectInterface;
 use Ttree\JsonApi\Contract\Object\RelationshipInterface;
 use Ttree\JsonApi\Domain\Model\Concern\DeserializesAttributeTrait;
@@ -25,6 +22,7 @@ use Ttree\JsonApi\Contract\Object\StandardObjectInterface;
 use Ttree\JsonApi\Encoder\Encoder;
 use Ttree\JsonApi\Exception;
 use Ttree\JsonApi\Exception\RuntimeException;
+use Ttree\JsonApi\Mvc\Controller\EncodingParametersParser;
 use Ttree\JsonApi\Utility\StringUtility as Str;
 
 /**
@@ -49,7 +47,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     protected $resource;
 
     /**
-     * @var EncodingParametersInterface
+     * @var EncodingParametersParser
      */
     protected $parameters;
 
@@ -151,9 +149,9 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     /**
      * @param string $endpoint
      * @param string $resource
-     * @param EncodingParametersInterface $parameters
+     * @param EncodingParametersParser $parameters
      */
-    public function __construct($endpoint, $resource, EncodingParametersInterface $parameters)
+    public function __construct($endpoint, $resource, EncodingParametersParser $parameters)
     {
         $this->endpoint = $endpoint;
         $this->resource = $resource;
@@ -191,7 +189,10 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     public function getEncoder($urlPrefix = null, $depth = 512)
     {
-        return Encoder::instance($this->configuration['schemas'], new EncoderOptions(JSON_PRETTY_PRINT, $urlPrefix, $depth));
+        return Encoder::instance($this->configuration['schemas'])
+            ->withUrlPrefix($urlPrefix)
+            ->withEncodeDepth($depth)
+            ->withEncodeOptions(JSON_PRETTY_PRINT);
     }
 
     /**
@@ -240,11 +241,11 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     abstract protected function filter($query, $filters);
 
     /**
-     * @param EncodingParametersInterface $parameters
+     * @param EncodingParametersParser $parameters
      * @return mixed|PageInterface
      * @throws RuntimeException
      */
-    public function query(EncodingParametersInterface $parameters)
+    public function query(EncodingParametersParser $parameters)
     {
         $filters = $this->extractFilters($parameters);
         $query = $this->newQuery();
@@ -260,7 +261,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         /** Filter and sort */
         $this->filter($query, $filters);
 
-        $this->sort($query, $parameters->getSortParameters());
+        $this->sort($query, $parameters->getSorts());
 
         /** Paginate results if needed. */
         $pagination = $this->extractPagination($parameters);
@@ -276,11 +277,11 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
-     * @param EncodingParametersInterface $parameters
+     * @param EncodingParametersParser $parameters
      * @return mixed
      * @throws RuntimeException
      */
-    public function count(EncodingParametersInterface $parameters)
+    public function count(EncodingParametersParser $parameters)
     {
         $filters = $this->extractFilters($parameters);
         $query = $this->newQuery();
@@ -299,10 +300,10 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      * comments adapter.
      *
      * @param Relations\BelongsToMany|Relations\HasMany|Relations\HasManyThrough $relation
-     * @param EncodingParametersInterface $parameters
+     * @param EncodingParametersParser $parameters
      * @return mixed
      */
-    public function queryRelation($relation, EncodingParametersInterface $parameters)
+    public function queryRelation($relation, EncodingParametersParser $parameters)
     {
         $query = $relation->newQuery();
 
@@ -328,7 +329,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     /**
      * @inheritDoc
      */
-    public function read($resourceId, EncodingParametersInterface $parameters)
+    public function read($resourceId, EncodingParametersParser $parameters)
     {
         if ($record = parent::read($resourceId, $parameters)) {
             $this->load($record, $parameters);
@@ -340,7 +341,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     /**
      * @inheritdoc
      */
-    public function update($record, ResourceObjectInterface $resource, EncodingParametersInterface $parameters)
+    public function update($record, ResourceObjectInterface $resource, EncodingParametersParser $parameters)
     {
         /** @var object $record */
         $record = parent::update($record, $resource, $parameters);
@@ -352,11 +353,11 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
 
     /**
      * @param $record
-     * @param EncodingParametersInterface $params
+     * @param EncodingParametersParser $params
      * @return bool|void
      * @throws \Neos\Flow\Persistence\Exception\IllegalObjectTypeException
      */
-    public function delete($record, EncodingParametersInterface $params)
+    public function delete($record, EncodingParametersParser $params)
     {
         $this->repository->remove($record);
     }
@@ -417,9 +418,9 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      * Add eager loading to a record.
      *
      * @param $record
-     * @param EncodingParametersInterface $parameters
+     * @param EncodingParametersParser $parameters
      */
-    protected function load($record, EncodingParametersInterface $parameters)
+    protected function load($record, EncodingParametersParser $parameters)
     {
 //        $relationshipPaths = $this->getRelationshipPaths($this->extractIncludePaths($parameters));
 
@@ -467,7 +468,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         $record,
         $field,
         RelationshipInterface $relationship,
-        EncodingParametersInterface $parameters
+        EncodingParametersParser $parameters
     )
     {
         $relation = $this->related($field);
@@ -483,12 +484,12 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      *
      * @param object $record
      * @param ResourceObjectInterface $resource
-     * @param EncodingParametersInterface $parameters
+     * @param EncodingParametersParser $parameters
      */
     protected function hydrateRelated(
         $record,
         ResourceObjectInterface $resource,
-        EncodingParametersInterface $parameters
+        EncodingParametersParser $parameters
     )
     {
         $relationships = $resource->getRelationships();
@@ -600,10 +601,10 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      * Return the result for a paginated query.
      *
      * @param QueryInterface $query
-     * @param EncodingParametersInterface $parameters
+     * @param EncodingParametersParser $parameters
      * @return PageInterface
      */
-    protected function paginate($query, EncodingParametersInterface $parameters)
+    protected function paginate($query, EncodingParametersParser $parameters)
     {
         return $this->paging->paginate($query, $parameters);
     }
@@ -629,30 +630,30 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
-     * @param EncodingParametersInterface $parameters
+     * @param EncodingParametersParser $parameters
      * @return array
      */
-    protected function extractIncludePaths(EncodingParametersInterface $parameters)
+    protected function extractIncludePaths(EncodingParametersParser $parameters)
     {
-        return $parameters->getIncludePaths();
+        return $parameters->getIncludes();
     }
 
     /**
-     * @param EncodingParametersInterface $parameters
+     * @param EncodingParametersParser $parameters
      * @return array
      */
-    protected function extractFilters(EncodingParametersInterface $parameters)
+    protected function extractFilters(EncodingParametersParser $parameters)
     {
-        return $parameters->getFilteringParameters();
+        return $parameters->getFilters();
     }
 
     /**
-     * @param EncodingParametersInterface $parameters
+     * @param EncodingParametersParser $parameters
      * @return array
      */
-    protected function extractPagination(EncodingParametersInterface $parameters)
+    protected function extractPagination(EncodingParametersParser $parameters)
     {
-        $pagination = (array)$parameters->getPaginationParameters();
+        $pagination = []; //(array)$parameters->getPaginationParameters();
 
         return $pagination ?: $this->defaultPagination();
     }
@@ -688,9 +689,8 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         }
 
         $ordering = [];
-        /** @var SortParameterInterface $param */
-        foreach ($sortBy as $param) {
-            $ordering = \array_merge($ordering, $this->sortBy($query, $param));
+        foreach ($sortBy as $property => $param) {
+            $ordering = \array_merge($ordering, $this->sortBy($query, $property, $param));
         }
 
         $query->setOrderings($ordering);
@@ -711,14 +711,15 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
 
     /**
      * @param QueryInterface $query
-     * @param SortParameterInterface $param
+     * @param string $property
+     * @param bool $param
      * @return array
      */
-    protected function sortBy($query, SortParameterInterface $param)
+    protected function sortBy($query, $property, $param)
     {
-        $column = $this->getQualifiedSortColumn($query, $param->getField());
+        $column = $this->getQualifiedSortColumn($query, $property);
 
-        return [$column => $param->isAscending() ? QueryInterface::ORDER_ASCENDING : QueryInterface::ORDER_DESCENDING];
+        return [$column => $param === true ? QueryInterface::ORDER_ASCENDING : QueryInterface::ORDER_DESCENDING];
     }
 
     /**

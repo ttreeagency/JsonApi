@@ -8,12 +8,12 @@ use Ttree\JsonApi\Adapter\AbstractAdapter;
 use Ttree\JsonApi\Adapter\DefaultAdapter;
 use Ttree\JsonApi\Exception\ConfigurationException;
 use Ttree\JsonApi\Exception\RuntimeException;
+use Ttree\JsonApi\Mvc\Controller\EncodingParametersParser;
 use Ttree\JsonApi\Mvc\Controller\QueryParametersParser;
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
 use Neomerx\JsonApi\Contracts\Factories\FactoryInterface;
-use Neomerx\JsonApi\Contracts\Encoder\Parameters\EncodingParametersInterface;
-use Neomerx\JsonApi\Document\Link;
-use Neomerx\JsonApi\Schema\SchemaProvider;
+use Neomerx\JsonApi\Schema\Link;
+use Neomerx\JsonApi\Schema\BaseSchema;
 use Ttree\JsonApi\Domain\Model\PaginationParameters;
 use Ttree\JsonApi\Mvc\ValidatedRequest;
 use Ttree\JsonApi\View\JsonApiView;
@@ -74,9 +74,9 @@ class JsonApiController extends ActionController
     protected $validatedRequest;
 
     /**
-     * @var EncodingParametersInterface
+     * @var EncodingParametersParser
      */
-    protected $parameters;
+    protected $encodedParameters;
 
     /**
      * @Flow\InjectConfiguration(path="endpoints")
@@ -133,10 +133,11 @@ class JsonApiController extends ActionController
 
         $validatedRequest = new ValidatedRequest($request);
         /** @var QueryParametersParser $parameterParser */
-        $parameterParser = new QueryParametersParser($this->factory);
-        $this->parameters = $parameterParser->parse($request);
+
+        $this->encodedParameters = new EncodingParametersParser($request->getArguments());
+
         $this->validatedRequest = $validatedRequest;
-        $this->registerAdapter($endpoint, $resource, $this->parameters);
+        $this->registerAdapter($endpoint, $resource);
 
         $urlPrefix = $this->getUrlPrefix($request);
         $this->encoder = $this->adapter->getEncoder($urlPrefix);
@@ -254,7 +255,7 @@ class JsonApiController extends ActionController
         parent::initializeView($view);
         $view->setResource($this->request->getArgument('resource'));
         $view->setEncoder($this->encoder);
-        $view->setParameters($this->parameters);
+        $view->setParameters($this->encodedParameters);
     }
 
     /**
@@ -263,46 +264,49 @@ class JsonApiController extends ActionController
      */
     public function listAction()
     {
-        $data = $this->adapter->query($this->parameters);
-        $count = $this->adapter->count($this->parameters);
+        $isSubUrl = false;
+        $hasMeta = false;
 
-        $parameters = new PaginationParameters($this->parameters->getPaginationParameters() ?: []);
+        $data = $this->adapter->query($this->encodedParameters);
+        $count = $this->adapter->count($this->encodedParameters);
+
+        $parameters = new PaginationParameters($this->encodedParameters->getPagination() ?: []);
         $arguments = $this->request->getHttpRequest()->getArguments();
 
         if ($arguments !== []) {
             $query = \http_build_query($arguments);
-            $self = new Link(\sprintf('/%s?%s', $this->adapter->getResource(), $query));
+            $self = new Link($isSubUrl, \sprintf('/%s?%s', $this->adapter->getResource(), $query), $hasMeta);
         } else {
-            $self = new Link(\sprintf('/%s', $this->adapter->getResource()));
+            $self = new Link($isSubUrl, \sprintf('/%s', $this->adapter->getResource()), $hasMeta);
         }
 
         $links = [
             Link::SELF => $self
         ];
 
-        if ($parameters->getLimit() !== null && $count > $parameters->getLimit()) {
+        if ($count > $parameters->getLimit()) {
             $prev = $parameters->prev();
             if ($prev !== null) {
                 $query = \http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $prev));
-                $links[Link::PREV] = new Link(\sprintf('/%s?%s', $this->adapter->getResource(), $query));
+                $links[Link::PREV] = new Link($isSubUrl, \sprintf('/%s?%s', $this->adapter->getResource(), $query), $hasMeta);
             }
 
             $next = $parameters->next($count);
             if ($next !== null) {
                 $query = \http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $next));
-                $links[Link::NEXT] = new Link(\sprintf('/%s?%s', $this->adapter->getResource(), $query));
+                $links[Link::NEXT] = new Link($isSubUrl, \sprintf('/%s?%s', $this->adapter->getResource(), $query), $hasMeta);
             }
 
             $first = $parameters->first();
             if ($first !== null) {
                 $query = \http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $first));
-                $links[Link::FIRST] = new Link(\sprintf('/%s?%s', $this->adapter->getResource(), $query));
+                $links[Link::FIRST] = new Link($isSubUrl, \sprintf('/%s?%s', $this->adapter->getResource(), $query), $hasMeta);
             }
 
             $last = $parameters->last($count);
             if ($last !== null) {
                 $query = \http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $last));
-                $links[Link::LAST] = new Link(\sprintf('/%s?%s', $this->adapter->getResource(), $query));
+                $links[Link::LAST] = new Link($isSubUrl, \sprintf('/%s?%s', $this->adapter->getResource(), $query), $hasMeta);
             }
         }
 
@@ -319,7 +323,7 @@ class JsonApiController extends ActionController
      */
     public function showAction($identifier)
     {
-        $data = $this->adapter->read($identifier, $this->parameters);
+        $data = $this->adapter->read($identifier, $this->encodedParameters);
 
         $this->view->setData($data);
     }
@@ -332,9 +336,9 @@ class JsonApiController extends ActionController
      */
     public function relatedAction($relationship)
     {
-        /** @var SchemaProvider $schema */
+        /** @var BaseSchema $schema */
         $schema = $this->view->getSchema($this->record);
-        $relationships = $schema->getRelationships($this->record, false, []);
+        $relationships = $schema->getRelationships($this->record);
         if (!isset($relationships[$relationship])) {
             $this->throwStatus(404, \sprintf('Relationship "%s" not found', $relationship));
         }
@@ -346,7 +350,7 @@ class JsonApiController extends ActionController
      */
     public function createAction()
     {
-        $data = $this->adapter->create($this->validatedRequest->getDocument()->getResource(), $this->parameters);
+        $data = $this->adapter->create($this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
 
         $this->response->setStatus(201);
         $this->view->setData($data);
@@ -357,7 +361,7 @@ class JsonApiController extends ActionController
      */
     public function updateAction()
     {
-        $data = $this->adapter->update($this->record, $this->validatedRequest->getDocument()->getResource(), $this->parameters);
+        $data = $this->adapter->update($this->record, $this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
 
         $this->persistenceManager->persistAll();
         $this->response->setStatus(200);
@@ -370,7 +374,7 @@ class JsonApiController extends ActionController
      */
     public function deleteAction()
     {
-        $this->adapter->delete($this->record, $this->parameters);
+        $this->adapter->delete($this->record, $this->encodedParameters);
 
         $this->response->setStatus(204);
         return '';
@@ -401,22 +405,21 @@ class JsonApiController extends ActionController
     /**
      * @param string $endpoint
      * @param string $resource
-     * @param EncodingParametersInterface $parameters
      * @return void
      * @throws RuntimeException
      */
-    protected function registerAdapter($endpoint, $resource, $parameters)
+    protected function registerAdapter($endpoint, $resource)
     {
         if (isset($this->availableResources[$resource]) && isset($this->availableResources[$resource]['adapter'])) {
             $adapterClass = $this->availableResources[$resource]['adapter'];
             if ($this->objectManager->isRegistered($adapterClass)) {
-                $this->adapter = new $adapterClass($resource, $parameters);
+                $this->adapter = new $adapterClass($resource, $this->encodedParameters);
             }
 
             throw new RuntimeException(\sprintf('Adapter %s is not registered', $adapterClass));
         }
 
-        $this->adapter = new DefaultAdapter($endpoint, $resource, $parameters);
+        $this->adapter = new DefaultAdapter($endpoint, $resource, $this->encodedParameters);
     }
 
     /**

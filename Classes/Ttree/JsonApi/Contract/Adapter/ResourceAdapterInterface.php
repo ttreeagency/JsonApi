@@ -2,7 +2,7 @@
 namespace Ttree\JsonApi\Contract\Adapter;
 
 use Ttree\JsonApi\Contract\Object\ResourceObjectInterface;
-use Neomerx\JsonApi\Contracts\Encoder\Parameters\EncodingParametersInterface;
+use Ttree\JsonApi\Mvc\Controller\EncodingParametersParser;
 
 /**
  * Interface ResourceAdapterInterface
@@ -20,28 +20,28 @@ interface ResourceAdapterInterface
     /**
      * Query many domain records.
      *
-     * @param EncodingParametersInterface $parameters
+     * @param EncodingParametersParser $parameters
      * @return mixed
      */
-    public function query(EncodingParametersInterface $parameters);
+    public function query(EncodingParametersParser $parameters);
 
     /**
      * Create a domain record using data from the supplied resource object.
      *
      * @param ResourceObjectInterface $resource
-     * @param EncodingParametersInterface $parameters
+     * @param EncodingParametersParser $parameters
      * @return object the created domain record.
      */
-    public function create(ResourceObjectInterface $resource, EncodingParametersInterface $parameters);
+    public function create(ResourceObjectInterface $resource, EncodingParametersParser $parameters);
 
     /**
      * Query a single domain record.
      *
      * @param string $resourceId
-     * @param EncodingParametersInterface $parameters
+     * @param EncodingParametersParser $parameters
      * @return object|null
      */
-    public function read($resourceId, EncodingParametersInterface $parameters);
+    public function read($resourceId, EncodingParametersParser $parameters);
 
     /**
      * Update a domain record with data from the supplied resource object.
@@ -49,19 +49,19 @@ interface ResourceAdapterInterface
      * @param object $record
      *      the domain record to update.
      * @param ResourceObjectInterface $resource
-     * @param EncodingParametersInterface $params
+     * @param EncodingParametersParser $params
      * @return object the updated domain record.
      */
-    public function update($record, ResourceObjectInterface $resource, EncodingParametersInterface $params);
+    public function update($record, ResourceObjectInterface $resource, EncodingParametersParser $params);
 
     /**
      * Delete a domain record.
      *
      * @param $record
-     * @param EncodingParametersInterface $params
+     * @param EncodingParametersParser $params
      * @return void whether the record was successfully destroyed.
      */
-    public function delete($record, EncodingParametersInterface $params);
+    public function delete($record, EncodingParametersParser $params);
 
     /**
      * Does a domain record of the specified JSON API resource id exist?

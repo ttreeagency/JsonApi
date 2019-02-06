@@ -8,8 +8,8 @@ use Ttree\JsonApi\Contract\Object\StandardObjectInterface;
 use Ttree\JsonApi\Contract\Object\RelationshipInterface;
 use Ttree\JsonApi\Contract\Object\RelationshipsInterface;
 use Ttree\JsonApi\Exception\RuntimeException;
+use Ttree\JsonApi\Mvc\Controller\EncodingParametersParser;
 use Ttree\JsonApi\Utility\StringUtility as Str;
-use Neomerx\JsonApi\Contracts\Encoder\Parameters\EncodingParametersInterface;
 
 /**
  * Class AbstractResourceAdaptor
@@ -49,7 +49,7 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
      * @todo
      * @inheritdoc
      */
-    public function create(ResourceObjectInterface $resource, EncodingParametersInterface $parameters)
+    public function create(ResourceObjectInterface $resource, EncodingParametersParser $parameters)
     {
         $record = $this->createRecord($resource);
         $this->hydrateAttributes($record, $resource->getAttributes());
@@ -66,7 +66,7 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
     /**
      * @inheritDoc
      */
-    public function read($resourceId, EncodingParametersInterface $parameters)
+    public function read($resourceId, EncodingParametersParser $parameters)
     {
         return $this->find($resourceId);
     }
@@ -75,7 +75,7 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
      * @todo
      * @inheritdoc
      */
-    public function update($record, ResourceObjectInterface $resource, EncodingParametersInterface $parameters)
+    public function update($record, ResourceObjectInterface $resource, EncodingParametersParser $parameters)
     {
         $this->hydrateAttributes($record, $resource->getAttributes());
 //        $this->hydrateRelationships($record, $resource->getRelationships(), $parameters);
@@ -129,7 +129,7 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
      */
     protected function methodForRelation($field)
     {
-//        $method = Str::camelize($field);
+        $method = Str::camelize($field);
 
         return method_exists($this, $method) ? $method : null;
     }
@@ -138,13 +138,13 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
      * @todo
      * @param $record
      * @param RelationshipsInterface $relationships
-     * @param EncodingParametersInterface $parameters
+     * @param EncodingParametersParser $parameters
      * @return void
      */
     protected function hydrateRelationships(
         $record,
         RelationshipsInterface $relationships,
-        EncodingParametersInterface $parameters
+        EncodingParametersParser $parameters
     )
     {
         foreach ($relationships->getAll() as $field => $relationship) {
@@ -174,13 +174,13 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
      * @param $record
      * @param $field
      * @param RelationshipInterface $relationship
-     * @param EncodingParametersInterface $parameters
+     * @param EncodingParametersParser $parameters
      */
     protected function hydrateRelationship(
         $record,
         $field,
         RelationshipInterface $relationship,
-        EncodingParametersInterface $parameters
+        EncodingParametersParser $parameters
     )
     {
         $relation = $this->related($field);

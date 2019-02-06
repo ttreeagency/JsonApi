@@ -4,12 +4,9 @@ namespace Ttree\JsonApi\View;
 
 use Neos\Flow\Annotations as Flow;
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
-use Neomerx\JsonApi\Contracts\Factories\FactoryInterface;
-use Neomerx\JsonApi\Contracts\Encoder\Parameters\EncodingParametersInterface;
-use Neomerx\JsonApi\Contracts\Schema\ContainerInterface;
-use Neomerx\JsonApi\Contracts\Schema\SchemaProviderInterface;
 use Ttree\JsonApi\Domain\Model\ResourceSettingsDefinition;
 use Neos\Flow\Mvc\View\AbstractView;
+use Ttree\JsonApi\Mvc\Controller\EncodingParametersParser;
 
 /**
  * Class JsonApiView
@@ -23,17 +20,6 @@ class JsonApiView extends AbstractView
     protected $encoder;
 
     /**
-     * @var ContainerInterface
-     */
-    protected $container;
-
-    /**
-     * @var FactoryInterface
-     * @Flow\Inject(lazy=false)
-     */
-    protected $factory;
-
-    /**
      * @var array
      */
     protected $data = [];
@@ -44,7 +30,7 @@ class JsonApiView extends AbstractView
     protected $resource;
 
     /**
-     * @var EncodingParametersInterface
+     * @var EncodingParametersParser
      */
     protected $parameters;
 
@@ -53,7 +39,7 @@ class JsonApiView extends AbstractView
      */
     public function render()
     {
-        return $this->encoder->encodeData($this->data, $this->parameters);
+        return $this->encoder->encodeData($this->data);
     }
 
     /**
@@ -66,7 +52,7 @@ class JsonApiView extends AbstractView
     }
 
     /**
-     * @param EncodingParametersInterface $parameters
+     * @param EncodingParametersParser $parameters
      */
     public function setParameters($parameters)
     {
@@ -81,7 +67,6 @@ class JsonApiView extends AbstractView
     {
         $this->resource = $resource;
         $resourceSettingsDefinition = new ResourceSettingsDefinition($this->resource);
-        $this->container = $this->factory->createContainer($resourceSettingsDefinition->getSchemas());
     }
 
     /**

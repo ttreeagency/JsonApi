@@ -4,10 +4,10 @@ namespace Ttree\JsonApi\Document;
 
 use Ttree\JsonApi\Contract\Document\MutableErrorInterface;
 use InvalidArgumentException;
-use Neomerx\JsonApi\Contracts\Document\ErrorInterface;
-use Neomerx\JsonApi\Contracts\Document\LinkInterface;
-use Neomerx\JsonApi\Document\Link;
-use Neomerx\JsonApi\Exceptions\ErrorCollection;
+use Neomerx\JsonApi\Contracts\Schema\ErrorInterface;
+use Neomerx\JsonApi\Contracts\Schema\LinkInterface;
+use Neomerx\JsonApi\Schema\Link;
+use Neomerx\JsonApi\Schema\ErrorCollection;
 
 /**
  * Class Error
@@ -230,7 +230,7 @@ class Error implements MutableErrorInterface
     /**
      * @inheritdoc
      */
-    public function getLinks()
+    public function getLinks(): iterable
     {
         return !empty($this->links) ? $this->links : null;
     }
@@ -252,7 +252,7 @@ class Error implements MutableErrorInterface
     /**
      * @inheritdoc
      */
-    public function getStatus()
+    public function getStatus(): string
     {
         return $this->hasStatus() ? (string)$this->status : null;
     }
@@ -282,7 +282,7 @@ class Error implements MutableErrorInterface
     /**
      * @inheritdoc
      */
-    public function getCode()
+    public function getCode(): string
     {
         return $this->hasCode() ? $this->code : null;
     }
@@ -312,7 +312,7 @@ class Error implements MutableErrorInterface
     /**
      * @inheritdoc
      */
-    public function getTitle()
+    public function getTitle(): string
     {
         return $this->hasTitle() ? $this->title : null;
     }
@@ -342,7 +342,7 @@ class Error implements MutableErrorInterface
     /**
      * @inheritdoc
      */
-    public function getDetail()
+    public function getDetail(): string
     {
         return $this->hasDetail() ? $this->detail : null;
     }
@@ -368,7 +368,7 @@ class Error implements MutableErrorInterface
     /**
      * @inheritdoc
      */
-    public function getSource()
+    public function getSource(): array
     {
         return !empty($this->source) ? $this->source : null;
     }
@@ -581,4 +581,13 @@ class Error implements MutableErrorInterface
         return $this;
     }
 
+    public function getTypeLinks(): ?iterable
+    {
+        // TODO: Implement getTypeLinks() method.
+    }
+
+    public function hasMeta(): bool
+    {
+        // TODO: Implement hasMeta() method.
+    }
 }

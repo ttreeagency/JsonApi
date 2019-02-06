@@ -2,9 +2,9 @@
 
 namespace Ttree\JsonApi\Contract\Document;
 
-use Neomerx\JsonApi\Contracts\Document\DocumentInterface;
-use Neomerx\JsonApi\Contracts\Document\ErrorInterface;
-use Neomerx\JsonApi\Contracts\Document\LinkInterface;
+use Neomerx\JsonApi\Contracts\Schema\DocumentInterface;
+use Neomerx\JsonApi\Contracts\Schema\ErrorInterface;
+use Neomerx\JsonApi\Contracts\Schema\LinkInterface;
 
 /**
  * Interface MutableErrorInterface

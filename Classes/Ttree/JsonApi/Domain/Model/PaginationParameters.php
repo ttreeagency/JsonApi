@@ -1,4 +1,5 @@
 <?php
+
 namespace Ttree\JsonApi\Domain\Model;
 
 use Neos\Flow\Annotations as Flow;
@@ -69,7 +70,7 @@ class PaginationParameters
         }
 
         if ($this->limit > $this->settings['maximumPageSize']) {
-            throw new Exception(sprintf('Maximum page (%s) size exceeded', $this->settings['maximumPageSize']), 1449347468);
+            throw new Exception(\sprintf('Maximum page (%s) size exceeded', $this->settings['maximumPageSize']), 1449347468);
         }
     }
 
@@ -118,14 +119,14 @@ class PaginationParameters
             case self::STRATEGY_NUMBER:
                 return [
                     'page' => [
-                        'number' => ceil($count / $this->limit),
+                        'number' => $this->limit > 0 ? \ceil($count / $this->limit) : 0,
                         'size' => $this->limit,
                     ]
                 ];
             case self::STRATEGY_OFFSET:
                 return [
                     'page' => [
-                        'offset' => floor($count / $this->limit),
+                        'offset' => \floor($count / $this->limit),
                         'limit' => $this->limit,
                     ]
                 ];
@@ -174,7 +175,7 @@ class PaginationParameters
             return null;
         }
 
-        if (($this->offset / $this->limit) + 1 >= ceil($count / $this->limit)) {
+        if (($this->offset / $this->limit) + 1 >= \ceil($count / $this->limit)) {
             return null;
         }
         switch ($this->strategy) {
