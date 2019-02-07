@@ -130,10 +130,8 @@ class JsonApiController extends ActionController
             $this->throwStatus(404);
         }
 
-        $validatedRequest = new ValidatedRequest($request);
+        $this->validatedRequest = new ValidatedRequest($request);
         $this->encodedParameters = new EncodingParametersParser($request->getArguments());
-
-        $this->validatedRequest = $validatedRequest;
         $this->registerAdapter($endpoint, $resource);
 
         $urlPrefix = $this->getUrlPrefix($request);
@@ -328,9 +326,9 @@ class JsonApiController extends ActionController
     /**
      * @param string $resource
      * @param string $relationship
+     * @throws RuntimeException
      * @throws UnsupportedRequestTypeException
      * @throws \Neos\Flow\Mvc\Exception\StopActionException
-     * @return void
      */
     public function relatedAction(string $resource, string $relationship)
     {

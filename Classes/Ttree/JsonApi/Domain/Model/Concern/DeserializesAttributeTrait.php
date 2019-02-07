@@ -42,19 +42,22 @@ trait DeserializesAttributeTrait
     protected $reflectionService;
 
     /**
+     * @var array
+     */
+    protected $dates = [];
+
+    /**
      * Convert a JSON API resource field name to a model key.
      *
      * @param $field
-     * @param Model $model
      * @return string
      */
-    protected function modelKeyForField($field, $model)
+    protected function modelKeyForField($field)
     {
         if (isset($this->attributes[$field])) {
             return $this->attributes[$field];
         }
-
-        $key = $model::$snakeAttributes ? Str::underscore($field) : Str::camelize($field);
+        $key = Str::camelize($field);
 
         return $this->attributes[$field] = $key;
     }
@@ -121,15 +124,21 @@ trait DeserializesAttributeTrait
      * Is this resource key a date attribute?
      *
      * @param $field
-     * @param Model $record
+     * @param object $record
      * @return bool
      */
     protected function isDateAttribute($field, $record)
     {
-        if (empty($this->dates)) {
-            return in_array($this->modelKeyForField($field, $record), $record->getDates(), true);
+        if ($result = \array_key_exists($field, $this->dates)) {
+            return $this->dates[$result];
         }
 
-        return in_array($field, $this->dates, true);
+        $tags = $this->reflectionService->getPropertyTagsValues(\get_class($record), $field);
+
+        if (isset($tags['var']) && $tags['var'] === '\DateTime') {
+            return $this->dates[$field] = true;
+        } else {
+            return $this->dates[$field] = false;
+        }
     }
 }

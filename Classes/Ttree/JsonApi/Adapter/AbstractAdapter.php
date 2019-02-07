@@ -258,14 +258,13 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         /** Paginate results if needed. */
         $pagination = $this->extractPagination($parameters);
 
-//        if (!$pagination->isEmpty() && !$this->hasPaging()) {
-//            throw new RuntimeException('Paging parameters exist but paging is not supported.');
-//        }
+        if (!$pagination->isEmpty() && !$this->hasPaging()) {
+            throw new RuntimeException('Paging parameters exist but paging is not supported.');
+        }
 
-//        return $pagination->isEmpty() ?
-//            $this->all($query) :
-//            $this->paginate($query, $this->normalizeParameters($parameters, $pagination));
-        return $this->all($query);
+        return $pagination->isEmpty() ?
+            $this->all($query) :
+            $this->paginate($query, $this->normalizeParameters($parameters, $pagination));
     }
 
     /**
@@ -285,7 +284,6 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
-     * @todo need to figure out what to do with this does not currently support default pagination as it causes a problem with polymorphic relations
      * Query the resource when it appears in a relation of a parent model.
      *
      * For example, a request to `/posts/1/comments` will invoke this method on the
@@ -436,18 +434,13 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     protected function hydrateAttributes($record, StandardObjectInterface $attributes)
     {
-        $data = [];
         foreach ($attributes as $attribute => $value) {
-            /** Skip any JSON API fields that are not to be filled. */
-            // TODO: Check if fields are prohibitated
-//            if ($this->isNotFillable($field, $record)) {
-//                continue;
-//            }
+            /** TODO: Skip any JSON API fields that are not to be filled. */
 
             $property = $this->attributeToProperty($attribute);
 
             if (method_exists($record, $methodName ='set'. \ucfirst($property))) {
-                $record->$methodName($this->deserializeAttribute($value, $property, $attributes));
+                $record->$methodName($this->deserializeAttribute($value, $property, $record));
             }
         }
     }
@@ -495,17 +488,17 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
 //                continue;
 //            }
 
-//            /** Skip any fields that are not relations */
-//            if (!$this->isRelation($field)) {
-//                continue;
-//            }
+            /** Skip any fields that are not relations */
+            if (!$this->isRelation($field)) {
+                continue;
+            }
 
-//            $relation = $this->related($field);
-//
-//            if ($this->requiresPrimaryRecordPersistence($relation)) {
-//                $relation->update($record, $relationships->getRelationship($field), $parameters);
-//                $changed = true;
-//            }
+            $relation = $this->related($field);
+
+            if ($this->requiresPrimaryRecordPersistence($relation)) {
+                $relation->update($record, $relationships->getRelationship($field), $parameters);
+                $changed = true;
+            }
             }
         }
 

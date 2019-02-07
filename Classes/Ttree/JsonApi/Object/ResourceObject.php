@@ -56,7 +56,7 @@ class ResourceObject extends StandardObject implements ResourceObjectInterface
             throw new RuntimeException('Relationships member is not an object.');
         }
 
-//        return new Relationships($relationships);
+        return new Relationships($relationships);
     }
 
     /**
