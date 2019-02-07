@@ -44,6 +44,24 @@ trait DeserializesAttributeTrait
     /**
      * Convert a JSON API resource field name to a model key.
      *
+     * @param $field
+     * @param Model $model
+     * @return string
+     */
+    protected function modelKeyForField($field, $model)
+    {
+        if (isset($this->attributes[$field])) {
+            return $this->attributes[$field];
+        }
+
+        $key = $model::$snakeAttributes ? Str::underscore($field) : Str::camelize($field);
+
+        return $this->attributes[$field] = $key;
+    }
+
+    /**
+     * Convert a JSON API resource field name to a model key.
+     *
      * @param string $attribute
      * @return string
      */
@@ -68,9 +86,9 @@ trait DeserializesAttributeTrait
      */
     protected function deserializeAttribute($value, $field, $record)
     {
-//        if ($this->isDateAttribute($field, $record)) {
-//            return $this->deserializeDate($value, $field, $record);
-//        }
+        if ($this->isDateAttribute($field, $record)) {
+            return $this->deserializeDate($value, $field, $record);
+        }
         // TODO do someting with property mapping
 
         $method = 'deserialize' . Str::classify($field) . 'Field';
@@ -97,5 +115,21 @@ trait DeserializesAttributeTrait
     protected function deserializeDate($value, $field, $record)
     {
         return !is_null($value) ? new \DateTime($value) : null;
+    }
+
+    /**
+     * Is this resource key a date attribute?
+     *
+     * @param $field
+     * @param Model $record
+     * @return bool
+     */
+    protected function isDateAttribute($field, $record)
+    {
+        if (empty($this->dates)) {
+            return in_array($this->modelKeyForField($field, $record), $record->getDates(), true);
+        }
+
+        return in_array($field, $this->dates, true);
     }
 }

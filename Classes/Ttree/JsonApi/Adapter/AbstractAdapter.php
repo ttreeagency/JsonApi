@@ -250,11 +250,6 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         /** Apply eager loading */
         $this->with($query, $this->extractIncludePaths($parameters));
 
-        /** Find by ids */
-        if ($this->isFindMany($filters)) {
-            return $this->findByIds($query, $filters);
-        }
-
         /** Filter and sort */
         $this->filter($query, $filters);
 
@@ -304,19 +299,19 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     {
         $query = $relation->newQuery();
 
-//        /** Apply eager loading */
-//        $this->with($query, $this->extractIncludePaths($parameters));
+        /** Apply eager loading */
+        $this->with($query, $this->extractIncludePaths($parameters));
 
         /** Filter and sort */
         $this->filter($query, $this->extractFilters($parameters));
-        $this->sort($query, (array)$parameters->getSortParameters());
+        $this->sort($query, (array)$parameters->getSorts());
 
         /** Paginate results if needed. */
-        $pagination = $parameters->getPaginationParameters();
+        $pagination = $parameters->getPagination();
 
-//        if (!$pagination->isEmpty() && !$this->hasPaging()) {
-//            throw new RuntimeException('Paging parameters exist but paging is not supported.');
-//        }
+        if (!$pagination->isEmpty() && !$this->hasPaging()) {
+            throw new RuntimeException('Paging parameters exist but paging is not supported.');
+        }
 
         return $pagination->isEmpty() ?
             $this->all($query) :
@@ -397,7 +392,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
-     * @todo Determine if necessary
+     * @todo Optimalization for better performance
      * Add eager loading to the query.
      *
      * @param QueryInterface $query
@@ -407,7 +402,8 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     protected function with($query, $includePaths)
     {
-        $query->with($this->getRelationshipPaths($includePaths));
+//        $query->setFetchMode($this->getRelationshipPaths($includePaths));
+        return;
     }
 
     /**

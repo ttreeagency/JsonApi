@@ -131,8 +131,6 @@ class JsonApiController extends ActionController
         }
 
         $validatedRequest = new ValidatedRequest($request);
-        /** @var QueryParametersParser $parameterParser */
-
         $this->encodedParameters = new EncodingParametersParser($request->getArguments());
 
         $this->validatedRequest = $validatedRequest;
@@ -167,10 +165,10 @@ class JsonApiController extends ActionController
                 unset($allowedMethods[$method]);
             }
         }
-//
-//        if (true === $throwError && !\in_array($this->request->getHttpRequest()->getMethod(), $allowedMethods)) {
-//            $this->throwStatus(403);
-//        }
+
+        if (!\in_array($this->request->getHttpRequest()->getMethod(), $allowedMethods)) {
+            $this->throwStatus(403);
+        }
 
         if ($this->request->getControllerActionName() === 'index') {
             $actionName = 'index';
@@ -230,7 +228,7 @@ class JsonApiController extends ActionController
                     $actionName = 'options';
                     break;
                 default:
-                    $this->throwStatus(403, null, 'No method allowed method specified.');
+                    $this->throwStatus(403, null, 'No allowed method specified.');
                     break;
             }
 
@@ -328,28 +326,25 @@ class JsonApiController extends ActionController
     }
 
     /**
+     * @param string $resource
      * @param string $relationship
      * @throws UnsupportedRequestTypeException
      * @throws \Neos\Flow\Mvc\Exception\StopActionException
      * @return void
      */
-    public function relatedAction($relationship)
+    public function relatedAction(string $resource, string $relationship)
     {
-\Neos\Flow\var_dump($relationship);
-
-        \Neos\Flow\var_dump($this->validatedRequest->getDocument());
-
-        /** @var BaseSchema $schema */
-        $schema = $this->view->getSchema($this->record);
+       /** @var BaseSchema $schema */
+        $schema = $this->getSchema($resource);
         $relationships = $schema->getRelationships($this->record);
         if (!isset($relationships[$relationship])) {
             $this->throwStatus(404, \sprintf('Relationship "%s" not found', $relationship));
         }
-        $this->view->setData($relationships[$relationship]['data']);
+        $this->view->setData($relationships[$relationship][BaseSchema::RELATIONSHIP_DATA]);
     }
 
     /**
-     * @throws \Ttree\JsonApi\Exception\InvalidJsonException
+     * @throws RuntimeException
      */
     public function createAction()
     {
@@ -360,7 +355,7 @@ class JsonApiController extends ActionController
     }
 
     /**
-     * @throws \Ttree\JsonApi\Exception\InvalidJsonException
+     * @throws RuntimeException
      */
     public function updateAction()
     {
@@ -411,7 +406,7 @@ class JsonApiController extends ActionController
      * @return void
      * @throws RuntimeException
      */
-    protected function registerAdapter($endpoint, $resource)
+    protected function registerAdapter($endpoint, $resource): void
     {
         if (isset($this->availableResources[$resource]) && isset($this->availableResources[$resource]['adapter'])) {
             $adapterClass = $this->availableResources[$resource]['adapter'];
@@ -423,6 +418,39 @@ class JsonApiController extends ActionController
         }
 
         $this->adapter = new DefaultAdapter($endpoint, $resource, $this->encodedParameters);
+    }
+
+    /**
+     * @param string $resource
+     * @param string $relation
+     * @return BaseSchema
+     * @throws RuntimeException
+     */
+    protected function getSchema(string $resource, string $relation = ''): BaseSchema
+    {
+        if (isset($this->availableResources[$resource]) && isset($this->availableResources[$resource]['related'])) {
+            if ($relation !== '') {
+                if (isset($this->availableResources[$resource]['related'][$relation])) {
+                    $schemaClass = key($this->availableResources[$resource]['related'][$relation]);
+                    if ($this->objectManager->isRegistered($schemaClass)) {
+                        return new $schemaClass();
+                    }
+
+                    throw new RuntimeException(\sprintf('Schema %s is not registered', $schemaClass));
+                }
+
+                throw new RuntimeException(\sprintf('Missing related definition for %s in `endpoints.resources.%s.related.%s` not registered!', $resource, $resource, $relation));
+            }
+
+            $schemaClass = $this->availableResources[$resource]['schema'];
+            if ($this->objectManager->isRegistered($schemaClass)) {
+                return new $schemaClass();
+            }
+
+            throw new RuntimeException(\sprintf('Schema %s is not registered', $schemaClass));
+        }
+
+        throw new RuntimeException(\sprintf('Missing related definition for %s in `endpoints.resources.%s.related` not registered!', $resource, $resource));
     }
 
     /**
