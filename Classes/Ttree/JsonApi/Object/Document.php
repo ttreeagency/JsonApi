@@ -2,15 +2,13 @@
 
 namespace Ttree\JsonApi\Object;
 
-//use CloudCreativity\LaravelJsonApi\Document\Error;
 use Ttree\JsonApi\Contract\Object\DocumentInterface;
 use Ttree\JsonApi\Contract\Object\StandardObjectInterface;
 use Ttree\JsonApi\Exception\RuntimeException;
 
 /**
  * Class Document
- *
- * @package CloudCreativity\LaravelJsonApi
+ * @package Ttree\JsonApi\Object
  */
 class Document extends StandardObject implements DocumentInterface
 {

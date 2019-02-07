@@ -2,7 +2,7 @@
 
 namespace Ttree\JsonApi\Contract\Object;
 
-use Neomerx\JsonApi\Contracts\Document\DocumentInterface as NeomerxDocumentInterface;
+use Neomerx\JsonApi\Contracts\Schema\DocumentInterface as NeomerxDocumentInterface;
 use Ttree\JsonApi\Exception\RuntimeException;
 
 /**

@@ -3,9 +3,8 @@
 namespace Ttree\JsonApi\Object;
 
 /**
- * Class ObjectProxyTrait
- *
- * @package CloudCreativity\Utils\Object
+ * Trait ObjectProxyTrait
+ * @package Ttree\JsonApi\Object
  */
 trait ObjectProxyTrait
 {

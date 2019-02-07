@@ -4,7 +4,7 @@ namespace Ttree\JsonApi\Object;
 
 use Ttree\JsonApi\Exception\RuntimeException;
 use Ttree\JsonApi\Contract\Object\StandardObjectInterface;
-use Neomerx\JsonApi\Contracts\Document\DocumentInterface;
+use Neomerx\JsonApi\Contracts\Schema\DocumentInterface;
 
 /**
  * Class MetaMemberTrait

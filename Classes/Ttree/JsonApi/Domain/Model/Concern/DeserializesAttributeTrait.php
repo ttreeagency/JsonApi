@@ -68,17 +68,6 @@ trait DeserializesAttributeTrait
      */
     protected function deserializeAttribute($value, $field, $record)
     {
-//        \Neos\Flow\var_dump($this->reflectionService->getClassPropertyNames(\get_class($record)));
-//        \Neos\Flow\var_dump($this->reflectionService->getPropertyTagsValues(\get_class($record), $field));
-//        \Neos\Flow\var_dump($this->reflectionService->getPropertyNamesByTag(\get_class($record), 'var'));
-//        exit();
-//
-//        if (method_exists($record))
-//        \Neos\Flow\var_dump($this->reflectionService->getMethodTagsValues(\get_class($record), 'set'. ucfirst($field)), 'test');
-//        exit();
-//
-//
-//
 //        if ($this->isDateAttribute($field, $record)) {
 //            return $this->deserializeDate($value, $field, $record);
 //        }
@@ -103,10 +92,10 @@ trait DeserializesAttributeTrait
      *      the JSON API field name being deserialized.
      * @param Model $record
      *      the domain record being filled.
-     * @return Carbon|null
+     * @return \DateTime|null
      */
     protected function deserializeDate($value, $field, $record)
     {
-        return !is_null($value) ? new Carbon($value) : null;
+        return !is_null($value) ? new \DateTime($value) : null;
     }
 }

@@ -2,12 +2,6 @@
 
 namespace Ttree\JsonApi\Adapter;
 
-//use CloudCreativity\LaravelJsonApi\Contracts\Adapter\HasManyAdapterInterface;
-//use CloudCreativity\LaravelJsonApi\Contracts\Adapter\RelationshipAdapterInterface;
-//use CloudCreativity\LaravelJsonApi\Contracts\Object\RelationshipInterface;
-//use CloudCreativity\LaravelJsonApi\Contracts\Object\ResourceObjectInterface;
-//use CloudCreativity\LaravelJsonApi\Contracts\Pagination\PageInterface;
-//use CloudCreativity\LaravelJsonApi\Contracts\Pagination\PagingStrategyInterface;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\ObjectManagement\ObjectManagerInterface;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
@@ -17,6 +11,8 @@ use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
 use Ttree\JsonApi\Contract\Object\ResourceObjectInterface;
 use Ttree\JsonApi\Contract\Object\RelationshipInterface;
 use Ttree\JsonApi\Domain\Model\Concern\DeserializesAttributeTrait;
+use Ttree\JsonApi\Domain\Model\Concern\ModelIncludesTrait;
+use Ttree\JsonApi\Domain\Model\PaginationParameters;
 use Ttree\JsonApi\Domain\Repository\DefaultRepository;
 use Ttree\JsonApi\Contract\Object\StandardObjectInterface;
 use Ttree\JsonApi\Encoder\Encoder;
@@ -34,7 +30,8 @@ use Ttree\JsonApi\Utility\StringUtility as Str;
  */
 abstract class AbstractAdapter extends AbstractResourceAdapter
 {
-    use DeserializesAttributeTrait;
+    use DeserializesAttributeTrait,
+        ModelIncludesTrait;
 
     /**
      * @var string
@@ -91,7 +88,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     protected $model;
 
     /**
-     * @var PagingStrategyInterface|null
+     * @var PaginationParameters|null
      */
     protected $paging;
 
@@ -250,14 +247,14 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         $filters = $this->extractFilters($parameters);
         $query = $this->newQuery();
 
-//        /** Apply eager loading */
-//        $this->with($query, $this->extractIncludePaths($parameters));
-//
-//        /** Find by ids */
-//        if ($this->isFindMany($filters)) {
-//            return $this->findByIds($query, $filters);
-//        }
-//
+        /** Apply eager loading */
+        $this->with($query, $this->extractIncludePaths($parameters));
+
+        /** Find by ids */
+        if ($this->isFindMany($filters)) {
+            return $this->findByIds($query, $filters);
+        }
+
         /** Filter and sort */
         $this->filter($query, $filters);
 
@@ -367,7 +364,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     public function exists($resourceId)
     {
-//        return $this->newQuery()->where($this->getQualifiedKeyName(), $resourceId)->exists();
+        return $this->newQuery()->where($this->getQualifiedKeyName(), $resourceId)->exists();
     }
 
     /**
@@ -383,7 +380,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     public function findMany(array $resourceIds)
     {
-//        return $this->newQuery()->whereIn($this->getQualifiedKeyName(), $resourceIds)->get()->all();
+        return $this->newQuery()->whereIn($this->getQualifiedKeyName(), $resourceIds)->get()->all();
     }
 
     /**
@@ -414,7 +411,6 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
-     * @todo eager load the includedpaths and relationship paths
      * Add eager loading to a record.
      *
      * @param $record
@@ -422,12 +418,12 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     protected function load($record, EncodingParametersParser $parameters)
     {
-//        $relationshipPaths = $this->getRelationshipPaths($this->extractIncludePaths($parameters));
+        $relationshipPaths = $this->getRelationshipPaths($this->extractIncludePaths($parameters));
 
-//        /** Eager load anything that needs to be loaded. */
-//        if (method_exists($record, 'loadMissing')) {
-//            $record->loadMissing($relationshipPaths);
-//        }
+        /** Eager load anything that needs to be loaded. */
+        if (\method_exists($record, 'loadMissing')) {
+            $record->loadMissing($relationshipPaths);
+        }
     }
 
     /**
@@ -474,7 +470,8 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         $relation = $this->related($field);
 
         if (!$this->requiresPrimaryRecordPersistence($relation)) {
-            $relation->update($record, $relationship, $parameters);
+            $this->persistenceManager->update($relation);
+//            $relation->update($record, $relationship, $parameters);
         }
     }
 
@@ -671,7 +668,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     protected function hasPaging()
     {
-//        return $this->paging instanceof PagingStrategyInterface;
+        return $this->paging instanceof PaginationParameters;
     }
 
     /**

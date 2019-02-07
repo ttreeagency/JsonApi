@@ -49,8 +49,6 @@ class VersionRoutePartHandler extends DynamicRoutePart
 
         foreach ($this->availableEndpoints as $endpointKey => $endpointConfiguration) {
             if (isset($endpointConfiguration['version']) && $endpointConfiguration['version'] === $value) {
-//                $this->setName('endpoint');
-//                $this->value = $endpointKey;
                 return true;
             }
         }

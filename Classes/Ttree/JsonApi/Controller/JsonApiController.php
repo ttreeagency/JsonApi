@@ -9,7 +9,6 @@ use Ttree\JsonApi\Adapter\DefaultAdapter;
 use Ttree\JsonApi\Exception\ConfigurationException;
 use Ttree\JsonApi\Exception\RuntimeException;
 use Ttree\JsonApi\Mvc\Controller\EncodingParametersParser;
-use Ttree\JsonApi\Mvc\Controller\QueryParametersParser;
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
 use Neomerx\JsonApi\Contracts\Factories\FactoryInterface;
 use Neomerx\JsonApi\Schema\Link;
@@ -336,6 +335,10 @@ class JsonApiController extends ActionController
      */
     public function relatedAction($relationship)
     {
+\Neos\Flow\var_dump($relationship);
+
+        \Neos\Flow\var_dump($this->validatedRequest->getDocument());
+
         /** @var BaseSchema $schema */
         $schema = $this->view->getSchema($this->record);
         $relationships = $schema->getRelationships($this->record);

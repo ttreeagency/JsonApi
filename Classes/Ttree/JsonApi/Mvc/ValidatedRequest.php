@@ -7,8 +7,8 @@ use Ttree\JsonApi\Object\ResourceIdentifier;
 use Ttree\JsonApi\Exception\RuntimeException;
 use Ttree\JsonApi\Exception\InvalidJsonException;
 
-use Neomerx\JsonApi\Contracts\Encoder\Parameters\EncodingParametersInterface;
-use Neomerx\JsonApi\Contracts\Http\HttpFactoryInterface;
+use Ttree\JsonApi\Mvc\Controller\EncodingParametersParser;
+use Neomerx\JsonApi\Contracts\Schema\HttpFactoryInterface;
 use Neos\Flow\Http\Request as HttpRequest;
 use Neos\Flow\Mvc\ActionRequest;
 use Neos\Flow\Mvc\RequestInterface;
@@ -42,7 +42,7 @@ class ValidatedRequest
     protected $document;
 
     /**
-     * @var EncodingParametersInterface|null
+     * @var EncodingParametersParser|null
      */
     protected $parameters;
 
@@ -94,7 +94,7 @@ class ValidatedRequest
     public function getResourceId()
     {
         /** Cache the resource id because binding substitutions will override it. */
-        if (is_null($this->resourceId)) {
+        if (\is_null($this->resourceId)) {
             $this->resourceId = $this->serverRequest->getArgument('identifier') ?: false;
         }
 
@@ -121,7 +121,7 @@ class ValidatedRequest
     {
         $resource = $this->serverRequest->getArgument('resource');
 
-        return is_object($resource) ? $resource : null;
+        return \is_object($resource) ? $resource : null;
     }
 
     /**
@@ -160,7 +160,7 @@ class ValidatedRequest
      */
     public function getDocument()
     {
-        if (is_null($this->document)) {
+        if (\is_null($this->document)) {
             $this->document = new Document($this->decodeDocument());
         }
 

@@ -2,8 +2,7 @@
 namespace Ttree\JsonApi\Domain\Repository;
 
 use Neos\Flow\Annotations as Flow;
-use Neomerx\JsonApi\Contracts\Encoder\Parameters\SortParameterInterface;
-use Neomerx\JsonApi\Contracts\Encoder\Parameters\EncodingParametersInterface;
+use Ttree\JsonApi\Mvc\Controller\EncodingParametersParser;
 use Ttree\JsonApi\Domain\Model\PaginationParameters;
 use Ttree\JsonApi\Domain\Model\ResourceSettingsDefinition;
 use Neos\Flow\Persistence\QueryInterface;
@@ -15,13 +14,13 @@ use Neos\Flow\Persistence\QueryResultInterface;
 trait JsonApiRepositoryTrait
 {
     /**
-     * @param EncodingParametersInterface $parameters
+     * @param EncodingParametersParser $parameters
      * @param ResourceSettingsDefinition $resourceSettingsDefinition
      * @return QueryResultInterface
      * @throws \Neos\Flow\Exception
      * @throws \Ttree\JsonApi\Exception\ConfigurationException
      */
-    public function findByJsonApiParameters(EncodingParametersInterface $parameters, ResourceSettingsDefinition $resourceSettingsDefinition)
+    public function findByJsonApiParameters(EncodingParametersParser $parameters, ResourceSettingsDefinition $resourceSettingsDefinition)
     {
         /** @var QueryInterface $query */
         $query = $this->createQuery();
@@ -38,11 +37,10 @@ trait JsonApiRepositoryTrait
 
         if ($parameters->getSortParameters()) {
             $ordering = [];
-            foreach ($parameters->getSortParameters() as $sortParameter) {
-                // todo better handling when the attributies does not exist (JSON API Error)
-                $field = $resourceSettingsDefinition->convertSortableAttributes($sortParameter->getField());
-                /** @var SortParameterInterface $sortParameter */
-                $ordering[$field] = $sortParameter->isAscending() ? QueryInterface::ORDER_ASCENDING : QueryInterface::ORDER_DESCENDING;
+            foreach ($parameters->getSorts() as $sortParameter => $value) {
+                // @todo better handling when the attributies does not exist (JSON API Error)
+                $field = $resourceSettingsDefinition->convertSortableAttributes($sortParameter);
+                $ordering[$field] = $value ? QueryInterface::ORDER_ASCENDING : QueryInterface::ORDER_DESCENDING;
             }
             $query->setOrderings($ordering);
         }
@@ -50,13 +48,13 @@ trait JsonApiRepositoryTrait
     }
 
     /**
-     * @param EncodingParametersInterface $parameters
+     * @param EncodingParametersParser $parameters
      * @param ResourceSettingsDefinition $resourceSettingsDefinition
      * @return QueryResultInterface
      * @throws \Neos\Flow\Exception
      * @throws \Ttree\JsonApi\Exception\ConfigurationException
      */
-    public function countByJsonApiParameters(EncodingParametersInterface $parameters, ResourceSettingsDefinition $resourceSettingsDefinition)
+    public function countByJsonApiParameters(EncodingParametersParser $parameters, ResourceSettingsDefinition $resourceSettingsDefinition)
     {
         /** @var QueryInterface $query */
         $query = $this->createQuery();

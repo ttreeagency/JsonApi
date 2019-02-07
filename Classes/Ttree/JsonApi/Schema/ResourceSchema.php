@@ -15,7 +15,7 @@ use Neos\Media\Domain\Model\AssetInterface;
 /**
  * Dynamic Entity Schema
  */
-class DynamicEntitySchema extends BaseSchema
+class ResourceSchema extends BaseSchema
 {
     /**
      * @var JsonApiSchemaDefinition
@@ -34,20 +34,9 @@ class DynamicEntitySchema extends BaseSchema
      */
     protected $resourcePublisher;
 
-//    /**
-//     * @param SchemaFactoryInterface $factory
-//     * @param ContainerInterface $container
-//     * @param string $classType
-//     */
-//    public function __construct(SchemaFactoryInterface $factory, ContainerInterface $container, $classType)
-//    {
-//        $this->resourceType = $classType;
-//        $this->schemaDefinition = new JsonApiSchemaDefinition($classType);
-//        $this->selfSubUrl = $this->schemaDefinition->getSelfSubUrl();
-//
-//        parent::__construct($factory);
-//    }
-
+    /**
+     * @return string
+     */
     public function getType(): string
     {
         // TODO: Implement getType() method.
@@ -138,6 +127,6 @@ class DynamicEntitySchema extends BaseSchema
         if ($includePaths === []) {
             return $includePaths;
         }
-        return array_keys(array_filter($includePaths));
+        return \array_keys(\array_filter($includePaths));
     }
 }

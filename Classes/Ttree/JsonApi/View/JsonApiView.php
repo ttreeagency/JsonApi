@@ -43,15 +43,6 @@ class JsonApiView extends AbstractView
     }
 
     /**
-     * @param object $resource
-     * @return SchemaProviderInterface
-     */
-    public function getSchema($resource)
-    {
-        return $this->container->getSchema($resource);
-    }
-
-    /**
      * @param EncodingParametersParser $parameters
      */
     public function setParameters($parameters)
@@ -61,12 +52,10 @@ class JsonApiView extends AbstractView
 
     /**
      * @param $resource
-     * @throws \Ttree\JsonApi\Exception\ConfigurationException
      */
     public function setResource($resource)
     {
         $this->resource = $resource;
-        $resourceSettingsDefinition = new ResourceSettingsDefinition($this->resource);
     }
 
     /**

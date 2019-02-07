@@ -1,7 +1,7 @@
 <?php
 namespace Ttree\JsonApi\Contract;
 
-use Neomerx\JsonApi\Contracts\Encoder\Parameters\EncodingParametersInterface;
+use Neomerx\JsonApi\Contracts\Encoder\EncodingParametersInterface;
 use Ttree\JsonApi\Domain\Model\ResourceSettingsDefinition;
 
 /**

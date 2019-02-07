@@ -117,11 +117,11 @@ class EncodingParametersParser
                 switch ($orderAndField[0]) {
                     case '-':
                         $isAsc = false;
-                        $field = substr($orderAndField, 1);
+                        $field = \substr($orderAndField, 1);
                         break;
                     case '+':
                         $isAsc = true;
-                        $field = substr($orderAndField, 1);
+                        $field = \substr($orderAndField, 1);
                         break;
                     default:
                         $isAsc = true;
@@ -207,7 +207,7 @@ class EncodingParametersParser
      */
     protected function getMessage(string $message): string
     {
-        $hasTranslation = $this->messages !== null && array_key_exists($message, $this->messages) === false;
+        $hasTranslation = $this->messages !== null && \array_key_exists($message, $this->messages) === false;
 
         return $hasTranslation === true ? $this->messages[$message] : $message;
     }
@@ -273,12 +273,12 @@ class EncodingParametersParser
         string $errorTitle
     ): iterable
     {
-        if (is_string($shouldBeString) === false || ($trimmed = trim($shouldBeString)) === '') {
+        if (is_string($shouldBeString) === false || ($trimmed = \trim($shouldBeString)) === '') {
             throw new JsonApiException($this->createParameterError($paramName, $errorTitle));
         }
 
-        foreach (explode($separator, $trimmed) as $value) {
-            $trimmedValue = trim($value);
+        foreach (\explode($separator, $trimmed) as $value) {
+            $trimmedValue = \trim($value);
             if ($trimmedValue === '') {
                 throw new JsonApiException($this->createParameterError($paramName, $errorTitle));
             }

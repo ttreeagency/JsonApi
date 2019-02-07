@@ -46,14 +46,16 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
     abstract protected function persist($record);
 
     /**
-     * @todo
-     * @inheritdoc
+     * @param ResourceObjectInterface $resource
+     * @param EncodingParametersParser $parameters
+     * @return object
+     * @throws RuntimeException
      */
     public function create(ResourceObjectInterface $resource, EncodingParametersParser $parameters)
     {
         $record = $this->createRecord($resource);
         $this->hydrateAttributes($record, $resource->getAttributes());
-//        $this->hydrateRelationships($record, $resource->getRelationships(), $parameters);
+        $this->hydrateRelationships($record, $resource->getRelationships(), $parameters);
         $record = $this->persist($record) ?: $record;
 
         if (method_exists($this, 'hydrateRelated')) {
@@ -64,7 +66,9 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
     }
 
     /**
-     * @inheritDoc
+     * @param string $resourceId
+     * @param EncodingParametersParser $parameters
+     * @return null|object
      */
     public function read($resourceId, EncodingParametersParser $parameters)
     {
@@ -72,13 +76,16 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
     }
 
     /**
-     * @todo
-     * @inheritdoc
+     * @param object $record
+     * @param ResourceObjectInterface $resource
+     * @param EncodingParametersParser $parameters
+     * @return object
+     * @throws RuntimeException
      */
     public function update($record, ResourceObjectInterface $resource, EncodingParametersParser $parameters)
     {
         $this->hydrateAttributes($record, $resource->getAttributes());
-//        $this->hydrateRelationships($record, $resource->getRelationships(), $parameters);
+        $this->hydrateRelationships($record, $resource->getRelationships(), $parameters);
         $record = $this->persist($record) ?: $record;
 
         if (method_exists($this, 'hydrateRelated')) {

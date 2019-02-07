@@ -3,7 +3,7 @@
 namespace Ttree\JsonApi\Object;
 
 use Ttree\JsonApi\Exception\RuntimeException;
-use Neomerx\JsonApi\Contracts\Document\DocumentInterface;
+use Neomerx\JsonApi\Contracts\Schema\DocumentInterface;
 
 /**
  * Class IdentifiableTrait

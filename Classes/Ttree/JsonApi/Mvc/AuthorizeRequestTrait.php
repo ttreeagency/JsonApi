@@ -2,10 +2,6 @@
 
 namespace Ttree\JsonApi\Mvc;
 
-//use CloudCreativity\LaravelJsonApi\Contracts\Auth\AuthorizerInterface;
-//use CloudCreativity\LaravelJsonApi\Contracts\Http\Requests\RequestInterface;
-//use Illuminate\Auth\Access\AuthorizationException;
-//use Illuminate\Auth\AuthenticationException;
 use Neos\Flow\Mvc\RequestInterface;
 
 /**
@@ -16,6 +12,7 @@ trait AuthorizeRequestTrait
 {
 
     /**
+     * @todo authorize
      * Authorize the request.
      *
      * @param AuthorizerInterface $authorizer

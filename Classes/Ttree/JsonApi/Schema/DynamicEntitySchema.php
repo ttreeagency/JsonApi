@@ -3,11 +3,9 @@
 namespace Ttree\JsonApi\Schema;
 
 use Neos\Flow\Annotations as Flow;
+use Neomerx\JsonApi\Schema\BaseSchema;
 use Doctrine\Common\Collections\Collection;
 use InvalidArgumentException;
-use Neomerx\JsonApi\Contracts\Schema\ContainerInterface;
-use Neomerx\JsonApi\Contracts\Schema\SchemaFactoryInterface;
-use Neomerx\JsonApi\Schema\SchemaProvider;
 use Ttree\JsonApi\Domain\Model\JsonApiSchemaDefinition;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\Utility\ObjectAccess;
@@ -17,7 +15,7 @@ use Neos\Media\Domain\Model\AssetInterface;
 /**
  * Dynamic Entity Schema
  */
-class DynamicEntitySchema extends SchemaProvider
+class DynamicEntitySchema extends BaseSchema
 {
     /**
      * @var JsonApiSchemaDefinition
@@ -36,25 +34,30 @@ class DynamicEntitySchema extends SchemaProvider
      */
     protected $resourcePublisher;
 
-    /**
-     * @param SchemaFactoryInterface $factory
-     * @param ContainerInterface $container
-     * @param string $classType
-     */
-    public function __construct(SchemaFactoryInterface $factory, ContainerInterface $container, $classType)
-    {
-        $this->resourceType = $classType;
-        $this->schemaDefinition = new JsonApiSchemaDefinition($classType);
-        $this->selfSubUrl = $this->schemaDefinition->getSelfSubUrl();
+//    /**
+//     * @param SchemaFactoryInterface $factory
+//     * @param ContainerInterface $container
+//     * @param string $classType
+//     */
+//    public function __construct(SchemaFactoryInterface $factory, ContainerInterface $container, $classType)
+//    {
+//        $this->resourceType = $classType;
+//        $this->schemaDefinition = new JsonApiSchemaDefinition($classType);
+//        $this->selfSubUrl = $this->schemaDefinition->getSelfSubUrl();
+//
+//        parent::__construct($factory);
+//    }
 
-        parent::__construct($factory);
+    public function getType(): string
+    {
+        // TODO: Implement getType() method.
     }
 
     /**
      * @param object $resource
      * @return string
      */
-    public function getId($resource)
+    public function getId($resource): string
     {
         return $this->persistenceManager->getIdentifierByObject($resource);
     }
@@ -63,7 +66,7 @@ class DynamicEntitySchema extends SchemaProvider
      * @param null $resource
      * @return string
      */
-    public function getSelfSubUrl($resource = null)
+    public function getSelfSubUrl($resource = null): string
     {
         return $this->schemaDefinition->getSelfSubUrl();
     }
@@ -83,7 +86,7 @@ class DynamicEntitySchema extends SchemaProvider
      *
      * @return array
      */
-    public function getAttributes($resource)
+    public function getAttributes($resource): iterable
     {
         $attributes = [];
         foreach ($this->schemaDefinition->getAttributes() as $name => $configuration) {
@@ -102,11 +105,9 @@ class DynamicEntitySchema extends SchemaProvider
 
     /**
      * @param object $resource
-     * @param bool $isPrimary
-     * @param array $includeRelationships
      * @return array
      */
-    public function getRelationships($resource, $isPrimary, array $includeRelationships)
+    public function getRelationships($resource): iterable
     {
         $relationships = [];
         foreach ($this->schemaDefinition->getRelationships() as $name => $configuration) {

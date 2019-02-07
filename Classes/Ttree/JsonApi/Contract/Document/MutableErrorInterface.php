@@ -22,7 +22,6 @@ interface MutableErrorInterface extends ErrorInterface
     const DETAIL = DocumentInterface::KEYWORD_ERRORS_DETAIL;
     const META = DocumentInterface::KEYWORD_ERRORS_META;
     const SOURCE = DocumentInterface::KEYWORD_ERRORS_SOURCE;
-    const LINKS = DocumentInterface::KEYWORD_ERRORS_LINKS;
     const LINKS_ABOUT = DocumentInterface::KEYWORD_ERRORS_ABOUT;
 
     /**

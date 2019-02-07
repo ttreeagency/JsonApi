@@ -23,7 +23,7 @@ class StringUtility
      */
     public static function uncamelize($string)
     {
-        return strtolower(preg_replace('/(.)([A-Z])/', '$1_$2', $string));
+        return \strtolower(\preg_replace('/(.)([A-Z])/', '$1_$2', $string));
     }
 
     /**
@@ -34,8 +34,8 @@ class StringUtility
      */
     public static function camelize($string)
     {
-        return preg_replace_callback('/-([a-z])/', function ($string) {
-            return strtoupper($string[1]);
+        return \preg_replace_callback('/-([a-z])/', function ($string) {
+            return \strtoupper($string[1]);
         }, $string);
     }
 
@@ -47,9 +47,9 @@ class StringUtility
      */
     public static function camelizeClassName($className)
     {
-        return ucfirst(
-            preg_replace_callback('/_([a-z0-9]{1})/i', function ($matches) {
-                return '\\' . strtoupper($matches[1]);
+        return \ucfirst(
+            \preg_replace_callback('/_([a-z0-9]{1})/i', function ($matches) {
+                return '\\' . \strtoupper($matches[1]);
             }, $className)
         );
     }
@@ -62,17 +62,17 @@ class StringUtility
     public static function uncamelizeClassName($className)
     {
         if ($className[0] === '\\') {
-            $className = substr($className, 1);
+            $className = \substr($className, 1);
         }
-        $className = preg_replace_callback('/\\\\([a-z0-9]{1})/i', function ($matches) {
-            return '_' . lcfirst($matches[1]);
+        $className = \preg_replace_callback('/\\\\([a-z0-9]{1})/i', function ($matches) {
+            return '_' . \lcfirst($matches[1]);
         }, $className);
         // Prevent malformed vendor namespace
-        $classParts = explode('_', $className, 2);
-        if (strtoupper($classParts[0]) === $classParts[0]) {
+        $classParts = \explode('_', $className, 2);
+        if (\strtoupper($classParts[0]) === $classParts[0]) {
             return $className;
         }
-        return lcfirst($className);
+        return \lcfirst($className);
     }
 
     /**
@@ -87,8 +87,8 @@ class StringUtility
             return self::$classified[$value];
         }
 
-        $converted = ucwords(str_replace(['-', '_'], ' ', $value));
+        $converted = \ucwords(\str_replace(['-', '_'], ' ', $value));
 
-        return self::$classified[$value] = str_replace(' ', '', $converted);
+        return self::$classified[$value] = \str_replace(' ', '', $converted);
     }
 }
