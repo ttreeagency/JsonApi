@@ -8,7 +8,7 @@ use Ttree\JsonApi\Exception\RuntimeException;
 /**
  * Class Relationships
  *
- * @package CloudCreativity\LaravelJsonApi
+ * @package Ttree\JsonApi
  */
 class Relationships extends StandardObject implements RelationshipsInterface
 {

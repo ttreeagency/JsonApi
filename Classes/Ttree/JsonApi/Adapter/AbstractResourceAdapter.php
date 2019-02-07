@@ -58,7 +58,7 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
         $this->hydrateRelationships($record, $resource->getRelationships(), $parameters);
         $record = $this->persist($record) ?: $record;
 
-        if (method_exists($this, 'hydrateRelated')) {
+        if (\method_exists($this, 'hydrateRelated')) {
             $record = $this->hydrateRelated($record, $resource, $parameters) ?: $record;
         }
 
@@ -88,7 +88,7 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
         $this->hydrateRelationships($record, $resource->getRelationships(), $parameters);
         $record = $this->persist($record) ?: $record;
 
-        if (method_exists($this, 'hydrateRelated')) {
+        if (\method_exists($this, 'hydrateRelated')) {
             $record = $this->hydrateRelated($record, $resource, $parameters) ?: $record;
         }
 
@@ -130,7 +130,6 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
     }
 
     /**
-     * @todo
      * @param $field
      * @return string|null
      */
@@ -138,15 +137,14 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
     {
         $method = Str::camelize($field);
 
-        return method_exists($this, $method) ? $method : null;
+        return \method_exists($this, $method) ? $method : null;
     }
 
     /**
-     * @todo
      * @param $record
      * @param RelationshipsInterface $relationships
      * @param EncodingParametersParser $parameters
-     * @return void
+     * @throws RuntimeException
      */
     protected function hydrateRelationships(
         $record,
@@ -155,15 +153,13 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
     )
     {
         foreach ($relationships->getAll() as $field => $relationship) {
-//            /** Skip any fields that are not fillable. */
-//            if ($this->isNotFillable($field, $record)) {
-//                continue;
-//            }
+            /** @todo Skip any fields that are not fillable. */
 
-//            /** Skip any fields that are not relations */
-//            if (!$this->isRelation($field)) {
-//                continue;
-//            }
+
+            /** Skip any fields that are not relations */
+            if (!$this->isRelation($field)) {
+                continue;
+            }
 
             $this->hydrateRelationship(
                 $record,
@@ -175,13 +171,11 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
     }
 
     /**
-     * @todo
-     * Fill a relationship from a resource object.
-     *
      * @param $record
      * @param $field
      * @param RelationshipInterface $relationship
      * @param EncodingParametersParser $parameters
+     * @throws RuntimeException
      */
     protected function hydrateRelationship(
         $record,
@@ -191,8 +185,6 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
     )
     {
         $relation = $this->related($field);
-
-//        $relation->update($record, $relationship, $parameters);
     }
 
 }

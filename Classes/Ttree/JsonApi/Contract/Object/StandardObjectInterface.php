@@ -10,7 +10,7 @@ use Traversable;
 /**
  * Interface StandardObjectInterface
  *
- * @package CloudCreativity\Utils\Object
+ * @package Ttree\JsonApi
  */
 interface StandardObjectInterface extends Traversable, Countable, JsonSerializable
 {

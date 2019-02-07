@@ -9,7 +9,7 @@ use Ttree\JsonApi\Exception\RuntimeException;
 /**
  * Interface DocumentInterface
  *
- * @package CloudCreativity\LaravelJsonApi
+ * @package Ttree\JsonApi
  */
 interface DocumentInterface extends StandardObjectInterface, MetaMemberInterface
 {
