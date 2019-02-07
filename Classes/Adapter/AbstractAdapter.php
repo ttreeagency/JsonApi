@@ -8,6 +8,7 @@ use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\Flow\Persistence\QueryInterface;
 use Neos\Utility\Arrays;
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
+use Ttree\JsonApi\Contract\JsonApiRepositoryInterface;
 use Ttree\JsonApi\Contract\Object\ResourceObjectInterface;
 use Ttree\JsonApi\Contract\Object\RelationshipInterface;
 use Ttree\JsonApi\Domain\Model\Concern\DeserializesAttributeTrait;
@@ -258,13 +259,14 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         /** Paginate results if needed. */
         $pagination = $this->extractPagination($parameters);
 
-        if (!$pagination->isEmpty() && !$this->hasPaging()) {
-            throw new RuntimeException('Paging parameters exist but paging is not supported.');
-        }
+//        if (!$pagination->isEmpty() && !$this->hasPaging()) {
+//            throw new RuntimeException('Paging parameters exist but paging is not supported.');
+//        }
 
-        return $pagination->isEmpty() ?
-            $this->all($query) :
-            $this->paginate($query, $this->normalizeParameters($parameters, $pagination));
+        return $this->all($query);
+//        return $pagination->isEmpty() ?
+//            $this->all($query) :
+//            $this->paginate($query, $this->normalizeParameters($parameters, $pagination));
     }
 
     /**
@@ -639,7 +641,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     protected function extractPagination(EncodingParametersParser $parameters)
     {
-        $pagination = []; //(array)$parameters->getPaginationParameters();
+        $pagination = (array)$parameters->getPagination();
 
         return $pagination ?: $this->defaultPagination();
     }
