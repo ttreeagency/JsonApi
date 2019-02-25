@@ -5,6 +5,7 @@ namespace Ttree\JsonApi\Object;
 use Ttree\JsonApi\Contract\Object\DocumentInterface;
 use Ttree\JsonApi\Contract\Object\StandardObjectInterface;
 use Ttree\JsonApi\Exception\RuntimeException;
+use Ttree\JsonApi\Document\Error;
 
 /**
  * Class Document
@@ -26,7 +27,7 @@ class Document extends StandardObject implements DocumentInterface
 
         $data = $this->get(self::DATA);
 
-        if (is_array($data) || is_null($data)) {
+        if (\is_array($data) || \is_null($data)) {
             return $data;
         }
 
@@ -44,7 +45,7 @@ class Document extends StandardObject implements DocumentInterface
     {
         $data = $this->{self::DATA};
 
-        if (!is_object($data)) {
+        if (!\is_object($data)) {
             throw new RuntimeException('Data member is not an object.');
         }
 
@@ -58,7 +59,7 @@ class Document extends StandardObject implements DocumentInterface
     {
         $data = $this->get(self::DATA);
 
-        if (!is_array($data)) {
+        if (!\is_array($data)) {
             throw new RuntimeException('Data member is not an array.');
         }
 
@@ -82,7 +83,7 @@ class Document extends StandardObject implements DocumentInterface
             return null;
         }
 
-        if (!is_array($data = $this->{self::INCLUDED})) {
+        if (!\is_array($data = $this->{self::INCLUDED})) {
             throw new RuntimeException('Included member is not an array.');
         }
 
@@ -98,7 +99,7 @@ class Document extends StandardObject implements DocumentInterface
             return null;
         }
 
-        if (!is_array($data = $this->{self::ERRORS})) {
+        if (!\is_array($data = $this->{self::ERRORS})) {
             throw new RuntimeException('Errors member is not an array.');
         }
 

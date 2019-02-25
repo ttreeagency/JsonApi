@@ -16,7 +16,7 @@ To generate validators for a resource type, use the following command:
 $ php artisan make:json-api:validators <resource-type> [<api>]
 ``` 
 
-> The same validators class is used for both Eloquent and generic resources.
+> The same validators class is used for both Doctrine and generic resources.
 
 This will generate the following:
 

@@ -24,7 +24,7 @@ trait MetaMemberTrait
     {
         $meta = $this->hasMeta() ? $this->get(DocumentInterface::KEYWORD_META) : new StandardObject();
 
-        if (!is_null($meta) && !$meta instanceof StandardObjectInterface) {
+        if (!\is_null($meta) && !$meta instanceof StandardObjectInterface) {
             throw new RuntimeException('Data member is not an object.');
         }
 

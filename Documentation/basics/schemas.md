@@ -9,7 +9,7 @@ to convert the PHP object into a JSON API resource object.
 Credit where credit is due... the encoding of PHP objects to JSON API resources is handled by the
 [neomerx/json-api](https://github.com/neomerx/json-api) package.
 
-> In previous versions we had an Eloquent schema. These are deprecated and will be removed for `v2.0.0`.
+> In previous versions we had an Doctrine schema. These are deprecated and will be removed for `v2.0.0`.
 We therefore recommend that you use generic schemas for any new schemas that you are creating. Documentation
 for this deprecated class can be found
 [here](https://github.com/cloudcreativity/laravel-json-api/blob/v1.0.0-alpha.1/docs/basics/schemas.md).
@@ -41,8 +41,8 @@ To generate a schema that extends, use the following command. The generated sche
 php artisan make:json-api:schema <resource-type> [<api>]
 ```
 
-> If your `use-eloquent` option is set to `true`, the created schema will have some methods already filled.
-If you want to generate a non-Eloquent schema, add the `-N` option.
+> If your `use-Doctrine` option is set to `true`, the created schema will have some methods already filled.
+If you want to generate a non-Doctrine schema, add the `-N` option.
 
 ## Identification
 
@@ -70,7 +70,7 @@ class Schema extends SchemaProvider
 }
 ```
 
-> If you are using the [Eloquent adapter](./adapters.md) and decide to use an `id` other than the model's key,
+> If you are using the [Doctrine adapter](./adapters.md) and decide to use an `id` other than the model's key,
 you must set the `$primaryKey` property on your adapter.
 
 ## Fields

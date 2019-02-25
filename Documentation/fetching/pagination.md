@@ -15,7 +15,7 @@ you can choose which strategy to use for each resource type.
 
 ## Page Pagination
 
-The page-based strategy provided by this package is called the *standard strategy*. To use this for Eloquent models,
+The page-based strategy provided by this package is called the *standard strategy*. To use this for Doctrine models,
 you use constructor injection on your `Adapter` class. For example:
 
 ```php
@@ -23,9 +23,9 @@ namespace App\JsonApi\Posts;
 
 use App\Post;
 use CloudCreativity\LaravelJsonApi\Pagination\StandardStrategy;
-use CloudCreativity\LaravelJsonApi\Store\EloquentAdapter;
+use CloudCreativity\LaravelJsonApi\Store\DoctrineAdapter;
 
-class Adapter extends EloquentAdapter
+class Adapter extends DoctrineAdapter
 {
 
     /**
@@ -41,7 +41,7 @@ class Adapter extends EloquentAdapter
 }
 ```
 
-> If you use Artisan generators - e.g. `make:json-api:resource` - then your Eloquent adapter will already have the
+> If you use Artisan generators - e.g. `make:json-api:resource` - then your Doctrine adapter will already have the
 standard strategy injected via its constructor.
 
 This means the following request:
@@ -84,7 +84,7 @@ The standard strategy provides a number of methods (described below) to customis
 strategy for a specific resource, call the methods in your constructor. For example:
 
 ```php
-class Adapter extends EloquentAdapter
+class Adapter extends DoctrineAdapter
 {
 
     /**
@@ -122,7 +122,7 @@ class CustomStrategy extends StandardStrategy
 Then in your adapter:
 
 ```php
-class Adapter extends EloquentAdapter
+class Adapter extends DoctrineAdapter
 {
 
     public function __construct(CustomStrategy $paging)
@@ -235,12 +235,12 @@ There are some resources that you will always want to be paginated - because wit
 return too many records in one request.
 
 To force a resource to be paginated even if the client does not send pagination paremeters, use the 
-`$defaultPagination` option on your Eloquent adapter. The parameters you set in this property are used by the
+`$defaultPagination` option on your Doctrine adapter. The parameters you set in this property are used by the
 adapter if the client does not provide any page parameters. For example, the following will force the first page
 to be used for the standard paging strategy:
 
 ```php
-class Adapter extends EloquentAdapter
+class Adapter extends DoctrineAdapter
 {
 
     protected $defaultPagination = ['number' => 1];
@@ -251,13 +251,13 @@ class Adapter extends EloquentAdapter
 ```
 
 > For the standard strategy, there is no need to provide a default page `size`. If none is provided, 
-Eloquent will use the default as set on your model's class.
+Doctrine will use the default as set on your model's class.
 
 If you need to programmatically work out the default paging parameters, overload the `defaultPagination` method. 
 For example, if you had a date based pagination strategy:
 
 ```php
-class Adapter extends EloquentAdapter
+class Adapter extends DoctrineAdapter
 {
 
     // ...
@@ -297,7 +297,7 @@ We recommend you look through the code for our `StandardStrategy` to see how to 
 You can then inject your new strategy into your adapters as follows:
 
 ```php
-class Adapter extends EloquentAdapter
+class Adapter extends DoctrineAdapter
 {
 
     /**

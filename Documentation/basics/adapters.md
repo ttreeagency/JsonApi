@@ -7,20 +7,20 @@ Adapters define how to query and update your application's storage layer that ho
 This package expects there to be an adapter for every JSON API resource type, because some of the logic of how
 to query and update domain records in your storage layer will be specific to each resource type.
 
-This package provides an Eloquent adapter for resource types that relate to Eloquent models. However it supports
+This package provides an Doctrine adapter for resource types that relate to Doctrine models. However it supports
 any type of application storage through an adapter interface.
 
-## Eloquent Adapters
+## Doctrine Adapters
 
 ### Generating an Adapter
 
-To generate an adapter for an Eloquent resource type, use the following command:
+To generate an adapter for an Doctrine resource type, use the following command:
 
 ```
 $ php artisan make:json-api:adapter -e <resource-type> [<api>]
 ```
 
-> The `-e` option does not need to be included if your API configuration has its `use-eloquent` option set
+> The `-e` option does not need to be included if your API configuration has its `use-Doctrine` option set
 to `true`.
 
 For example, this would create the following for a `posts` resource:
@@ -29,9 +29,9 @@ For example, this would create the following for a `posts` resource:
 namespace App\JsonApi\Posts;
 
 use App\Post;
-use CloudCreativity\LaravelJsonApi\Eloquent\AbstractAdapter;
+use CloudCreativity\LaravelJsonApi\Doctrine\AbstractAdapter;
 use CloudCreativity\LaravelJsonApi\Pagination\StandardStrategy;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Doctrine\Builder;
 use Illuminate\Support\Collection;
 
 class Adapter extends AbstractAdapter
@@ -75,13 +75,13 @@ class Adapter extends AbstractAdapter
 ```
 
 > The `StandardStrategy` that is injected into the adapter's constructor defines how to page queries for
-the resource, and is explained in the [Pagination](../fetching/pagination.md) chapter. The Eloquent adapter
+the resource, and is explained in the [Pagination](../fetching/pagination.md) chapter. The Doctrine adapter
 also handles [Filtering](../fetching/filtering.md), [Sorting](../fetching/sorting.md) and eager loading
 when [Including Related Resources](../fetching/inclusion.md). Details can be found in the relevant chapters.
 
 ### Resource ID
 
-By default, the Eloquent adapter expects the model key that is used for the resource `id` to be the
+By default, the Doctrine adapter expects the model key that is used for the resource `id` to be the
 model's primary key - i.e. the value returned from `Model::getKeyName()`. You can easily change this
 behaviour by setting the `$primaryKey` attribute on your adapter.
 
@@ -124,8 +124,8 @@ class Adapter extends AbstractAdapter
 #### Mass Assignment
 
 All attributes received in a JSON API resource from a client will be filled into your model, as we assume that
-you will protect any attributes that are not fillable using Eloquent's
-[mass assignment](https://laravel.com/docs/eloquent#mass-assignment) feature.
+you will protect any attributes that are not fillable using Doctrine's
+[mass assignment](https://laravel.com/docs/Doctrine#mass-assignment) feature.
 
 There may be cases where an attribute is fillable on your model, but you do not want to allow your JSON API to
 fill it. You can set your adapter to skip attributes received from a client by listing the JSON API
@@ -191,8 +191,8 @@ public function deserializeDate($value, $field, $record)
 
 #### Mutators
 
-If you need to convert any values as they are being filled into your Eloquent model, you can use
-[Eloquent mutators](https://laravel.com/docs/eloquent-mutators#defining-a-mutator).
+If you need to convert any values as they are being filled into your Doctrine model, you can use
+[Doctrine mutators](https://laravel.com/docs/Doctrine-mutators#defining-a-mutator).
 
 However, if there are cases where your conversion is unique to your JSON API or not appropriate on your model,
 the adapter allows you to implement mutator methods. These must be called `deserializeFooField`, where `Foo`
@@ -214,11 +214,11 @@ class Adapter extends AbstractAdapter
 
 ### Relationships
 
-The Eloquent adapter provides a syntax for defining JSON API resource relationships that is similar to that used
-for Eloquent models. The relationship types available are `belongsTo`, `hasOne`, `hasMany`, `hasManyThrough` and
-`morphMany`. These map to Eloquent relations as follow:
+The Doctrine adapter provides a syntax for defining JSON API resource relationships that is similar to that used
+for Doctrine models. The relationship types available are `belongsTo`, `hasOne`, `hasMany`, `hasManyThrough` and
+`morphMany`. These map to Doctrine relations as follow:
 
-| Eloquent | JSON API |
+| Doctrine | JSON API |
 | :-- | :-- |
 | `hasOne` | `hasOne` |
 | `belongsTo` | `belongsTo` |
@@ -236,7 +236,7 @@ a resource object. If you want to prevent a relationship from being filled, add 
 
 #### Belongs-To
 
-The JSON API `belongsTo` relation can be used for an Eloquent `belongsTo` or `morphTo` relation. The relation
+The JSON API `belongsTo` relation can be used for an Doctrine `belongsTo` or `morphTo` relation. The relation
 is defined in your adapter as follows:
 
 ```php
@@ -251,8 +251,8 @@ class Adapter extends AbstractAdapter
 }
 ```
 
-By default this will assume that the Eloquent relation name is the same as the JSON API relation name - `author`
-in the example above. If this is not the case, you can provide the Eloquent relation name as the first function
+By default this will assume that the Doctrine relation name is the same as the JSON API relation name - `author`
+in the example above. If this is not the case, you can provide the Doctrine relation name as the first function
 argument.
 
 For example, if our JSON API `author` relation related to the `user` model relation:
@@ -271,7 +271,7 @@ class Adapter extends AbstractAdapter
 
 #### Has-One
 
-Use the `hasOne` relation for an Eloquent `hasOne` relation. This has the same syntax as the `belongsTo` relation.
+Use the `hasOne` relation for an Doctrine `hasOne` relation. This has the same syntax as the `belongsTo` relation.
 For example if a `users` JSON API resource had a has-one `phone` relation:
 
 ```php
@@ -286,8 +286,8 @@ class Adapter extends AbstractAdapter
 }
 ```
 
-This will assume that the Eloquent relation on the model is also called `phone`. If this is not the case, pass
-the Eloquent relation name as the first function argument:
+This will assume that the Doctrine relation on the model is also called `phone`. If this is not the case, pass
+the Doctrine relation name as the first function argument:
 
 ```php
 class Adapter extends AbstractAdapter
@@ -303,7 +303,7 @@ class Adapter extends AbstractAdapter
 
 #### Has-Many
 
-The JSON API `hasMany` relation can be used for an Eloquent `hasMany`, `belongsToMany`, `morphMany` and
+The JSON API `hasMany` relation can be used for an Doctrine `hasMany`, `belongsToMany`, `morphMany` and
 `morphToMany` relation. For example, if our `posts` resource has a `tags` relationship:
 
 ```php
@@ -318,8 +318,8 @@ class Adapter extends AbstractAdapter
 }
 ```
 
-This will assume that the Eloquent relation on the model is also called `tags`. If this is not the case, pass
-the Eloquent relation name as the first function argument:
+This will assume that the Doctrine relation on the model is also called `tags`. If this is not the case, pass
+the Doctrine relation name as the first function argument:
 
 ```php
 class Adapter extends AbstractAdapter
@@ -335,7 +335,7 @@ class Adapter extends AbstractAdapter
 
 #### Has-Many-Through
 
-The JSON API `hasMany` relation can be used for an Eloquent `hasManyThrough` relation. The important thing to note
+The JSON API `hasMany` relation can be used for an Doctrine `hasManyThrough` relation. The important thing to note
 about this relationship is it is **read-only**. This is because the relationship can be modified in your API by
 modifying the intermediary model. For example, a `countries` resource might have many `posts` resources through an
 intermediate `users` resource. The relationship is effectively modified by creating and deleting posts and/or a user
@@ -355,8 +355,8 @@ class Adapter extends AbstractAdapter
 }
 ```
 
-This will assume that the Eloquent relation on the country model is also called `posts`. If this is not the case,
-pass the Eloquent relation name as the first function argument:
+This will assume that the Doctrine relation on the country model is also called `posts`. If this is not the case,
+pass the Doctrine relation name as the first function argument:
 
 ```php
 class Adapter extends AbstractAdapter
@@ -372,7 +372,7 @@ class Adapter extends AbstractAdapter
 
 #### Morph-Many
 
-Use the JSON API `morphMany` relation for an Eloquent `morphedByMany` relation. The `morphMany` relation in effect
+Use the JSON API `morphMany` relation for an Doctrine `morphedByMany` relation. The `morphMany` relation in effect
 *mixes* multiple different JSON API resource relationships in a single relationship.
 
 This is best demonstrated with an example. If our application has a `tags` resource that can be linked to either
@@ -398,14 +398,14 @@ and beta releases. If you have problems using it, please create an issue as this
 
 ## Custom Adapters
 
-Custom adapters can be used for any domain record that is not an Eloquent model. Adapters will work with this
+Custom adapters can be used for any domain record that is not an Doctrine model. Adapters will work with this
 package as long as they implement the `CloudCreativity\LaravelJsonApi\Contracts\Adapter\ResourceAdapterInterface`.
-We have also provided an abstract class to extend that contains some of the logic that is used in our Eloquent
+We have also provided an abstract class to extend that contains some of the logic that is used in our Doctrine
 adapter.
 
 > If a lot of your domain records use the same persistence layer, it is likely you can write your own abstract
 adapter class to handle those domain records generically. For example, if you were using Doctrine you could write
-an abstract Doctrine adapter. We recommend looking our generic Eloquent adapter as an example.
+an abstract Doctrine adapter. We recommend looking our generic Doctrine adapter as an example.
 
 ### Generating an Adapter
 
@@ -415,7 +415,7 @@ To generate a custom adapter that extends the package's abstract adapter, use th
 $ php artisan make:json-api:adapter -N <resource-type> [<api>]
 ```
 
-> The `-N` option does not need to be included if your API configuration has its `use-eloquent` option set
+> The `-N` option does not need to be included if your API configuration has its `use-Doctrine` option set
 to `false`.
 
 For example, this would create the following for a `posts` resource:
@@ -509,11 +509,11 @@ You can add support for any kind of relationship by writing a class that impleme
 - `CloudCreativity\LaravelJsonApi\Contracts\Adapter\HasManyAdapterInterface` for *to-many* relations.
 
 Again, if you use a common persistence layer you are likely to find that you can write generic classes to
-handle specific *types* of relationships. For examples see the Eloquent relation classes that are in the
-`CloudCreativity\LaravelJsonApi\Eloquent` namespace.
+handle specific *types* of relationships. For examples see the Doctrine relation classes that are in the
+`CloudCreativity\LaravelJsonApi\Doctrine` namespace.
 
 If you are extending the abstract adapter provided by this package, you can define relationships on your resource
-adapter in the same way as the Eloquent adapter. For example:
+adapter in the same way as the Doctrine adapter. For example:
 
 ```php
 class Adapter extends AbstractAdapter

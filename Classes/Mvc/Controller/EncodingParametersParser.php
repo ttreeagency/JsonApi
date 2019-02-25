@@ -6,13 +6,14 @@ use Neomerx\JsonApi\Contracts\Schema\ErrorInterface;
 use Neomerx\JsonApi\Exceptions\JsonApiException;
 use Neomerx\JsonApi\Contracts\Http\Query\BaseQueryParserInterface as P;
 use Neomerx\JsonApi\Schema\Error;
+use Ttree\JsonApi\Contract\Parameters\EncodingParametersInterface;
 
 
 /**
  * Class EncodingParametersParser
  * @package Ttree\JsonApi\Mvc\Controller
  */
-class EncodingParametersParser
+class EncodingParametersParser implements EncodingParametersInterface
 {
     /**
      * @var null|array
@@ -33,9 +34,6 @@ class EncodingParametersParser
      * @var null
      */
     protected $filters = null;
-
-    /** Message */
-    public const MSG_ERR_INVALID_PARAMETER = 'Invalid Parameter.';
 
     /**
      * @var array
@@ -67,7 +65,7 @@ class EncodingParametersParser
                 yield $type => $this->splitCommaSeparatedStringAndCheckNoEmpties(
                     $type,
                     $fieldList,
-                    SELF::MSG_ERR_INVALID_PARAMETER
+                    self::MSG_ERR_INVALID_PARAMETER
                 );
             }
         }
@@ -81,11 +79,11 @@ class EncodingParametersParser
         if (\array_key_exists(P::PARAM_FIELDS, $this->parameters) === true) {
             $fields = $this->parameters[P::PARAM_FIELDS];
             if (\is_array($fields) === false || empty($fields) === true) {
-                throw new JsonApiException($this->createParameterError(P::PARAM_FIELDS, SELF::MSG_ERR_INVALID_PARAMETER));
+                throw new JsonApiException($this->createParameterError(P::PARAM_FIELDS, self::MSG_ERR_INVALID_PARAMETER));
             }
 
             foreach ($fields as $type => $fieldList) {
-                yield $type => $this->splitCommaSeparatedStringAndCheckNoEmpties($type, $fieldList, SELF::MSG_ERR_INVALID_PARAMETER);
+                yield $type => $this->splitCommaSeparatedStringAndCheckNoEmpties($type, $fieldList, self::MSG_ERR_INVALID_PARAMETER);
             }
         }
     }
@@ -98,8 +96,8 @@ class EncodingParametersParser
         if (\array_key_exists(P::PARAM_INCLUDE, $this->parameters) === true) {
             $paramName = P::PARAM_INCLUDE;
             $includes = $this->parameters[P::PARAM_INCLUDE];
-            foreach ($this->splitCommaSeparatedStringAndCheckNoEmpties($paramName, $includes, SELF::MSG_ERR_INVALID_PARAMETER) as $path) {
-                yield $path => $this->splitStringAndCheckNoEmpties(P::PARAM_INCLUDE, $path, '.', SELF::MSG_ERR_INVALID_PARAMETER);
+            foreach ($this->splitCommaSeparatedStringAndCheckNoEmpties($paramName, $includes, self::MSG_ERR_INVALID_PARAMETER) as $path) {
+                yield $path => $this->splitStringAndCheckNoEmpties(P::PARAM_INCLUDE, $path, '.', self::MSG_ERR_INVALID_PARAMETER);
             }
         }
     }
@@ -112,7 +110,7 @@ class EncodingParametersParser
         if (\array_key_exists(P::PARAM_SORT, $this->parameters) === true) {
             $sorts = $this->parameters[P::PARAM_SORT];
 
-            $values = $this->splitCommaSeparatedStringAndCheckNoEmpties(P::PARAM_SORT, $sorts, SELF::MSG_ERR_INVALID_PARAMETER);
+            $values = $this->splitCommaSeparatedStringAndCheckNoEmpties(P::PARAM_SORT, $sorts, self::MSG_ERR_INVALID_PARAMETER);
             foreach ($values as $orderAndField) {
                 switch ($orderAndField[0]) {
                     case '-':
@@ -145,7 +143,7 @@ class EncodingParametersParser
             yield from $this->splitSpaceSeparatedStringAndCheckNoEmpties(
                 P::PARAM_PROFILE,
                 $decodedUrls,
-                SELF::MSG_ERR_INVALID_PARAMETER
+                self::MSG_ERR_INVALID_PARAMETER
             );
         }
     }
@@ -161,7 +159,7 @@ class EncodingParametersParser
             return $this->splitSpaceSeparatedStringAndCheckNoEmpties(
                 P::PARAM_PAGE,
                 $decodedUrls,
-                SELF::MSG_ERR_INVALID_PARAMETER
+                self::MSG_ERR_INVALID_PARAMETER
             );
         }
 

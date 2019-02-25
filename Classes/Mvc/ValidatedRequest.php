@@ -155,8 +155,8 @@ class ValidatedRequest
     }
 
     /**
-     * @return null|object
-     * @throws InvalidJsonException
+     * @return bool|null|object|Document
+     * @throws \Neos\Flow\Http\Exception
      */
     public function getDocument()
     {

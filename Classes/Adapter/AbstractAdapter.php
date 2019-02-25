@@ -11,6 +11,9 @@ use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
 use Ttree\JsonApi\Contract\JsonApiRepositoryInterface;
 use Ttree\JsonApi\Contract\Object\ResourceObjectInterface;
 use Ttree\JsonApi\Contract\Object\RelationshipInterface;
+use Ttree\JsonApi\Domain\BelongsTo;
+use Ttree\JsonApi\Domain\HasOne;
+use Ttree\JsonApi\Domain\HasMany;
 use Ttree\JsonApi\Domain\Model\Concern\DeserializesAttributeTrait;
 use Ttree\JsonApi\Domain\Model\Concern\ModelIncludesTrait;
 use Ttree\JsonApi\Domain\Model\PaginationParameters;
@@ -69,7 +72,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
 
     /**
      * @var array
-     * @Flow\InjectConfiguration(path="endpoints")
+     * @Flow\InjectConfiguration(package="Ttree.JsonApi", path="endpoints")
      */
     protected $settings;
 
@@ -427,7 +430,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     protected function createRecord(ResourceObjectInterface $resource)
     {
-        return new $this->model();
+        return $this->model = new $this->model();
     }
 
     /**
@@ -441,14 +444,13 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
 
             $property = $this->attributeToProperty($attribute);
 
-            if (method_exists($record, $methodName ='set'. \ucfirst($property))) {
+            if (\method_exists($record, $methodName = 'set' . \ucfirst($property))) {
                 $record->$methodName($this->deserializeAttribute($value, $property, $record));
             }
         }
     }
 
     /**
-     * @todo
      * @inheritdoc
      */
     protected function fillRelationship(
@@ -459,11 +461,22 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     )
     {
         $relation = $this->related($field);
-
         if (!$this->requiresPrimaryRecordPersistence($relation)) {
-            $this->persistenceManager->update($relation);
-//            $relation->update($record, $relationship, $parameters);
+            $relation->update($record, $relationship, $parameters);
         }
+
+//
+//        if ($this->persistenceManager->isNewObject($relation)) {
+//            $this->persistenceManager->add($relation);
+//            $relation->add($record, $relationship, $parameters);
+//        } else {
+//            $this->persistenceManager->update($relation);
+//
+//        }
+//        if (!$this->requiresPrimaryRecordPersistence($relation)) {
+//            $this->persistenceManager->update($relation);
+////            $relation->update($record, $relationship, $parameters);
+//        }
     }
 
     /**
@@ -490,17 +503,17 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
 //                continue;
 //            }
 
-            /** Skip any fields that are not relations */
-            if (!$this->isRelation($field)) {
-                continue;
-            }
+                /** Skip any fields that are not relations */
+                if (!$this->isRelation($field)) {
+                    continue;
+                }
 
-            $relation = $this->related($field);
+                $relation = $this->related($field);
 
-            if ($this->requiresPrimaryRecordPersistence($relation)) {
-                $relation->update($record, $relationships->getRelationship($field), $parameters);
-                $changed = true;
-            }
+                if ($this->requiresPrimaryRecordPersistence($relation)) {
+                    $relation->update($record, $relationships->getRelationship($field), $parameters);
+                    $changed = true;
+                }
             }
         }
 
@@ -754,54 +767,41 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
 
         return Str::camelize($field);
     }
-//
-//    /**
-//     * @todo
-//     * @param string|null $modelKey
-//     * @return BelongsTo
-//     */
-//    protected function belongsTo($modelKey = null)
-//    {
-//        return new BelongsTo($this->model, $modelKey ?: $this->guessRelation());
-//    }
-//
-//    /**
-//     * @todo
-//     * @param string|null $modelKey
-//     * @return HasOne
-//     */
-//    protected function hasOne($modelKey = null)
-//    {
-//        return new HasOne($this->model, $modelKey ?: $this->guessRelation());
-//    }
-//
-//    /**
-//     * @todo
-//     * @param string|null $modelKey
-//     * @return HasMany
-//     */
-//    protected function hasMany($modelKey = null)
-//    {
-//        return new HasMany($this->model, $modelKey ?: $this->guessRelation());
-//    }
-//
-//    /**
-//     * @todo
-//     * @param string|null $modelKey
-//     * @return HasManyThrough
-//     */
-//    protected function hasManyThrough($modelKey = null)
-//    {
-//        return new HasManyThrough($this->model, $modelKey ?: $this->guessRelation());
-//    }
-//
-//    /**
-//     * @todo
-//     * @param HasManyAdapterInterface ...$adapters
-//     * @return MorphHasMany
-//     */
-//    protected function morphMany(HasManyAdapterInterface ...$adapters)
-//    {
-//        return new MorphHasMany(...$adapters);
-//    }
+
+    /**
+     * @param string|null $modelKey
+     * @return BelongsTo
+     */
+    protected function belongsTo($modelKey = null)
+    {
+        return new BelongsTo($this->model, $modelKey ?: $this->guessRelation());
+    }
+
+    /**
+     * @param string|null $modelKey
+     * @return HasOne
+     */
+    protected function hasOne($modelKey = null)
+    {
+        return new HasOne($this->model, $modelKey ?: $this->guessRelation());
+    }
+
+    /**
+     * @param string|null $modelKey
+     * @return HasMany
+     */
+    protected function hasMany($modelKey = null)
+    {
+        return new HasMany($this->model, $modelKey ?: $this->guessRelation());
+    }
+
+    /**
+     * @return string
+     */
+    protected function guessRelation()
+    {
+        list($one, $two, $caller) = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
+
+        return $caller['function'];
+    }
 }

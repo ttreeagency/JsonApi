@@ -52,7 +52,7 @@ trait IdentifiableTrait
 
         $id = $this->get(DocumentInterface::KEYWORD_ID);
 
-        if (!is_string($id)) {
+        if (!\is_string($id)) {
             throw new RuntimeException('Id member is not a string.');
         }
 

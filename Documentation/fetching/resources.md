@@ -74,7 +74,7 @@ Content-Type application/vnd.api+json
 }
 ```
 
-This request is handled by the Adapter's `query` method. By default the Eloquent adapter will return all
+This request is handled by the Adapter's `query` method. By default the Doctrine adapter will return all
 models for a resource collection query that does not provide any pagination or filtering parameters.
 
 > If there are potentially hundreds of resources that could be returned for a resource collection, we strongly

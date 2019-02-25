@@ -147,7 +147,7 @@ class StandardStrategy implements PagingStrategyInterface
     /**
      * Get the default per-page value for the query.
      *
-     * If the query is an Eloquent builder, we can pass in `null` as the default,
+     * If the query is an Doctrine builder, we can pass in `null` as the default,
      * which then delegates to the model to get the default. Otherwise the Laravel
      * standard default is 15.
      *
@@ -156,7 +156,7 @@ class StandardStrategy implements PagingStrategyInterface
      */
     protected function getDefaultPerPage($query)
     {
-//        return $query instanceof EloquentBuilder ? null : 15;
+//        return $query instanceof DoctrineBuilder ? null : 15;
     }
 
     /**

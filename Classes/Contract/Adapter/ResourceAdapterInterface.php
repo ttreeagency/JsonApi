@@ -1,4 +1,5 @@
 <?php
+
 namespace Ttree\JsonApi\Contract\Adapter;
 
 use Ttree\JsonApi\Contract\Object\ResourceObjectInterface;

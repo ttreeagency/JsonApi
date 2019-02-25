@@ -409,7 +409,8 @@ class JsonApiController extends ActionController
         if (isset($this->availableResources[$resource]) && isset($this->availableResources[$resource]['adapter'])) {
             $adapterClass = $this->availableResources[$resource]['adapter'];
             if ($this->objectManager->isRegistered($adapterClass)) {
-                $this->adapter = new $adapterClass($resource, $this->encodedParameters);
+                $this->adapter = new $adapterClass($endpoint, $resource, $this->encodedParameters);
+                return;
             }
 
             throw new RuntimeException(\sprintf('Adapter %s is not registered', $adapterClass));

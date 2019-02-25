@@ -67,7 +67,7 @@ class Relationship extends StandardObject implements RelationshipInterface
 
         $data = $this->{self::DATA};
 
-        return is_null($data) || is_object($data);
+        return \is_null($data) || \is_object($data);
     }
 
     /**
@@ -87,6 +87,6 @@ class Relationship extends StandardObject implements RelationshipInterface
      */
     public function isHasMany()
     {
-        return is_array($this->{self::DATA});
+        return \is_array($this->{self::DATA});
     }
 }

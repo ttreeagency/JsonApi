@@ -52,7 +52,7 @@ It is possible to force the inclusion of certain related resources; displaying i
 ```php
 namespace App\JsonApiV1\Posts;
 
-class Schema extends EloquentSchema
+class Schema extends DoctrineSchema
 {
 
     /* Your code here ...*/

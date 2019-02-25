@@ -122,7 +122,7 @@ class ResourceObjectCollection implements ResourceObjectCollectionInterface
      */
     public function count()
     {
-        return count($this->stack);
+        return \count($this->stack);
     }
 
     /**

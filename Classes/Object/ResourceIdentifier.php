@@ -36,7 +36,7 @@ class ResourceIdentifier extends StandardObject implements ResourceIdentifierInt
      */
     public function isType($typeOrTypes)
     {
-        return in_array($this->get(self::TYPE), (array)$typeOrTypes, true);
+        return \in_array($this->get(self::TYPE), (array)$typeOrTypes, true);
     }
 
     /**
@@ -46,11 +46,11 @@ class ResourceIdentifier extends StandardObject implements ResourceIdentifierInt
     {
         $type = $this->getType();
 
-        if (array_key_exists($type, $map)) {
+        if (\array_key_exists($type, $map)) {
             return $map[$type];
         }
 
-        throw new RuntimeException(sprintf('Type "%s" is not in the supplied map.', $type));
+        throw new RuntimeException(\sprintf('Type "%s" is not in the supplied map.', $type));
     }
 
     /**
@@ -75,7 +75,7 @@ class ResourceIdentifier extends StandardObject implements ResourceIdentifierInt
      */
     public function toString()
     {
-        return sprintf('%s:%s', $this->getType(), $this->getId());
+        return \sprintf('%s:%s', $this->getType(), $this->getId());
     }
 
 }

@@ -67,10 +67,10 @@ responsible for reading and writing resources to/from your application's storage
 
 > We suggest taking a look at the newly added [adapters documentation](./basics/adapters.md).
 
-If you have any non-Eloquent adapters, you will need to implement the new methods on the adapter interface. We
+If you have any non-Doctrine adapters, you will need to implement the new methods on the adapter interface. We
 suggest you check out the documentation on Adapters for guidance.
 
-For Eloquent hydrators, transfer any properties and code from you hydrator into your adapter class. Then make the 
+For Doctrine hydrators, transfer any properties and code from you hydrator into your adapter class. Then make the 
 following modifications...
 
 The `$attributes` property now only needs to list JSON API resource attributes that are mapped to a different

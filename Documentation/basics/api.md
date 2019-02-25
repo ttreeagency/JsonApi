@@ -88,30 +88,30 @@ App\JsonApi
 You must stick to whatever pattern you choose to use. This is because we use the structure to automatically detect
 JSON API classes.
 
-### Eloquent
+### Doctrine
 
-The config also contains a `use-eloquent` option. Set this to `true` if the majority of your resources relate to
-Eloquent models.
+The config also contains a `use-Doctrine` option. Set this to `true` if the majority of your resources relate to
+Doctrine models.
 
-This option is used by the package's generators, so that they know to generate Eloquent JSON API classes or not. This
+This option is used by the package's generators, so that they know to generate Doctrine JSON API classes or not. This
 saves you having to specify the type whenever generating JSON API classes.
 
-The `use-eloquent` option is effectively a default, and can be overridden when using a generator. For example, if
-`use-eloquent` is `true`:
+The `use-Doctrine` option is effectively a default, and can be overridden when using a generator. For example, if
+`use-Doctrine` is `true`:
 
 ```bash
-# will generate Eloquent classes
+# will generate Doctrine classes
 $ php artisan make:json-api:resource posts
-# will generate non-Eloquent classes
+# will generate non-Doctrine classes
 $ php artisan make:json-api:resource posts -N
 ```
 
-If `use-eloquent` is `false`:
+If `use-Doctrine` is `false`:
 
 ```bash
-# will generate non-Eloquent classes
+# will generate non-Doctrine classes
 $ php artisan make:json-api:resource posts
-# will generate Eloquent classes
+# will generate Doctrine classes
 $ php artisan make:json-api:resource posts -e
 ```
 
@@ -120,7 +120,7 @@ $ php artisan make:json-api:resource posts -e
 Your API must be configured to understand how a JSON API resource type maps to a PHP class within your application. 
 This is defined in the `resources` setting in the API's configuration file.
 
-For example, if your application had two Eloquent models - `Post` and `Comment` - your resource configuration would be:
+For example, if your application had two Doctrine models - `Post` and `Comment` - your resource configuration would be:
 
 ```php
 // config/json-api-default.php

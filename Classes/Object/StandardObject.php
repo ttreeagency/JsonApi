@@ -92,6 +92,6 @@ class StandardObject implements IteratorAggregate, StandardObjectInterface
      */
     public function count()
     {
-        return count($this->toArray());
+        return \count($this->toArray());
     }
 }
