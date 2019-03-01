@@ -3,7 +3,7 @@
   "type": "neos-package",
   "description": "Fast and simple way to build JSON-API webservice with Flow Framework",
   "require": {
-    "neos/flow": "~5.0.0",
+    "neos/flow": ">=5.0.0",
     "neomerx/json-api": "~3.0.0",
     "php": ">=7.0.0",
     "ext-json": "*"
