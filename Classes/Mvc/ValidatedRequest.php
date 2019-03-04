@@ -71,6 +71,7 @@ class ValidatedRequest
 
         $resourceType = $this->getResourceType();
 
+        // Todo: what does the resolver do?
         if (!$type = $this->resolver->getType($resourceType)) {
             throw new RuntimeException("JSON API resource type {$resourceType} is not registered.");
         }

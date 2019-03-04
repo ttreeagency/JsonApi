@@ -16,6 +16,7 @@ interface RelationshipInterface extends StandardObjectInterface
 
     const DATA = NeomerxDocumentInterface::KEYWORD_DATA;
     const META = NeomerxDocumentInterface::KEYWORD_META;
+    const ATTRIBUTES = NeomerxDocumentInterface::KEYWORD_ATTRIBUTES;
 
     /**
      * Get the data member as a correctly casted object.

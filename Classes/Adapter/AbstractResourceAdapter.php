@@ -2,13 +2,13 @@
 
 namespace Ttree\JsonApi\Adapter;
 
-use Neos\Flow\Annotations\Entity;
 use Ttree\JsonApi\Contract\Adapter\RelationshipAdapterInterface;
 use Ttree\JsonApi\Contract\Adapter\ResourceAdapterInterface;
 use Ttree\JsonApi\Contract\Object\ResourceObjectInterface;
 use Ttree\JsonApi\Contract\Object\StandardObjectInterface;
 use Ttree\JsonApi\Contract\Object\RelationshipInterface;
 use Ttree\JsonApi\Contract\Object\RelationshipsInterface;
+use Ttree\JsonApi\Contract\Parameters\EncodingParametersInterface;
 use Ttree\JsonApi\Exception\RuntimeException;
 use Ttree\JsonApi\Mvc\Controller\EncodingParametersParser;
 use Ttree\JsonApi\Utility\StringUtility as Str;
@@ -43,9 +43,33 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
      * Persist changes to the record.
      *
      * @param $record
-     * @return object|void
+     * @return object
      */
     abstract protected function persist($record);
+
+    /**
+     * @param $propertyMappedResource
+     * @param ResourceObjectInterface $resourceObject
+     * @param EncodingParametersInterface $parameters
+     * @return object
+     */
+    public function createEntity($propertyMappedResource, ResourceObjectInterface $resourceObject, EncodingParametersInterface $parameters)
+    {
+        // Do other stuff?
+        return $this->persist($propertyMappedResource);
+    }
+
+    /**
+     * @param $propertyMappedResource
+     * @param ResourceObjectInterface $resourceObject
+     * @param EncodingParametersInterface $parameters
+     * @return object
+     */
+    public function updateEntity($propertyMappedResource, ResourceObjectInterface $resourceObject, EncodingParametersInterface $parameters)
+    {
+        // Do other stuff?
+        return $this->persist($propertyMappedResource);
+    }
 
     /**
      * @param ResourceObjectInterface $resource
@@ -114,10 +138,6 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
         }
 
         $relation->withFieldName($field);
-
-        if ($relation instanceof Entity) {
-            \Neos\Flow\var_dump($relation, 'yes = Entity ');
-        }
 
         return $relation;
     }

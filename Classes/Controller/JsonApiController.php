@@ -3,9 +3,13 @@
 namespace Ttree\JsonApi\Controller;
 
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Mvc\Controller\Argument;
+use Neos\Flow\Mvc\Exception\InvalidArgumentTypeException;
 use Neos\Flow\Mvc\Exception\NoSuchActionException;
+use Neos\Utility\TypeHandling;
 use Ttree\JsonApi\Adapter\AbstractAdapter;
 use Ttree\JsonApi\Adapter\DefaultAdapter;
+use Ttree\JsonApi\Contract\Object\ResourceObjectInterface;
 use Ttree\JsonApi\Exception\ConfigurationException;
 use Ttree\JsonApi\Exception\RuntimeException;
 use Ttree\JsonApi\Mvc\Controller\EncodingParametersParser;
@@ -87,15 +91,6 @@ class JsonApiController extends ActionController
      * @var array
      */
     protected $availableResources;
-
-    /**
-     * Initialize Action
-     */
-    protected function initializeAction()
-    {
-        parent::initializeAction();
-        $this->response->setHeader('Content-Type', 'application/vnd.api+json');
-    }
 
     /**
      * Initializes the controller
@@ -199,6 +194,7 @@ class JsonApiController extends ActionController
                         $this->throwStatus(400, null, 'No resource specified');
                     }
 
+                    // TODO: use property mapper
                     $record = $this->adapter->find($this->request->getArgument('identifier'));
                     if (!$record) {
                         $this->throwStatus(404);
@@ -237,6 +233,95 @@ class JsonApiController extends ActionController
             }
         }
         return parent::resolveActionMethodName();
+    }
+
+    /**
+     * Implementation of the arguments initialization in the action controller:
+     * Automatically registers arguments of the current action
+     *
+     * Don't override this method - use initializeAction() instead.
+     *
+     * @return void
+     * @throws InvalidArgumentTypeException
+     * @see initializeArguments()
+     */
+    protected function initializeActionMethodArguments()
+    {
+        $actionMethodParameters = static::getActionMethodParameters($this->objectManager);
+        if (isset($actionMethodParameters[$this->actionMethodName])) {
+            $methodParameters = $actionMethodParameters[$this->actionMethodName];
+        } else {
+            $methodParameters = [];
+        }
+
+        $this->arguments->removeAll();
+        foreach ($methodParameters as $parameterName => $parameterInfo) {
+            $dataType = null;
+            if (isset($parameterInfo['type'])) {
+                $dataType = $parameterInfo['type'];
+            } elseif ($parameterInfo['array']) {
+                $dataType = 'array';
+            }
+            if ($dataType === null) {
+                throw new InvalidArgumentTypeException('The argument type for parameter $' . $parameterName . ' of method ' . get_class($this) . '->' . $this->actionMethodName . '() could not be detected.', 1253175643);
+            }
+            $defaultValue = (isset($parameterInfo['defaultValue']) ? $parameterInfo['defaultValue'] : null);
+            if ($parameterInfo['optional'] === true && $defaultValue === null) {
+                $dataType = TypeHandling::stripNullableType($dataType);
+            }
+
+            // Custom behaviour to get passed validation
+            if ($parameterName === 'resource') {
+                $dataType = $this->adapter->getModel();
+            }
+
+            $this->arguments->addNewArgument($parameterName, $dataType, ($parameterInfo['optional'] === false), $defaultValue);
+        }
+    }
+
+    /**
+     * Initialize Action
+     */
+    protected function initializeAction()
+    {
+        parent::initializeAction();
+        $this->response->setHeader('Content-Type', 'application/vnd.api+json');
+    }
+
+    /**
+     * Maps arguments delivered by the request object to the local controller arguments.
+     *
+     * @api
+     * @throws \Neos\Flow\Mvc\Exception\NoSuchArgumentException
+     * @throws \Neos\Flow\Mvc\Exception\RequiredArgumentMissingException
+     * @return void
+     */
+    protected function mapRequestArgumentsToControllerArguments()
+    {
+        if (!\in_array($this->request->getHttpRequest()->getMethod(), ['POST', 'PUT', 'PATCH'])) {
+            parent::mapRequestArgumentsToControllerArguments();
+            return;
+        }
+
+        /** @var ResourceObjectInterface $resource */
+        $resource = $this->validatedRequest->getDocument()->getResource();
+
+        /** @var \Neos\Flow\Mvc\Controller\MvcPropertyMappingConfiguration $propertyMappingConfiguration */
+        $propertyMappingConfiguration = $this->arguments['resource']->getPropertyMappingConfiguration();
+        $this->adapter->setPropertyMappingConfiguration($propertyMappingConfiguration, $resource);
+
+        /** @var Argument $argument */
+        foreach ($this->arguments as $argument) {
+            $argumentName = $argument->getName();
+            if ($this->request->hasArgument($argumentName)) {
+                $arguments = $this->adapter->hydrateAttributes($resource, $resource->getAttributes());
+                $relationshipArguments = $this->adapter->hydrateRelations($resource, $resource->getRelationships());
+                $arguments = \array_merge($arguments, $relationshipArguments);
+                $argument->setValue($arguments);
+            } elseif ($argument->isRequired()) {
+                throw new \Neos\Flow\Mvc\Exception\RequiredArgumentMissingException('Required argument "' . $argumentName . '" is not set.', 1298012500);
+            }
+        }
     }
 
     /**
@@ -332,7 +417,7 @@ class JsonApiController extends ActionController
      */
     public function relatedAction(string $resource, string $relationship)
     {
-       /** @var BaseSchema $schema */
+        /** @var BaseSchema $schema */
         $schema = $this->getSchema($resource);
         $relationships = $schema->getRelationships($this->record);
         if (!isset($relationships[$relationship])) {
@@ -342,24 +427,26 @@ class JsonApiController extends ActionController
     }
 
     /**
+     * @param $resource
      * @throws RuntimeException
+     * @throws \Neos\Flow\Http\Exception
      */
-    public function createAction()
+    public function createAction($resource)
     {
-        $data = $this->adapter->create($this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
+        $data = $this->adapter->createEntity($resource, $this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
 
         $this->response->setStatus(201);
         $this->view->setData($data);
     }
 
     /**
+     * @param $resource
      * @throws RuntimeException
+     * @throws \Neos\Flow\Http\Exception
      */
-    public function updateAction()
+    public function updateAction($resource)
     {
-        $data = $this->adapter->update($this->record, $this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
-
-        $this->persistenceManager->persistAll();
+        $data = $this->adapter->updateEntity($resource, $this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
         $this->response->setStatus(200);
         $this->view->setData($data);
     }
@@ -396,6 +483,40 @@ class JsonApiController extends ActionController
         $this->response->setHeader('Access-Control-Allow-Methods', \implode(', ', \array_unique($allowedMethods)));
         $this->response->setStatus(204);
         return '';
+    }
+
+    /**
+     * @return string
+     * @api
+     */
+    protected function errorAction()
+    {
+        $this->response->setStatus(422);
+        $this->addErrorFlashMessage();
+        return $this->getFlattenedValidationErrorMessage();
+    }
+
+    /**
+     * Returns a json object containing all validation errors.
+     *
+     * @return string
+     */
+    protected function getFlattenedValidationErrorMessage()
+    {
+        $errorMessages = [];
+        foreach ($this->arguments->getValidationResults()->getFlattenedErrors() as $propertyPath => $errors) {
+            foreach ($errors as $key => $error) {
+                $errorObject = [];
+                $errorObject['status'] = '422';
+                $errorObject['detail'] = $error->render();
+
+                $properties = \explode('.', $propertyPath);
+                $errorObject['source']['pointer'] = '/data/attributes/' . \array_pop($properties);
+
+                $errorMessages['errors'][] = $errorObject;
+            }
+        }
+        return \json_encode((object)$errorMessages);
     }
 
     /**
