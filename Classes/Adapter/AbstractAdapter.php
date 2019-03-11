@@ -190,8 +190,11 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     public function getEncoder($urlPrefix = null, $depth = 512)
     {
-        return Encoder::instance($this->configuration['schemas'])
-            ->withUrlPrefix($urlPrefix)
+        return Encoder::instance(
+            [
+                $this->configuration['entity'] => $this->configuration['schema']
+            ]
+        )->withUrlPrefix($urlPrefix)
             ->withEncodeDepth($depth)
             ->withEncodeOptions(JSON_PRETTY_PRINT);
     }

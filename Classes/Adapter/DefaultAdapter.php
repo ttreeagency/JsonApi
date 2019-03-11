@@ -16,7 +16,7 @@ class DefaultAdapter extends AbstractAdapter
      * Map attributes to different named properties
      * @var array
      */
-    protected $attributesMapping = [];
+    protected $mapAttributeToProperty = [];
 
     /**
      * @param \Neos\Flow\Persistence\QueryInterface $query

@@ -6,6 +6,7 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\Exception\NoSuchActionException;
 use Ttree\JsonApi\Adapter\AbstractAdapter;
 use Ttree\JsonApi\Adapter\DefaultAdapter;
+use Ttree\JsonApi\Exception;
 use Ttree\JsonApi\Exception\ConfigurationException;
 use Ttree\JsonApi\Exception\RuntimeException;
 use Ttree\JsonApi\Mvc\Controller\EncodingParametersParser;
@@ -134,6 +135,12 @@ class JsonApiController extends ActionController
         $this->encodedParameters = new EncodingParametersParser($request->getArguments());
         $this->registerAdapter($endpoint, $resource);
 
+        try {
+            $this->validatedRequest->getDocument();
+        } catch( Exception\InvalidJsonException $e) {
+            $this->throwStatus(406, $e->getMessage());
+        }
+
         $urlPrefix = $this->getUrlPrefix($request);
         $this->encoder = $this->adapter->getEncoder($urlPrefix);
     }
@@ -156,7 +163,7 @@ class JsonApiController extends ActionController
         $resource = $this->request->getArgument('resource');
         if (isset($this->availableResources[$resource]['allowedMethods'])) {
             $allowedMethods = $this->availableResources[$resource]['allowedMethods'];
-        };
+        }
 
         if (isset($this->availableResources[$resource]['disallowedMethods'])) {
             foreach ($this->availableResources[$resource]['disallowedMethods'] as $method) {
