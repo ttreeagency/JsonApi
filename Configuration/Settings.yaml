@@ -4,8 +4,28 @@ Ttree:
       'default':
         baseUrl: 'api'
         version: 'v1'
-        resources: []
+        resources:
+          'posts':
+            adapter: 'SZ\SocialSmartz\JsonApi\Post\Adapter'
+            entity: 'SZ\SocialSmartz\Domain\Model\Post'
+            schema: 'SZ\SocialSmartz\JsonApi\Post\Schema'
+            related:
+              'comments':
+                'SZ\SocialSmartz\Domain\Model\Comment': 'SZ\SocialSmartz\JsonApi\Comment\Schema'
+            allowedMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS']
+            allowedProperties:
+            - 'message'
+            - ''
+            mapAttributeToProperty:
+              'messagez': 'message'
 
+          'profiles':
+            entity: 'RFY\Users\Domain\Model\Profile'
+            schema: 'RFY\Users\JsonApi\Profile\Schema'
+            schemas:
+              'RFY\Users\Domain\Model\Profile': 'RFY\Users\JsonApi\Profile\Schema'
+              'Neos\Party\Domain\Model\ElectronicAddress': 'RFY\Users\JsonApi\ElectronicAddress\Schema'
+              'Neos\Flow\Security\Account': 'RFY\Users\JsonApi\Account\Schema'
 Neos:
   Flow:
     mvc:

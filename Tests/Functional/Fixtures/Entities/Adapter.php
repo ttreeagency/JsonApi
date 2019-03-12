@@ -1,6 +1,6 @@
 <?php
 
-namespace Ttree\JsonApi\Tests\Functional\Fixtures;
+namespace Ttree\JsonApi\Tests\Functional\Fixtures\Entities;
 
 use Neos\Flow\Annotations as Flow;
 use Ttree\JsonApi\Adapter\AbstractAdapter;

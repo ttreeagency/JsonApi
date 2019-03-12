@@ -1,12 +1,10 @@
 <?php
 
-namespace Ttree\JsonApi\Tests\Functional\Fixtures;
+namespace Ttree\JsonApi\Tests\Functional\Fixtures\Entities;
 
 use Neos\Flow\Annotations as Flow;
 use Neomerx\JsonApi\Schema\BaseSchema;
 use Neos\Flow\Tests\Functional\Persistence\Fixtures\TestEntity;
-use SZ\SocialSmartz\Domain\Model\Post;
-use Ttree\JsonApi\Domain\Model\JsonApiSchemaDefinition;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
 
 /**
@@ -84,12 +82,18 @@ class Schema extends BaseSchema
     }
 
     /**
-     * @param Post $resource
+     * @param TestEntity $resource
      * @return array
      */
     public function getRelationships($resource): iterable
     {
-        return [];
+        return [
+            'entity' => [
+                self::RELATIONSHIP_DATA => $resource->getRelatedEntity(),
+                self::RELATIONSHIP_LINKS_SELF => true,
+                self::RELATIONSHIP_LINKS_RELATED => true,
+            ]
+        ];
     }
 
     /**

@@ -129,6 +129,21 @@ class JsonApiController extends ActionController
 
         $this->resourceConfiguration = $availableResources[$resource];
 
+        // Default deny all
+        $allowedMethods = [];
+        if (isset($this->resourceConfiguration['allowedMethods'])) {
+            $allowedMethods = $this->resourceConfiguration['allowedMethods'];
+        }
+
+        if (isset($this->resourceConfiguration['disallowedMethods'])) {
+            foreach ($this->resourceConfiguration['disallowedMethods'] as $method) {
+                unset($allowedMethods[$method]);
+            }
+        }
+        if (!\in_array($this->request->getHttpRequest()->getMethod(), $allowedMethods)) {
+            $this->throwStatus(403);
+        }
+
         $this->validatedRequest = new ValidatedRequest($request);
         $this->encodedParameters = new EncodingParametersParser($request->getArguments());
         $this->registerAdapter($this->resourceConfiguration, $resource);
@@ -146,22 +161,6 @@ class JsonApiController extends ActionController
      */
     protected function resolveActionMethodName()
     {
-        // Default deny all
-        $allowedMethods = [];
-        if (isset($this->resourceConfiguration['allowedMethods'])) {
-            $allowedMethods = $this->resourceConfiguration['allowedMethods'];
-        }
-
-        if (isset($this->resourceConfiguration['disallowedMethods'])) {
-            foreach ($this->resourceConfiguration['disallowedMethods'] as $method) {
-                unset($allowedMethods[$method]);
-            }
-        }
-
-        if (!\in_array($this->request->getHttpRequest()->getMethod(), $allowedMethods)) {
-            $this->throwStatus(403);
-        }
-
         if ($this->request->getHttpRequest()->getMethod() === 'OPTIONS') {
             return 'optionsAction';
         }
