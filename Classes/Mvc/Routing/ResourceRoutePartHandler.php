@@ -15,7 +15,23 @@ use Ttree\JsonApi\Exception\ConfigurationException;
  * Class ModelNameRoutePart
  * @package Ttree\JsonApi\Routing
  */
-class EndpointRoutePartHandler extends AbstractRoutePartHandler
+class ResourceRoutePartHandler extends AbstractRoutePartHandler
 {
 
+    /**
+     * @param string $value
+     * @return boolean
+     */
+    protected function matchValue($value)
+    {
+        if ($value === null || $value === '') {
+            return false;
+        }
+        if ($this->name === '@resource') {
+            $this->value = $value[0];
+            return true;
+        }
+
+        return false;
+    }
 }

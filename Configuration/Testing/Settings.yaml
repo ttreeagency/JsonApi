@@ -1,7 +1,7 @@
 Ttree:
   JsonApi:
     endpoints:
-      'default':
+      'testing':
         baseUrl: 'testing'
         version: 'v1'
         resources:
@@ -10,8 +10,10 @@ Ttree:
             entity: 'Neos\Flow\Tests\Functional\Persistence\Fixtures\TestEntity'
             schema: 'Ttree\JsonApi\Tests\Functional\Fixtures\Schema'
             allowedMethods: ['GET', 'POST', 'UPDATE', 'PATCH', 'DELETE']
+            related: []
           'restricted-entities':
             adapter: 'Ttree\JsonApi\Tests\Functional\Fixtures\Adapter'
             entity: 'Neos\Flow\Tests\Functional\Persistence\Fixtures\TestEntity'
             schema: 'Ttree\JsonApi\Tests\Functional\Fixtures\Schema'
+            related: []
             allowedMethods: []

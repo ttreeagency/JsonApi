@@ -280,32 +280,13 @@ class JsonApiControllerTest extends FunctionalTestCase
     public function updateResource()
     {
         $entity = new TestEntity();
-        $entity->setName('Z at the start');
+        $entity->setName('Name #1');
+        $entity->setDescription('Test Description');
         $this->testEntityRepository->add($entity);
         $this->persistenceManager->persistAll();
         $this->persistenceManager->clearState();
 
         $entityIdentifier = $this->persistenceManager->getIdentifierByObject($entity);
-        $request['data'] = [
-            'type' => 'entities',
-            'id' => $entityIdentifier,
-            'attributes' => [
-                'name' => 'Name #1',
-                'description' => 'A description'
-            ]
-        ];
-
-        $response = $this->browser->request('http://localhost/testing/v1/entities', 'UPDATE', [], [], [], \json_encode($request));
-        $jsonResponse = \json_decode($response->getContent());
-
-        $this->isJson($response->getContent());
-        \Neos\Flow\var_dump($response->getContent());
-        $this->assertEquals(201, $response->getStatusCode());
-        $this->assertSame('entities', $jsonResponse->data->type);
-        $this->assertEquals($entityIdentifier, $jsonResponse->data->id);
-        $this->assertSame('Name #1', $jsonResponse->data->attributes->name);
-        $this->assertSame('A description', $jsonResponse->data->attributes->description);
-        $this->assertStringStartsWith('http://localhost/testing/v1/entities/', $jsonResponse->data->links->self);
 
         $request['data'] = [
             'type' => 'entities',
@@ -315,7 +296,7 @@ class JsonApiControllerTest extends FunctionalTestCase
             ]
         ];
 
-        $response = $this->browser->request('http://localhost/testing/v1/entities', 'PATCH', [], [], [], \json_encode($request));
+        $response = $this->browser->request('http://localhost/testing/v1/entities/' . $entityIdentifier, 'PATCH', [], [], [], \json_encode($request));
         $jsonResponse = \json_decode($response->getContent());
 
         $this->isJson($response->getContent());
@@ -342,7 +323,6 @@ class JsonApiControllerTest extends FunctionalTestCase
 
         $request = [];
         $response = $this->browser->request('http://localhost/testing/v1/entities/' . $entityIdentifier, 'UPDATE', [], [], [], \json_encode($request));
-
         $this->assertEquals(406, $response->getStatusCode());
     }
 

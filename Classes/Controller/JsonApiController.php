@@ -43,6 +43,16 @@ class JsonApiController extends ActionController
     protected $supportedMediaTypes = array('application/vnd.api+json');
 
     /**
+     * @var array
+     */
+    protected $endpoint;
+
+    /**
+     * @var array
+     */
+    protected $resourceConfiguration;
+
+    /**
      * @var JsonApiView
      */
     protected $view;
@@ -79,17 +89,6 @@ class JsonApiController extends ActionController
     protected $encodedParameters;
 
     /**
-     * @Flow\InjectConfiguration(path="endpoints")
-     * @var array
-     */
-    protected $availableEndpoints;
-
-    /**
-     * @var array
-     */
-    protected $availableResources;
-
-    /**
      * Initialize Action
      */
     protected function initializeAction()
@@ -116,30 +115,23 @@ class JsonApiController extends ActionController
         parent::initializeController($request, $response);
 
         /** @var ActionRequest $request */
-        if ($request->hasArgument('endpoint' === false)) {
+        if ($request->hasArgument('@endpoint' === false)) {
             throw new ConfigurationException('Endpoint should be set');
         }
-        $endpoint = $request->getArgument('endpoint');
-        $this->availableResources = $this->availableEndpoints[$endpoint]['resources'];
 
-        if ($request->hasArgument('resource') === false) {
-            $this->throwStatus(400);
-        }
+        $this->endpoint = $request->getArgument('@endpoint');
+        $availableResources = $this->endpoint['resources'];
 
-        $resource = $request->getArgument('resource');
-        if (!\array_key_exists($resource, $this->availableResources)) {
+        $resource = $request->getArgument('@resource');
+        if (!\array_key_exists($resource, $availableResources)) {
             $this->throwStatus(404);
         }
 
+        $this->resourceConfiguration = $availableResources[$resource];
+
         $this->validatedRequest = new ValidatedRequest($request);
         $this->encodedParameters = new EncodingParametersParser($request->getArguments());
-        $this->registerAdapter($endpoint, $resource);
-
-        try {
-            $this->validatedRequest->getDocument();
-        } catch( Exception\InvalidJsonException $e) {
-            $this->throwStatus(406, $e->getMessage());
-        }
+        $this->registerAdapter($this->resourceConfiguration, $resource);
 
         $urlPrefix = $this->getUrlPrefix($request);
         $this->encoder = $this->adapter->getEncoder($urlPrefix);
@@ -147,26 +139,21 @@ class JsonApiController extends ActionController
 
     /**
      * Determines the action method and assures that the method exists.
-     *
      * @return string
-     * @throws NoSuchActionException
      * @throws UnsupportedRequestTypeException
-     * @throws \Neos\Flow\Mvc\Exception\InvalidActionNameException
-     * @throws \Neos\Flow\Mvc\Exception\InvalidActionVisibilityException
-     * @throws \Neos\Flow\Mvc\Exception\NoSuchArgumentException if the action specified in the request object does not exist (and if there's no default action either).
+     * @throws \Neos\Flow\Mvc\Exception\NoSuchArgumentException
      * @throws \Neos\Flow\Mvc\Exception\StopActionException
      */
     protected function resolveActionMethodName()
     {
         // Default deny all
         $allowedMethods = [];
-        $resource = $this->request->getArgument('resource');
-        if (isset($this->availableResources[$resource]['allowedMethods'])) {
-            $allowedMethods = $this->availableResources[$resource]['allowedMethods'];
+        if (isset($this->resourceConfiguration['allowedMethods'])) {
+            $allowedMethods = $this->resourceConfiguration['allowedMethods'];
         }
 
-        if (isset($this->availableResources[$resource]['disallowedMethods'])) {
-            foreach ($this->availableResources[$resource]['disallowedMethods'] as $method) {
+        if (isset($this->resourceConfiguration['disallowedMethods'])) {
+            foreach ($this->resourceConfiguration['disallowedMethods'] as $method) {
                 unset($allowedMethods[$method]);
             }
         }
@@ -175,75 +162,39 @@ class JsonApiController extends ActionController
             $this->throwStatus(403);
         }
 
-        if ($this->request->getControllerActionName() === 'index') {
-            $actionName = 'index';
-            switch ($method = $this->request->getHttpRequest()->getMethod()) {
-                case 'HEAD':
-                case 'GET':
-                    $actionName = 'list';
-                    if ($this->request->hasArgument('identifier') && $identifier = $this->request->getArgument('identifier')) {
-                        $actionName = 'show';
-
-                        $record = $this->adapter->find($this->request->getArgument('identifier'));
-                        if (!$record) {
-                            $this->throwStatus(404);
-                        }
-                        $this->record = $record;
-
-                        if ($this->request->hasArgument('relationship')) {
-                            $actionName = 'related';
-                        }
-                    }
-                    break;
-                case 'POST':
-                    $actionName = 'create';
-                    break;
-                case 'PUT':
-                case 'PATCH':
-                    if (!$this->request->hasArgument('identifier')
-                        && $this->request->getArgument('identifier') !== ''
-                    ) {
-                        $this->throwStatus(400, null, 'No resource specified');
-                    }
-
-                    $record = $this->adapter->find($this->request->getArgument('identifier'));
-                    if (!$record) {
-                        $this->throwStatus(404);
-                    }
-                    $this->record = $record;
-
-                    $actionName = 'update';
-                    break;
-                case 'DELETE':
-                    if (!$this->request->hasArgument('identifier')
-                        && $this->request->getArgument('identifier') !== ''
-                    ) {
-                        $this->throwStatus(400, null, 'No resource specified');
-                    }
-
-                    $record = $this->adapter->find($this->request->getArgument('identifier'));
-                    if (!$record) {
-                        $this->throwStatus(404);
-                    }
-                    $this->record = $record;
-
-                    $actionName = 'delete';
-                    break;
-                case 'OPTIONS':
-                    $actionName = 'options';
-                    break;
-                default:
-                    $this->throwStatus(403, null, 'No allowed method specified.');
-                    break;
-            }
-
-            if ($this->request->getControllerActionName() !== $actionName) {
-                // Clone the request, because it should not be mutated to prevent unexpected routing behavior
-                $this->request = clone $this->request;
-                $this->request->setControllerActionName($actionName);
-            }
+        if ($this->request->getHttpRequest()->getMethod() === 'OPTIONS') {
+            return 'optionsAction';
         }
-        return parent::resolveActionMethodName();
+
+        if ($this->validatedRequest->isIndex()) {
+            return 'listAction';
+        } elseif ($this->validatedRequest->isCreateResource()) {
+            return 'createAction';
+        }
+
+        $this->record = $this->adapter->find($this->request->getArgument('identifier'));
+        if (!$this->record) {
+            $this->throwStatus(404);
+        }
+
+        if ($this->validatedRequest->isReadResource()) {
+            return 'showAction';
+        } elseif ($this->validatedRequest->isUpdateResource()) {
+            return 'updateAction';
+        } elseif ($this->validatedRequest->isDeleteResource()) {
+            return 'deleteAction';
+        }
+
+        $relationship = $this->validatedRequest->getRelationshipName();
+
+        /** Relationships */
+        if ($this->validatedRequest->isReadRelatedResource() || $this->validatedRequest->isReadRelationship()) {
+//            $this->validatedRequest->readRelationship($record, $field, $request);
+            return 'relatedAction';
+        } else {
+//            $this->validatedRequest->modifyRelationship($record, $field, $request);
+            return 'updateRelationshipAction';
+        }
     }
 
     /**
@@ -255,7 +206,7 @@ class JsonApiController extends ActionController
     {
         /** @var JsonApiView $view */
         parent::initializeView($view);
-        $view->setResource($this->request->getArgument('resource'));
+        $view->setResource($this->request->getArgument('@resource'));
         $view->setEncoder($this->encoder);
         $view->setParameters($this->encodedParameters);
     }
@@ -339,7 +290,7 @@ class JsonApiController extends ActionController
      */
     public function relatedAction(string $resource, string $relationship)
     {
-       /** @var BaseSchema $schema */
+        /** @var BaseSchema $schema */
         $schema = $this->getSchema($resource);
         $relationships = $schema->getRelationships($this->record);
         if (!isset($relationships[$relationship])) {
@@ -350,10 +301,16 @@ class JsonApiController extends ActionController
 
     /**
      * @throws RuntimeException
+     * @throws \Neos\Flow\Http\Exception
      */
     public function createAction()
     {
-        $data = $this->adapter->create($this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
+        try {
+            $data = $this->adapter->create($this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
+        } catch (Exception\InvalidJsonException $e) {
+            $this->response->setStatus(406);
+            return;
+        }
 
         $this->response->setStatus(201);
         $this->view->setData($data);
@@ -361,10 +318,16 @@ class JsonApiController extends ActionController
 
     /**
      * @throws RuntimeException
+     * @throws \Neos\Flow\Http\Exception
      */
     public function updateAction()
     {
-        $data = $this->adapter->update($this->record, $this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
+        try {
+            $data = $this->adapter->update($this->record, $this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
+        } catch (Exception\InvalidJsonException $e) {
+            $this->response->setStatus(406);
+            return;
+        }
 
         $this->persistenceManager->persistAll();
         $this->response->setStatus(200);
@@ -406,24 +369,24 @@ class JsonApiController extends ActionController
     }
 
     /**
-     * @param string $endpoint
+     * @param array $configuration
      * @param string $resource
      * @return void
      * @throws RuntimeException
      */
-    protected function registerAdapter($endpoint, $resource): void
+    protected function registerAdapter($configuration, $resource): void
     {
-        if (isset($this->availableResources[$resource]) && isset($this->availableResources[$resource]['adapter'])) {
-            $adapterClass = $this->availableResources[$resource]['adapter'];
+        if (isset($configuration['adapter'])) {
+            $adapterClass = $configuration['adapter'];
             if ($this->objectManager->isRegistered($adapterClass)) {
-                $this->adapter = new $adapterClass($endpoint, $resource, $this->encodedParameters);
+                $this->adapter = new $adapterClass($configuration, $resource, $this->encodedParameters);
                 return;
             }
 
             throw new RuntimeException(\sprintf('Adapter %s is not registered', $adapterClass));
         }
 
-        $this->adapter = new DefaultAdapter($endpoint, $resource, $this->encodedParameters);
+        $this->adapter = new DefaultAdapter($configuration, $resource, $this->encodedParameters);
     }
 
     /**
@@ -434,10 +397,10 @@ class JsonApiController extends ActionController
      */
     protected function getSchema(string $resource, string $relation = ''): BaseSchema
     {
-        if (isset($this->availableResources[$resource]) && isset($this->availableResources[$resource]['related'])) {
+        if (isset($this->resourceConfiguration['related'])) {
             if ($relation !== '') {
-                if (isset($this->availableResources[$resource]['related'][$relation])) {
-                    $schemaClass = key($this->availableResources[$resource]['related'][$relation]);
+                if (isset($this->resourceConfiguration['related'][$relation])) {
+                    $schemaClass = key($this->resourceConfiguration['related'][$relation]);
                     if ($this->objectManager->isRegistered($schemaClass)) {
                         return new $schemaClass();
                     }
@@ -448,7 +411,7 @@ class JsonApiController extends ActionController
                 throw new RuntimeException(\sprintf('Missing related definition for %s in `endpoints.resources.%s.related.%s` not registered!', $resource, $resource, $relation));
             }
 
-            $schemaClass = $this->availableResources[$resource]['schema'];
+            $schemaClass = $this->resourceConfiguration['schema'];
             if ($this->objectManager->isRegistered($schemaClass)) {
                 return new $schemaClass();
             }
@@ -465,7 +428,8 @@ class JsonApiController extends ActionController
      */
     protected function getUrlPrefix(RequestInterface $request)
     {
-        return \rtrim($request->getMainRequest()->getHttpRequest()->getBaseUri() . $this->adapter->getBaseUrl(), '/');
+        $suffix = isset($this->endpoint['baseUrl']) && isset($this->endpoint['version']) ? $this->endpoint['baseUrl'] . '/' . $this->endpoint['version'] : '/';
+        return \rtrim($request->getMainRequest()->getHttpRequest()->getBaseUri() . $suffix, '/');
     }
 
 }

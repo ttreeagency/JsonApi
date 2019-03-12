@@ -87,7 +87,7 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
     public function update($record, ResourceObjectInterface $resource, EncodingParametersParser $parameters)
     {
         $this->hydrateAttributes($record, $resource->getAttributes());
-        $this->hydrateRelationships($record, $resource->getRelationships(), $parameters);
+        $this->fillRelationships($record, $resource->getRelationships(), $parameters);
         $record = $this->persist($record) ?: $record;
 
         if (\method_exists($this, 'hydrateRelated')) {
@@ -114,10 +114,6 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
         }
 
         $relation->withFieldName($field);
-
-        if ($relation instanceof Entity) {
-            \Neos\Flow\var_dump($relation, 'yes = Entity ');
-        }
 
         return $relation;
     }

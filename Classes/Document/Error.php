@@ -528,15 +528,15 @@ class Error implements MutableErrorInterface
             $this->setId($input[self::ID]);
         }
 
-        // Links
-        if (\array_key_exists(self::LINKS, $input)) {
-            $this->addLinks((array)$input[self::LINKS]);
-        }
+//        // Links
+//        if (\array_key_exists(self::LINKS, $input)) {
+//            $this->addLinks((array)$input[self::LINKS]);
+//        }
 
-        // About Link
-        if (\array_key_exists(self::LINKS_ABOUT, $input) && $input[self::LINKS_ABOUT] instanceof LinkInterface) {
-            $this->setAboutLink($input[self::LINKS_ABOUT]);
-        }
+//        // About Link
+//        if (\array_key_exists(self::LINKS_ABOUT, $input) && $input[self::LINKS_ABOUT] instanceof LinkInterface) {
+//            $this->setAboutLink($input[self::LINKS_ABOUT]);
+//        }
 
         // Status
         if (\array_key_exists(self::STATUS, $input)) {

@@ -40,12 +40,22 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     /**
      * @var string
      */
-    protected $endpoint;
+    protected $resource;
 
     /**
      * @var string
      */
-    protected $resource;
+    protected $entity;
+
+    /**
+     * @var string
+     */
+    protected $schema;
+
+    /**
+     * @var array
+     */
+    protected $related;
 
     /**
      * @var EncodingParametersParser
@@ -69,17 +79,6 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      * @Flow\Inject
      */
     protected $objectManager;
-
-    /**
-     * @var array
-     * @Flow\InjectConfiguration(package="Ttree.JsonApi", path="endpoints")
-     */
-    protected $settings;
-
-    /**
-     * @var array
-     */
-    protected $endPointSettings;
 
     /**
      * @var array
@@ -148,13 +147,13 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     protected $sortColumns = [];
 
     /**
-     * @param string $endpoint
+     * @param array $configuration
      * @param string $resource
      * @param EncodingParametersParser $parameters
      */
-    public function __construct($endpoint, $resource, EncodingParametersParser $parameters)
+    public function __construct($configuration, $resource, EncodingParametersParser $parameters)
     {
-        $this->endpoint = $endpoint;
+        $this->configuration = $configuration;
         $this->resource = $resource;
         $this->parameters = $parameters;
     }
@@ -174,13 +173,18 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     protected function initializeConfiguration()
     {
-        $this->endPointSettings = $this->settings[$this->endpoint];
-
-        $configuration = Arrays::getValueByPath($this->endPointSettings, ['resources', $this->resource]);
-        if (!\is_array($configuration)) {
-            throw new Exception(\sprintf('Resource "%s" not configured', $this->resource), 1447947509);
+        $this->entity = Arrays::getValueByPath($this->configuration, 'entity');
+        if (!\is_string($this->entity)) {
+            throw new Exception(\sprintf('Resource "%s" entity not found!', $this->resource), 1447947501);
         }
-        $this->configuration = $configuration;
+        $this->schema = Arrays::getValueByPath($this->configuration, 'schema');
+        if (!\is_string($this->schema)) {
+            throw new Exception(\sprintf('Resource "%s" schema not found!', $this->resource), 1447947502);
+        }
+        $this->related = Arrays::getValueByPath($this->configuration, 'related');
+        if (!\is_array($this->related)) {
+            throw new Exception(\sprintf('Resource "%s" related not configured', $this->resource), 1447947503);
+        }
     }
 
     /**
@@ -190,21 +194,25 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     public function getEncoder($urlPrefix = null, $depth = 512)
     {
-        return Encoder::instance(
-            [
-                $this->configuration['entity'] => $this->configuration['schema']
-            ]
-        )->withUrlPrefix($urlPrefix)
+        return Encoder::instance($this->getResources())
+            ->withUrlPrefix($urlPrefix)
             ->withEncodeDepth($depth)
             ->withEncodeOptions(JSON_PRETTY_PRINT);
     }
 
     /**
-     * @return string
+     * Get definition from this resource by combining entity and schema for both top level and sublevel related resources
      */
-    public function getBaseUrl()
+    protected function getResources()
     {
-        return isset($this->endPointSettings['baseUrl']) && isset($this->endPointSettings['version']) ? $this->endPointSettings['baseUrl'] . '/' . $this->endPointSettings['version'] : '/';
+        $resources = [
+            $this->entity => $this->schema
+        ];
+
+        foreach($this->related as $resource) {
+            $resources[$key = key($resource)] = $resource[$key];
+        }
+        return $resources;
     }
 
     /**

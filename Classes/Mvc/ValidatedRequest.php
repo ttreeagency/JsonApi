@@ -61,24 +61,6 @@ class ValidatedRequest
     }
 
     /**
-     * @inheritDoc
-     */
-    public function getType()
-    {
-        if ($resource = $this->getResource()) {
-            return \get_class($resource);
-        }
-
-        $resourceType = $this->getResourceType();
-
-        if (!$type = $this->resolver->getType($resourceType)) {
-            throw new RuntimeException("JSON API resource type {$resourceType} is not registered.");
-        }
-
-        return $type;
-    }
-
-    /**
      * @todo
      * @inheritdoc
      */
@@ -88,7 +70,6 @@ class ValidatedRequest
     }
 
     /**
-     * @todo
      * @inheritdoc
      */
     public function getResourceId()
@@ -130,7 +111,7 @@ class ValidatedRequest
      */
     public function getRelationshipName()
     {
-        return $this->request->route(ResourceRegistrar::PARAM_RELATIONSHIP_NAME);
+//        return $this->request->route(ResourceRegistrar::PARAM_RELATIONSHIP_NAME);
     }
 
     /**
@@ -139,7 +120,7 @@ class ValidatedRequest
      */
     public function getInverseResourceType()
     {
-        return $this->request->route(ResourceRegistrar::PARAM_RELATIONSHIP_INVERSE_TYPE);
+//        return $this->request->route(ResourceRegistrar::PARAM_RELATIONSHIP_INVERSE_TYPE);
     }
 
     /**
@@ -296,11 +277,9 @@ class ValidatedRequest
     }
 
     /**
-     * @todo
      * Is the HTTP request method the one provided?
      *
-     * @param string $method
-     *      the expected method - case insensitive.
+     * @param string $method the expected method - case insensitive.
      * @return bool
      */
     protected function isMethod($method)
@@ -318,11 +297,7 @@ class ValidatedRequest
      */
     protected function decodeDocument($assoc = false)
     {
-        if (!$this->serverRequest->getHttpRequest()->getContent()) {
-            return null;
-        }
-
-        $decoded = \json_decode((string)$this->serverRequest->getHttpRequest()->getContent(), $assoc, 512, 0);
+        $decoded = \json_decode((string)$this->serverRequest->getHttpRequest()->getBody(), $assoc, 512, 0);
 
         if (JSON_ERROR_NONE !== \json_last_error()) {
             throw InvalidJsonException::create();
