@@ -1,25 +1,184 @@
-{namespace k=Neos\Kickstarter\ViewHelpers}<?php
+<?php
 namespace {namespace};
 
-/*
- * This file is part of the {packageKey} package.
- */
+use Neos\Flow\Persistence\Doctrine\PersistenceManager;
+use Neos\Flow\Tests\FunctionalTestCase;
+use {entity};
 
 /**
- * Testcase for {modelName -> k:inflect.humanizeCamelCase()}
+ * Testcase for {resource}
  */
-class {testName} extends \Neos\Flow\Tests\UnitTestCase
+class {testName} extends FunctionalTestCase
 {
+    /**
+     * @var boolean
+     */
+    protected static $testablePersistenceEnabled = true;
+
+    public function setUp()
+    {
+        parent::setUp();
+        if (!$this->persistenceManager instanceof PersistenceManager) {
+            $this->markTestSkipped('Doctrine persistence is not enabled');
+        }
+    }
 
     /**
      * @test
      */
-    public function makeSureThatSomethingHolds()
+    public function assertEndpointOptions()
     {
-        $this->markTestIncomplete('Automatically generated test case; you need to adjust this!');
+        $response = $this->browser->request('http://localhost/{endpoint}/v1/{resourcePlural}', 'OPTIONS');
+        $this->assertEquals(200, $response->getStatusCode());
+    }
 
-        $expected = 'Foo';
-        $actual = 'Foo'; // This should be the result of some function call
-        $this->assertSame($expected, $actual);
+    /**
+     * @test
+     */
+    public function fetchingResourceList()
+    {
+        $this->markTestSkipped('resource listing');
+
+        $entity1 = new {entityShortName}();
+        // Add required attributes
+        $entity2 = new {entityShortName}();
+        // Add required attributes
+
+        $this->persistenceManager->add($entity1);
+        $this->persistenceManager->add($entity2);
+        $this->persistenceManager->persistAll();
+        $this->persistenceManager->clearState();
+
+        $response = $this->browser->request('http://localhost/{endpoint}/v1/{resourcePlural}', 'GET');
+        $jsonResponse = \json_decode($response->getBody());
+
+        $this->isJson($response->getBody());
+
+        $this->assertSame('{resourcePlural}', $jsonResponse->data[0]->type);
+        $this->assertSame('{resourcePlural}', $jsonResponse->data[1]->type);
+
+        $entityIdentifier = $this->persistenceManager->getIdentifierByObject($entity2);
+        $this->assertSame('http://localhost/{endpoint}/v1/{resourcePlural}/' . $entityIdentifier, $jsonResponse->data[0]->links->self);
+        $entityIdentifier = $this->persistenceManager->getIdentifierByObject($entity1);
+        $this->assertSame('http://localhost/{endpoint}/v1/{resourcePlural}/' . $entityIdentifier, $jsonResponse->data[1]->links->self);
+    }
+
+    /**
+     * @test
+     */
+    public function fetchResource()
+    {
+        $this->markTestSkipped('get resource');
+
+        $entity = new {entityShortName}();
+        // Add required attributes
+        $this->persistenceManager->add($entity);
+        $this->persistenceManager->persistAll();
+        $this->persistenceManager->clearState();
+
+        $entityIdentifier = $this->persistenceManager->getIdentifierByObject($entity);
+        $response = $this->browser->request('http://localhost/{endpoint}/v1/{resourcePlural}/' . $entityIdentifier, 'GET');
+        $jsonResponse = \json_decode($response->getBody());
+
+        $this->isJson($response->getBody());
+        $this->assertSame('{resourcePlural}', $jsonResponse->data->type);
+        $this->assertSame($entityIdentifier, $jsonResponse->data->id);
+
+        // Add attributes check
+        // $this->assertSame('Name #1', $jsonResponse->data->attributes->name);
+
+        $this->assertSame('http://localhost/{endpoint}/v1/{resourcePlural}/' . $entityIdentifier, $jsonResponse->data->links->self);
+    }
+
+    /**
+     * @test
+     */
+    public function createResource()
+    {
+        $this->markTestSkipped('create resource');
+
+        $request['data'] = [
+            'type' => '{resourcePlural}',
+            'attributes' => [
+                // Add attributes
+            ]
+        ];
+
+        $response = $this->browser->request('http://localhost/{endpoint}/v1/{resourcePlural}', 'POST', [], [], [], \json_encode($request));
+        $jsonResponse = \json_decode($response->getBody());
+
+        $this->isJson($response->getBody());
+        $this->assertEquals(201, $response->getStatusCode());
+        $this->assertSame('{resourcePlural}', $jsonResponse->data->type);
+        $this->assertNotNull($jsonResponse->data->id);
+
+        // Add attributes check
+        // $this->assertSame('Name #1', $jsonResponse->data->attributes->name);
+
+        $this->assertStringStartsWith('http://localhost/{endpoint}/v1/{resourcePlural}/', $jsonResponse->data->links->self);
+    }
+
+    /**
+     * @test
+     */
+    public function updateResource()
+    {
+        $this->markTestSkipped('update resource');
+
+        $entity = new {entityShortName}();
+        // Add required attributes
+        $this->persistenceManager->add($entity);
+        $this->persistenceManager->persistAll();
+        $this->persistenceManager->clearState();
+
+        $entityIdentifier = $this->persistenceManager->getIdentifierByObject($entity);
+
+        $request['data'] = [
+            'type' => '{resourcePlural}',
+            'id' => $entityIdentifier,
+            'attributes' => [
+                // Add attributes
+            ]
+        ];
+
+        $response = $this->browser->request('http://localhost/{endpoint}/v1/{resourcePlural}/' . $entityIdentifier, 'PATCH', [], [], [], \json_encode($request));
+        $jsonResponse = \json_decode($response->getBody());
+
+        $this->isJson($response->getBody());
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertSame('{resourcePlural}', $jsonResponse->data->type);
+        $this->assertEquals($entityIdentifier, $jsonResponse->data->id);
+
+        // Add attributes check
+        // $this->assertSame('Name #1', $jsonResponse->data->attributes->name);
+
+        $this->assertStringStartsWith('http://localhost/{endpoint}/v1/{resourcePlural}/', $jsonResponse->data->links->self);
+    }
+
+    /**
+     * @test
+     */
+    public function deleteResource()
+    {
+        $this->markTestSkipped('delete resource');
+
+        $entity = new {entityShortName}();
+        // Add required attributes
+        $this->persistenceManager->add($entity);
+        $this->persistenceManager->persistAll();
+        $this->persistenceManager->clearState();
+
+        $entityIdentifier = $this->persistenceManager->getIdentifierByObject($entity);
+        $response = $this->browser->request('http://localhost/{endpoint}/v1/{resourcePlural}/' . $entityIdentifier, 'DELETE');
+
+        $this->assertEquals(204, $response->getStatusCode());
+    }
+
+    /**
+     * @test
+     */
+    public function validateResource()
+    {
+        $this->markTestSkipped('validate resource');
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Ttree\JsonApi\Service;
 
 use Neos\Flow\Annotations as Flow;
@@ -40,6 +41,11 @@ class GeneratorService
     protected $generatedFiles = [];
 
     /**
+     * @var array
+     */
+    protected $namespaces = [];
+
+    /**
      * Generate a resource from a entity for the package with the given resource and entity
      *
      * @param Package $package
@@ -57,7 +63,7 @@ class GeneratorService
 
         $this->generateAdapter($package->getPackageKey(), $endpoint, $resource, $overwrite);
         $this->generateSchema($package->getPackageKey(), $endpoint, $resource, $entity, $overwrite);
-        $this->generateTestsForResource($package->getPackageKey(), $endpoint, $resource, $overwrite);
+        $this->generateTestsForResource($package->getPackageKey(), $endpoint, $resource, $entity, $overwrite);
 
         return $this->generatedFiles;
     }
@@ -77,16 +83,16 @@ class GeneratorService
     public function generateAdapter($packageKey, $endpoint, $resource, $entity, $overwrite = false)
     {
         list($baseNamespace, $namespaceEntryPath) = $this->getPrimaryNamespaceAndEntryPath($this->packageManager->getPackage($packageKey));
-        $entityName = \ucfirst($entity);
         $resourceName = \ucfirst($resource);
-        $adapterClassName = $entityName . 'Adapter';
+        $adapterClassName = 'Adapter';
         $namespace = \trim($baseNamespace, '\\') . '\\JsonApi\\' . $endpoint . '\\' . $resourceName;
+
+        $this->namespaces['adapter'] = $namespace . '\\' . $adapterClassName;
 
         $templatePathAndFilename = 'resource://Ttree.JsonApi/Private/Generator/Adapter/AdapterTemplate.php.tmpl';
 
         $contextVariables = [];
         $contextVariables['packageKey'] = $packageKey;
-        $contextVariables['adapterClassName'] = $adapterClassName;
         $contextVariables['namespace'] = $namespace;
 
         $fileContent = $this->renderTemplate($templatePathAndFilename, $contextVariables);
@@ -117,8 +123,10 @@ class GeneratorService
         $entityShortName = \substr($entity, \strrpos($entity, '\\') + 1);
         $resourcePlural = Str::pluralize($resource);
         $resourceName = \ucfirst($resource);
-        $schemaClassName = $resourceName . 'Schema';
+        $schemaClassName = 'Schema';
         $namespace = \trim($baseNamespace, '\\') . '\\JsonApi\\' . $endpoint . '\\' . $resourceName;
+
+        $this->namespaces['schema'] = $namespace . '\\' . $schemaClassName;
 
         $templatePathAndFilename = 'resource://Ttree.JsonApi/Private/Generator/Schema/SchemaTemplate.php.tmpl';
 
@@ -158,8 +166,9 @@ class GeneratorService
     {
         list($baseNamespace) = $this->getPrimaryNamespaceAndEntryPath($this->packageManager->getPackage($packageKey));
         $testName = ucfirst($resource) . 'EndpointTest';
-        $resourceName = \ucfirst($resource);
-        $namespace = trim($baseNamespace, '\\') . '\\Tests\\Functional\\JsonApi\\' . $endpoint . '\\' . $resourceName;
+        $entityShortName = \substr($entity, \strrpos($entity, '\\') + 1);
+        $resourcePlural = Str::pluralize($resource);
+        $namespace = trim($baseNamespace, '\\') . '\\Tests\\Functional\\JsonApi\\' . $endpoint;
 
         $templatePathAndFilename = 'resource://Ttree.JsonApi/Private/Generator/Tests/Functional/Resource/ResourceEndpointTestTemplate.php.tmpl';
 
@@ -167,18 +176,31 @@ class GeneratorService
         $contextVariables['packageKey'] = $packageKey;
         $contextVariables['testName'] = $testName;
         $contextVariables['resource'] = $resource;
+        $contextVariables['resourcePlural'] = $resourcePlural;
         $contextVariables['entity'] = $entity;
+        $contextVariables['entityShortName'] = $entityShortName;
         $contextVariables['namespace'] = $namespace;
 
         $fileContent = $this->renderTemplate($templatePathAndFilename, $contextVariables);
 
         $testFilename = $testName . '.php';
-        $testPath = $this->packageManager->getPackage($packageKey)->getPackagePath() . FlowPackageInterface::DIRECTORY_TESTS_FUNCTIONAL . 'JsonApi/' . $endpoint;
+        $testPath = $this->packageManager->getPackage($packageKey)->getPackagePath() . FlowPackageInterface::DIRECTORY_TESTS_FUNCTIONAL . 'JsonApi/' . $endpoint . '/';
         $targetPathAndFilename = $testPath . $testFilename;
 
         $this->generateFile($targetPathAndFilename, $fileContent, $overwrite);
 
         return $this->generatedFiles;
+    }
+
+    /**
+     * @param string $entry
+     * @return string
+     */
+    public function getNamespacesEntry($entry)
+    {
+        if (isset($this->namespaces[$entry])) {
+            return $this->namespaces[$entry];
+        }
     }
 
     /**

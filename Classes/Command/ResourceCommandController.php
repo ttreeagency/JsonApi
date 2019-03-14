@@ -1,4 +1,5 @@
 <?php
+
 namespace Ttree\JsonApi\Command;
 
 /*
@@ -10,6 +11,7 @@ use Neos\Flow\Cli\CommandController;
 use Neos\Flow\Package;
 use Neos\Flow\Reflection\ReflectionService;
 use Ttree\JsonApi\Service\GeneratorService;
+use Ttree\JsonApi\Utility\StringUtility as Str;
 
 /**
  * @Flow\Scope("singleton")
@@ -92,10 +94,24 @@ class ResourceCommandController extends CommandController
 
         $this->outputLine();
         $this->outputLine('Next Steps:');
-        $this->outputLine('- Review and adjust the generated migration.');
+        $this->outputLine('- Review and adjust the generated resource code.');
+        $this->outputLine();
         $this->outputLine('- Add configuration based on newly created/updated resource in Settings.yaml.');
-// TODO: note the Settings.yaml needing to be added.
+        $this->outputLine();
+        $this->outputLine('Ttree:');
+        $this->outputLine('  JsonApi:');
+        $this->outputLine('    endpoints:');
+        $this->outputLine('      \'' . $selectedEndpoint . '\':');
+        $this->outputLine('        ...');
+        $this->outputLine('          \'%s\':', [Str::pluralize($resource)]);
+        $this->outputLine('            adapter: \'%s\'', [$this->generatorService->getNamespacesEntry('adapter')]);
+        $this->outputLine('            schema: \'%s\'', [$this->generatorService->getNamespacesEntry('schema')]);
+        $this->outputLine('            entity: \'%s\'', [$entity]);
+        $this->outputLine('            related: []');
+        $this->outputLine('            allowedMethods: [\'GET\', \'POST\', \'PATCH\', \'DELETE\', \'OPTIONS\']');
 
+        $this->outputLine();
+        $this->outputLine('<b>Resource creation completed!</b>');
     }
 
     /**
@@ -106,9 +122,9 @@ class ResourceCommandController extends CommandController
      */
     protected function isEntityFound($entity)
     {
-       if (\class_exists($entity)) {
-           return $entity;
-       }
+        if (\class_exists($entity)) {
+            return $entity;
+        }
         $this->outputLine('The entity: %s cannot be found.', [$entity]);
         $this->outputLine();
         $newEntity = $this->output->ask('Please specify the complete namespace of the entity you wish to use? ');
