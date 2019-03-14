@@ -176,6 +176,7 @@ class GeneratorService
         $contextVariables['packageKey'] = $packageKey;
         $contextVariables['testName'] = $testName;
         $contextVariables['resource'] = $resource;
+        $contextVariables['endpoint'] = $endpoint;
         $contextVariables['resourcePlural'] = $resourcePlural;
         $contextVariables['entity'] = $entity;
         $contextVariables['entityShortName'] = $entityShortName;
