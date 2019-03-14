@@ -19,10 +19,17 @@ Routing
 -------
 
 Currently the routing is really basic, check [Routes.yaml](Configuration/Routes.yaml). The stable version will contain
-a custom RoutePartHandler for more flexibility.
+custom RoutePartHandlers for more flexibility.
 
 How to start you own JSON-API Web Service
 -----------------------------------------
+
+## Create a Resource
+
+The creation of a resource is now easily done with the command `./flow resource:create` the wizard will guide you through the possible options.
+It will create a resource with a select class and generate a default `Adapter`, `Schema` and a Functional tes to ensure everything is working properly.
+
+When ready you can extend the schema class with the desired attributes. Add filters to your adapter and start restricting access for example.
 
 ## Based on Custom Schema class
 
@@ -157,27 +164,29 @@ Features
 - [x] Fetching Resources
 - [x] Fetching Resource
 - [x] Fetching Relationships
-- [x] Compound Documents
-- [x] Sparse Fieldsets
-- [x] Schema generation based on YAML definition for Doctrine entites
+- [ ] Compound Documents
+- [ ] Sparse Fieldsets
+- [ ] Schema generation based on YAML definition for Doctrine entites
   - [ ] Property post processors based on EEL during Schema generation
 - [x] Sorting
 - [x] Pagination (page[number] / page[size] and page[offset] / page[limit])
-  - [ ] Configure defautl pagination strategy, currently hardcode to page[number] & page[size]
-- [ ] Error Handling
+  - [ ] Configure default pagination strategy, currently hardcode to page[number] & page[size]
+- [x] Error Handling - to be improved
+- [x] Multiple endpoints
+- [x] Resource code generation for adapter and schema
+- [ ] Complete test coverage
 
 # 2.0
 
 - [ ] Schema generation based on YAML definition for TYPO3CR nodes
 - [ ] Filtering
 - [ ] Caching
+- [ ] Elastic Search backend
 
 Acknowledgments
 ---------------
 
-Development sponsored by [ttree ltd - neos solution provider](http://ttree.ch).
-
-We try our best to craft this package with a lots of love, we are open to sponsoring, support request, ... just contact us.
+Development sponsored by [REFACTORY - Ambitious Online Solutions](https://rfy.nl) and [ttree ltd - neos solution provider](http://ttree.ch).
 
 License
 -------

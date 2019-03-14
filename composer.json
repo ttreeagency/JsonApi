@@ -1,6 +1,6 @@
 {
   "name": "ttree/jsonapi",
-  "type": "neos-package",
+  "type": "neos-framework",
   "description": "Fast and simple way to build JSON-API webservice with Flow Framework",
   "require": {
     "neos/flow": ">=5.0.0",

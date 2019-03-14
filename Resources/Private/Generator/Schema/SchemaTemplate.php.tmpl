@@ -1,0 +1,95 @@
+<?php
+namespace {namespace};
+
+/*
+ * This file is part of the {packageKey} package.
+ */
+
+use Neos\Flow\Annotations as Flow;
+use Neomerx\JsonApi\Schema\BaseSchema;
+use {entityClassName};
+use Neos\Flow\Persistence\PersistenceManagerInterface;
+
+/**
+ * Entity SchemaProvider
+ * @Flow\Scope("singleton")
+ */
+class Schema extends BaseSchema
+{
+    /**
+     * @var string
+     */
+    protected $resourceType = '{entityClassName}';
+
+    /**
+     * @var string
+     */
+    protected $type = '{resourcePlural}';
+
+    /**
+     * @var PersistenceManagerInterface
+     * @Flow\Inject
+     */
+    protected $persistenceManager;
+
+    /**
+     * @return string
+     */
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    /**
+     * @param {entityShortName} $resource
+     * @return string
+     */
+    public function getId($resource): string
+    {
+        return $this->persistenceManager->getIdentifierByObject($resource);
+    }
+
+    /**
+     * @param null $resource
+     * @return string
+     */
+    public function getSelfSubUrl($resource = null): string
+    {
+        return \sprintf('/%s/%s', $this->type, $this->getId($resource));
+    }
+
+    /**
+     * Get resource attributes.
+     *
+     * @param {entityShortName} $resource
+     *
+     * @return array
+     */
+    public function getAttributes($resource): iterable
+    {
+        $attributes = [
+        ];
+
+        return $attributes;
+    }
+
+    /**
+     * @param {entityShortName} $resource
+     * @return array
+     */
+    public function getRelationships($resource): iterable
+    {
+        $relationships = [
+        ];
+
+        return $relationships;
+    }
+
+    /**
+     * @return array
+     */
+    public function getIncludePaths()
+    {
+        return [];
+    }
+}

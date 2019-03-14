@@ -1,0 +1,30 @@
+<?php
+namespace {namespace};
+
+/*
+ * This file is part of the {packageKey} package.
+ */
+
+use Neos\Flow\Annotations as Flow;
+use Ttree\JsonApi\Adapter\AbstractAdapter;
+
+/**
+ * @Flow\Scope("singleton")
+ */
+class {adapterClassName} extends AbstractAdapter
+{
+    /**
+     * Map attributes to different named properties
+     * @var array
+     */
+    protected $attributesMapping = [];
+
+    /**
+     * @param \Neos\Flow\Persistence\QueryInterface $query
+     * @param array|null $filters
+     */
+    public function filter($query, $filters)
+    {
+        // Add filters here
+    }
+}

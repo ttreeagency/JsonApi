@@ -1,7 +1,7 @@
 Ttree:
   JsonApi:
     endpoints:
-      'default':
+      'api':
         baseUrl: 'api'
         version: 'v1'
         resources:
