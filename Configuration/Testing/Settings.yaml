@@ -27,3 +27,9 @@ Ttree:
                 'Neos\Flow\Tests\Functional\Persistence\Fixtures\TestEntity': 'Ttree\JsonApi\Tests\Functional\Fixtures\Entities\Schema'
               'subentities':
                 'Neos\Flow\Tests\Functional\Persistence\Fixtures\TestEntity': 'Ttree\JsonApi\Tests\Functional\Fixtures\Entities\Schema'
+          'resources':
+            adapter: 'Ttree\JsonApi\JsonApi\PersistentResource\Adapter'
+            schema: 'Ttree\JsonApi\JsonApi\PersistentResource\Schema'
+            entity: 'Neos\Flow\ResourceManagement\PersistentResource'
+            allowedMethods: ['GET', 'DELETE', 'OPTIONS']
+            related: []
