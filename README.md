@@ -6,8 +6,7 @@ This package can help you build JSON-API Web Service is a few minutes with Flow 
 
 This package is Composer ready, [PSR-2] and [PSR-4] compliant.
 
-Compatible with Flow 2.3.x (we plan to make it compatible with Flow 3.x as soon as our current customer projet upgrade
-to Flow 3.x).
+Compatible with Flow 5.2.x (we plan to make it compatible with Flow 5.3 for long term support).
 
 How it work ?
 -------------
