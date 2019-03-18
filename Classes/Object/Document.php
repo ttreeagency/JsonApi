@@ -1,15 +1,15 @@
 <?php
 
-namespace Ttree\JsonApi\Object;
+namespace Flowpack\JsonApi\Object;
 
-use Ttree\JsonApi\Contract\Object\DocumentInterface;
-use Ttree\JsonApi\Contract\Object\StandardObjectInterface;
-use Ttree\JsonApi\Exception\RuntimeException;
-use Ttree\JsonApi\Document\Error;
+use Flowpack\JsonApi\Contract\Object\DocumentInterface;
+use Flowpack\JsonApi\Contract\Object\StandardObjectInterface;
+use Flowpack\JsonApi\Exception\RuntimeException;
+use Flowpack\JsonApi\Document\Error;
 
 /**
  * Class Document
- * @package Ttree\JsonApi\Object
+ * @package Flowpack\JsonApi\Object
  */
 class Document extends StandardObject implements DocumentInterface
 {

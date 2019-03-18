@@ -1,17 +1,17 @@
 <?php
 
-namespace Ttree\JsonApi\Mvc\Controller;
+namespace Flowpack\JsonApi\Mvc\Controller;
 
 use Neomerx\JsonApi\Contracts\Schema\ErrorInterface;
 use Neomerx\JsonApi\Exceptions\JsonApiException;
 use Neomerx\JsonApi\Contracts\Http\Query\BaseQueryParserInterface as P;
 use Neomerx\JsonApi\Schema\Error;
-use Ttree\JsonApi\Contract\Parameters\EncodingParametersInterface;
+use Flowpack\JsonApi\Contract\Parameters\EncodingParametersInterface;
 
 
 /**
  * Class EncodingParametersParser
- * @package Ttree\JsonApi\Mvc\Controller
+ * @package Flowpack\JsonApi\Mvc\Controller
  */
 class EncodingParametersParser implements EncodingParametersInterface
 {

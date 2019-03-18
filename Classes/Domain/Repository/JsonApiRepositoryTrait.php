@@ -1,10 +1,10 @@
 <?php
-namespace Ttree\JsonApi\Domain\Repository;
+namespace Flowpack\JsonApi\Domain\Repository;
 
 use Neos\Flow\Annotations as Flow;
-use Ttree\JsonApi\Mvc\Controller\EncodingParametersParser;
-use Ttree\JsonApi\Domain\Model\PaginationParameters;
-use Ttree\JsonApi\Domain\Model\ResourceSettingsDefinition;
+use Flowpack\JsonApi\Mvc\Controller\EncodingParametersParser;
+use Flowpack\JsonApi\Domain\Model\PaginationParameters;
+use Flowpack\JsonApi\Domain\Model\ResourceSettingsDefinition;
 use Neos\Flow\Persistence\QueryInterface;
 use Neos\Flow\Persistence\QueryResultInterface;
 
@@ -18,7 +18,7 @@ trait JsonApiRepositoryTrait
      * @param ResourceSettingsDefinition $resourceSettingsDefinition
      * @return QueryResultInterface
      * @throws \Neos\Flow\Exception
-     * @throws \Ttree\JsonApi\Exception\ConfigurationException
+     * @throws \Flowpack\JsonApi\Exception\ConfigurationException
      */
     public function findByJsonApiParameters(EncodingParametersParser $parameters, ResourceSettingsDefinition $resourceSettingsDefinition)
     {
@@ -52,7 +52,7 @@ trait JsonApiRepositoryTrait
      * @param ResourceSettingsDefinition $resourceSettingsDefinition
      * @return QueryResultInterface
      * @throws \Neos\Flow\Exception
-     * @throws \Ttree\JsonApi\Exception\ConfigurationException
+     * @throws \Flowpack\JsonApi\Exception\ConfigurationException
      */
     public function countByJsonApiParameters(EncodingParametersParser $parameters, ResourceSettingsDefinition $resourceSettingsDefinition)
     {

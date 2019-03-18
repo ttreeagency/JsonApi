@@ -1,12 +1,12 @@
 <?php
 
-namespace Ttree\JsonApi\Domain;
+namespace Flowpack\JsonApi\Domain;
 
 use Doctrine\ORM\Mapping\Entity;
-use Ttree\JsonApi\Adapter\AbstractAdapter;
-use Ttree\JsonApi\Exception\RuntimeException;
-use Ttree\JsonApi\Contract\Adapter\HasManyAdapterInterface;
-use Ttree\JsonApi\Contract\Parameters\EncodingParametersInterface;
+use Flowpack\JsonApi\Adapter\AbstractAdapter;
+use Flowpack\JsonApi\Exception\RuntimeException;
+use Flowpack\JsonApi\Contract\Adapter\HasManyAdapterInterface;
+use Flowpack\JsonApi\Contract\Parameters\EncodingParametersInterface;
 
 /**
  * Class AbstractManyRelation

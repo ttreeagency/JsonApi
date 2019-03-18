@@ -1,12 +1,12 @@
 <?php
 
-namespace Ttree\JsonApi\Schema;
+namespace Flowpack\JsonApi\Schema;
 
 use Neos\Flow\Annotations as Flow;
 use Neomerx\JsonApi\Schema\BaseSchema;
 use Doctrine\Common\Collections\Collection;
 use InvalidArgumentException;
-use Ttree\JsonApi\Domain\Model\JsonApiSchemaDefinition;
+use Flowpack\JsonApi\Domain\Model\JsonApiSchemaDefinition;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\Utility\ObjectAccess;
 use Neos\Flow\ResourceManagement\PersistentResource;

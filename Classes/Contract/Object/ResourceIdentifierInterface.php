@@ -1,14 +1,14 @@
 <?php
 
-namespace Ttree\JsonApi\Contract\Object;
+namespace Flowpack\JsonApi\Contract\Object;
 
 use Neomerx\JsonApi\Contracts\Schema\DocumentInterface as NeomerxDocumentInterface;
-use Ttree\JsonApi\Exception\RuntimeException;
+use Flowpack\JsonApi\Exception\RuntimeException;
 
 /**
  * Interface ResourceIdentifierInterface
  *
- * @package Ttree\JsonApi
+ * @package Flowpack\JsonApi
  */
 interface ResourceIdentifierInterface extends StandardObjectInterface, MetaMemberInterface
 {

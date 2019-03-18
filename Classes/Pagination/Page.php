@@ -1,14 +1,14 @@
 <?php
 
-namespace Ttree\JsonApi\Pagination;
+namespace Flowpack\JsonApi\Pagination;
 
 use Neomerx\JsonApi\Contracts\Schema\LinkInterface;
-use Ttree\JsonApi\Contract\Pagination\PageInterface;
+use Flowpack\JsonApi\Contract\Pagination\PageInterface;
 
 /**
  * Class Page
  *
- * @package Ttree\JsonApi
+ * @package Flowpack\JsonApi
  */
 class Page implements PageInterface
 {

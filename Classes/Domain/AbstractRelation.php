@@ -1,12 +1,12 @@
 <?php
 
-namespace Ttree\JsonApi\Domain;
+namespace Flowpack\JsonApi\Domain;
 
 use Neos\Flow\Annotations as Flow;
 use Doctrine\ORM\Mapping\Entity;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
-use Ttree\JsonApi\Exception\RuntimeException;
-use Ttree\JsonApi\Contract\Adapter\RelationshipAdapterInterface;
+use Flowpack\JsonApi\Exception\RuntimeException;
+use Flowpack\JsonApi\Contract\Adapter\RelationshipAdapterInterface;
 
 /**
  * Class AbstractRelation

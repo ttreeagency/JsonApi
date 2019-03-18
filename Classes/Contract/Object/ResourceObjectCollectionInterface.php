@@ -1,15 +1,15 @@
 <?php
 
-namespace Ttree\JsonApi\Contract\Object;
+namespace Flowpack\JsonApi\Contract\Object;
 
-use Ttree\JsonApi\Exception\RuntimeException;
+use Flowpack\JsonApi\Exception\RuntimeException;
 use Countable;
 use IteratorAggregate;
 
 /**
  * Interface ResourceIdentifierCollectionInterface
  *
- * @package Ttree\JsonApi
+ * @package Flowpack\JsonApi
  */
 interface ResourceObjectCollectionInterface extends IteratorAggregate, Countable
 {

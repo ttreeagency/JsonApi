@@ -1,8 +1,8 @@
 <?php
 
-namespace Ttree\JsonApi\Contract\Object;
+namespace Flowpack\JsonApi\Contract\Object;
 
-use Ttree\JsonApi\Exception\RuntimeException;
+use Flowpack\JsonApi\Exception\RuntimeException;
 
 /**
  * Interface MetaMemberInterface

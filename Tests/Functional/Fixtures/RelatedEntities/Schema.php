@@ -1,12 +1,12 @@
 <?php
 
-namespace Ttree\JsonApi\Tests\Functional\Fixtures\RelatedEntities;
+namespace Flowpack\JsonApi\Tests\Functional\Fixtures\RelatedEntities;
 
 use Neos\Flow\Annotations as Flow;
 use Neomerx\JsonApi\Schema\BaseSchema;
 use Neos\Flow\Tests\Functional\Persistence\Fixtures\TestEntity;
 use SZ\SocialSmartz\Domain\Model\Post;
-use Ttree\JsonApi\Domain\Model\JsonApiSchemaDefinition;
+use Flowpack\JsonApi\Domain\Model\JsonApiSchemaDefinition;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
 
 /**

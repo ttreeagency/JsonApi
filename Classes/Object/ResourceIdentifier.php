@@ -1,14 +1,14 @@
 <?php
 
-namespace Ttree\JsonApi\Object;
+namespace Flowpack\JsonApi\Object;
 
-use Ttree\JsonApi\Contract\Object\ResourceIdentifierInterface;
-use Ttree\JsonApi\Exception\RuntimeException;
+use Flowpack\JsonApi\Contract\Object\ResourceIdentifierInterface;
+use Flowpack\JsonApi\Exception\RuntimeException;
 
 /**
  * Class ResourceIdentifier
  *
- * @package Ttree\JsonApi
+ * @package Flowpack\JsonApi
  */
 class ResourceIdentifier extends StandardObject implements ResourceIdentifierInterface
 {

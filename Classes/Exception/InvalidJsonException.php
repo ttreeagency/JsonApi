@@ -1,11 +1,11 @@
 <?php
 
-namespace Ttree\JsonApi\Exception;
+namespace Flowpack\JsonApi\Exception;
 
 use Neos\Flow\Annotations as Flow;
-use Ttree\JsonApi\Exception;
+use Flowpack\JsonApi\Exception;
 use Neomerx\JsonApi\Exceptions\JsonApiException;
-use Ttree\JsonApi\Document\Error;
+use Flowpack\JsonApi\Document\Error;
 
 /**
  * Exception

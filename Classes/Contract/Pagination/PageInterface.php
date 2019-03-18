@@ -1,6 +1,6 @@
 <?php
 
-namespace Ttree\JsonApi\Contract\Pagination;
+namespace Flowpack\JsonApi\Contract\Pagination;
 
 use Neomerx\JsonApi\Contracts\Schema\DocumentInterface;
 use Neomerx\JsonApi\Contracts\Schema\LinkInterface;
@@ -8,7 +8,7 @@ use Neomerx\JsonApi\Contracts\Schema\LinkInterface;
 /**
  * Interface PageInterface
  *
- * @package Ttree\JsonApi
+ * @package Flowpack\JsonApi
  */
 interface PageInterface
 {

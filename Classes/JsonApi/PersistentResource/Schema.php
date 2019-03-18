@@ -1,12 +1,12 @@
 <?php
 
-namespace Ttree\JsonApi\JsonApi\PersistentResource;
+namespace Flowpack\JsonApi\JsonApi\PersistentResource;
 
 use Neos\Flow\Annotations as Flow;
 use Neomerx\JsonApi\Schema\BaseSchema;
 use Neos\Flow\ResourceManagement\PersistentResource;
 use SZ\SocialSmartz\Domain\Model\Post;
-use Ttree\JsonApi\Domain\Model\JsonApiSchemaDefinition;
+use Flowpack\JsonApi\Domain\Model\JsonApiSchemaDefinition;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
 
 /**

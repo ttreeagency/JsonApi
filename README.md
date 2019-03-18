@@ -119,7 +119,7 @@ JsonApi:
           repository: 'Your\Package\Domain\Repository\MovieRepository'
           
           schemas:
-            'Your\Package\Domain\Model\Movie': 'Ttree\JsonApi\Schema\DynamicEntitySchema'
+            'Your\Package\Domain\Model\Movie': 'Flowpack\JsonApi\Schema\DynamicEntitySchema'
             'Your\Package\Domain\Model\GenericPerson': 'Your\Package\Schema\GenericPersonSchema'
             'Your\Package\Domain\Model\Category': 'Your\Package\Schema\CategorySchema'
 ```
@@ -151,7 +151,7 @@ JsonApi:
             'title': 'title'
             
           schemas:
-            'Your\Package\Domain\Model\Movie': 'Ttree\JsonApi\Schema\DynamicEntitySchema'
+            'Your\Package\Domain\Model\Movie': 'Flowpack\JsonApi\Schema\DynamicEntitySchema'
             'Your\Package\Domain\Model\GenericPerson': 'Your\Package\Schema\GenericPersonSchema'
             'Your\Package\Domain\Model\Category': 'Your\Package\Schema\CategorySchema'
 ```
@@ -186,7 +186,7 @@ Features
 Acknowledgments
 ---------------
 
-Development sponsored by [REFACTORY - Ambitious Online Solutions](https://rfy.nl) and [ttree ltd - neos solution provider](http://ttree.ch).
+Development sponsored by [REFACTORY - Ambitious Online Solutions](https://rfy.nl) and [flowpack ltd - neos solution provider](http://flowpack.ch).
 
 License
 -------

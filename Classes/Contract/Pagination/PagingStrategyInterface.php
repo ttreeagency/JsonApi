@@ -1,13 +1,13 @@
 <?php
 
-namespace Ttree\JsonApi\Contract\Pagination;
+namespace Flowpack\JsonApi\Contract\Pagination;
 
-use Ttree\JsonApi\Mvc\Controller\EncodingParametersParser;
+use Flowpack\JsonApi\Mvc\Controller\EncodingParametersParser;
 
 /**
  * Interface PagingStrategyInterface
  *
- * @package Ttree\JsonApi
+ * @package Flowpack\JsonApi
  */
 interface PagingStrategyInterface
 {

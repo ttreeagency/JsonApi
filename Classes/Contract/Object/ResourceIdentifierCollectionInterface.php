@@ -1,6 +1,6 @@
 <?php
 
-namespace Ttree\JsonApi\Contract\Object;
+namespace Flowpack\JsonApi\Contract\Object;
 
 use Countable;
 use IteratorAggregate;
@@ -8,7 +8,7 @@ use IteratorAggregate;
 /**
  * Interface ResourceIdentifierCollectionInterface
  *
- * @package Ttree\JsonApi
+ * @package Flowpack\JsonApi
  */
 interface ResourceIdentifierCollectionInterface extends IteratorAggregate, Countable
 {

@@ -1,11 +1,11 @@
 <?php
 
-namespace Ttree\JsonApi\Object;
+namespace Flowpack\JsonApi\Object;
 
 use InvalidArgumentException;
 use stdClass;
 use Traversable;
-use Ttree\JsonApi\Contract\Object\StandardObjectInterface;
+use Flowpack\JsonApi\Contract\Object\StandardObjectInterface;
 
 /**
  * Class ObjectUtils

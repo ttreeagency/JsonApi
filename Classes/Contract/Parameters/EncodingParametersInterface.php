@@ -1,6 +1,6 @@
 <?php
 
-namespace Ttree\JsonApi\Contract\Parameters;
+namespace Flowpack\JsonApi\Contract\Parameters;
 
 interface EncodingParametersInterface
 {

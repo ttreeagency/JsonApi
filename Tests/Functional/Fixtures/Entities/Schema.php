@@ -1,6 +1,6 @@
 <?php
 
-namespace Ttree\JsonApi\Tests\Functional\Fixtures\Entities;
+namespace Flowpack\JsonApi\Tests\Functional\Fixtures\Entities;
 
 use Neos\Flow\Annotations as Flow;
 use Neomerx\JsonApi\Schema\BaseSchema;

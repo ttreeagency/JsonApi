@@ -1,6 +1,6 @@
 <?php
 
-namespace Ttree\JsonApi\Utility;
+namespace Flowpack\JsonApi\Utility;
 
 use Neos\Flow\Annotations as Flow;
 

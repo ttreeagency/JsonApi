@@ -1,9 +1,9 @@
 <?php
 
-namespace Ttree\JsonApi\Contract\Adapter;
+namespace Flowpack\JsonApi\Contract\Adapter;
 
-use Ttree\JsonApi\Contract\Object\ResourceObjectInterface;
-use Ttree\JsonApi\Mvc\Controller\EncodingParametersParser;
+use Flowpack\JsonApi\Contract\Object\ResourceObjectInterface;
+use Flowpack\JsonApi\Mvc\Controller\EncodingParametersParser;
 
 /**
  * Interface ResourceAdapterInterface
@@ -13,7 +13,7 @@ use Ttree\JsonApi\Mvc\Controller\EncodingParametersParser;
  * repository to query different types of domain records regardless of how these are actually stored
  * and retrieved within an application.
  *
- * @package Ttree\JsonApi
+ * @package Flowpack\JsonApi
  */
 interface ResourceAdapterInterface
 {

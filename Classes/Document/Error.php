@@ -1,8 +1,8 @@
 <?php
 
-namespace Ttree\JsonApi\Document;
+namespace Flowpack\JsonApi\Document;
 
-use Ttree\JsonApi\Contract\Document\MutableErrorInterface;
+use Flowpack\JsonApi\Contract\Document\MutableErrorInterface;
 use InvalidArgumentException;
 use Neomerx\JsonApi\Contracts\Schema\ErrorInterface;
 use Neomerx\JsonApi\Contracts\Schema\LinkInterface;
@@ -12,7 +12,7 @@ use Neomerx\JsonApi\Schema\ErrorCollection;
 /**
  * Class Error
  *
- * @package Ttree\JsonApi
+ * @package Flowpack\JsonApi
  */
 class Error implements MutableErrorInterface
 {

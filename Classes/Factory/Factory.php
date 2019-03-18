@@ -1,8 +1,8 @@
 <?php
 
-namespace Ttree\JsonApi\Factory;
+namespace Flowpack\JsonApi\Factory;
 
-use Ttree\JsonApi\Schema\Container;
+use Flowpack\JsonApi\Schema\Container;
 use Neos\Flow\Annotations as Flow;
 
 /**

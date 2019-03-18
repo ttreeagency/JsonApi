@@ -1,14 +1,14 @@
 <?php
 
-namespace Ttree\JsonApi\Tests\Functional\Fixtures\Entities;
+namespace Flowpack\JsonApi\Tests\Functional\Fixtures\Entities;
 
 use Neos\Flow\Annotations as Flow;
-use Ttree\JsonApi\Adapter\AbstractAdapter;
+use Flowpack\JsonApi\Adapter\AbstractAdapter;
 
 /**
  *
  * Class DefaultAdapter
- * @package Ttree\JsonApi\Adapter
+ * @package Flowpack\JsonApi\Adapter
  * @api
  */
 class Adapter extends AbstractAdapter
@@ -28,7 +28,7 @@ class Adapter extends AbstractAdapter
     }
 
     /**
-     * @return \Ttree\JsonApi\Domain\BelongsTo
+     * @return \Flowpack\JsonApi\Domain\BelongsTo
      */
     protected function createdBy()
     {
@@ -36,7 +36,7 @@ class Adapter extends AbstractAdapter
     }
 
     /**
-     * @return \Ttree\JsonApi\Domain\HasMany
+     * @return \Flowpack\JsonApi\Domain\HasMany
      */
     protected function comments()
     {

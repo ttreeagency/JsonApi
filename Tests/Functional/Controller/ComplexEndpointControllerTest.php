@@ -1,6 +1,6 @@
 <?php
 
-namespace Ttree\JsonApi\Tests\Functional\Controller;
+namespace Flowpack\JsonApi\Tests\Functional\Controller;
 
 use Neos\Flow\Persistence\Doctrine\PersistenceManager;
 use Neos\Flow\Tests\Functional\Persistence\Fixtures\TestEntity;

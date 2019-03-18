@@ -1,6 +1,6 @@
 <?php
 
-namespace Ttree\JsonApi\Contract\Object;
+namespace Flowpack\JsonApi\Contract\Object;
 
 use Countable;
 use JsonSerializable;
@@ -10,7 +10,7 @@ use Traversable;
 /**
  * Interface StandardObjectInterface
  *
- * @package Ttree\JsonApi
+ * @package Flowpack\JsonApi
  */
 interface StandardObjectInterface extends Traversable, Countable, JsonSerializable
 {

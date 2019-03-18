@@ -1,5 +1,5 @@
 <?php
-namespace Ttree\JsonApi\Tests\Functional;
+namespace Flowpack\JsonApi\Tests\Functional;
 
 use Neos\Flow\Persistence\Doctrine\PersistenceManager;
 use Neos\Flow\ResourceManagement\ResourceManager;

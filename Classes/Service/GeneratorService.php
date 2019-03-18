@@ -1,6 +1,6 @@
 <?php
 
-namespace Ttree\JsonApi\Service;
+namespace Flowpack\JsonApi\Service;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Package;
@@ -9,7 +9,7 @@ use Neos\Flow\Core\ClassLoader;
 use Neos\Flow\Package\PackageInterface;
 use Neos\Flow\Package\FlowPackageInterface;
 use Neos\Utility\Files;
-use Ttree\JsonApi\Utility\StringUtility as Str;
+use Flowpack\JsonApi\Utility\StringUtility as Str;
 
 /**
  * Service for the JsonApi generator
@@ -89,7 +89,7 @@ class GeneratorService
 
         $this->namespaces['adapter'] = $namespace . '\\' . $adapterClassName;
 
-        $templatePathAndFilename = 'resource://Ttree.JsonApi/Private/Generator/Adapter/AdapterTemplate.php.tmpl';
+        $templatePathAndFilename = 'resource://Flowpack.JsonApi/Private/Generator/Adapter/AdapterTemplate.php.tmpl';
 
         $contextVariables = [];
         $contextVariables['packageKey'] = $packageKey;
@@ -128,7 +128,7 @@ class GeneratorService
 
         $this->namespaces['schema'] = $namespace . '\\' . $schemaClassName;
 
-        $templatePathAndFilename = 'resource://Ttree.JsonApi/Private/Generator/Schema/SchemaTemplate.php.tmpl';
+        $templatePathAndFilename = 'resource://Flowpack.JsonApi/Private/Generator/Schema/SchemaTemplate.php.tmpl';
 
         $contextVariables = [];
         $contextVariables['packageKey'] = $packageKey;
@@ -170,7 +170,7 @@ class GeneratorService
         $resourcePlural = Str::pluralize($resource);
         $namespace = trim($baseNamespace, '\\') . '\\Tests\\Functional\\JsonApi\\' . $endpoint;
 
-        $templatePathAndFilename = 'resource://Ttree.JsonApi/Private/Generator/Tests/Functional/Resource/ResourceEndpointTestTemplate.php.tmpl';
+        $templatePathAndFilename = 'resource://Flowpack.JsonApi/Private/Generator/Tests/Functional/Resource/ResourceEndpointTestTemplate.php.tmpl';
 
         $contextVariables = [];
         $contextVariables['packageKey'] = $packageKey;

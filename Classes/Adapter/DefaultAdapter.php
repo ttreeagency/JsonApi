@@ -1,13 +1,13 @@
 <?php
 
-namespace Ttree\JsonApi\Adapter;
+namespace Flowpack\JsonApi\Adapter;
 
 use Neos\Flow\Annotations as Flow;
 
 /**
  *
  * Class DefaultAdapter
- * @package Ttree\JsonApi\Adapter
+ * @package Flowpack\JsonApi\Adapter
  * @api
  */
 class DefaultAdapter extends AbstractAdapter

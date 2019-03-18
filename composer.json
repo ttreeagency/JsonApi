@@ -1,5 +1,5 @@
 {
-  "name": "ttree/jsonapi",
+  "name": "flowpack/jsonapi",
   "type": "neos-framework",
   "description": "Fast and simple way to build JSON-API webservice with Flow Framework",
   "require": {
@@ -10,7 +10,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Ttree\\JsonApi\\": "Classes/"
+      "Flowpack\\JsonApi\\": "Classes/"
     }
   }
 }

@@ -1,10 +1,10 @@
 <?php
 
-namespace Ttree\JsonApi\Object;
+namespace Flowpack\JsonApi\Object;
 
-use Ttree\JsonApi\Contract\Object\ResourceObjectInterface;
-use Ttree\JsonApi\Contract\Object\StandardObjectInterface;
-use Ttree\JsonApi\Exception\RuntimeException;
+use Flowpack\JsonApi\Contract\Object\ResourceObjectInterface;
+use Flowpack\JsonApi\Contract\Object\StandardObjectInterface;
+use Flowpack\JsonApi\Exception\RuntimeException;
 
 /**
  * Class Resource

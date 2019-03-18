@@ -1,22 +1,22 @@
 <?php
 
-namespace Ttree\JsonApi\Controller;
+namespace Flowpack\JsonApi\Controller;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\Exception\NoSuchActionException;
-use Ttree\JsonApi\Adapter\AbstractAdapter;
-use Ttree\JsonApi\Adapter\DefaultAdapter;
-use Ttree\JsonApi\Exception;
-use Ttree\JsonApi\Exception\ConfigurationException;
-use Ttree\JsonApi\Exception\RuntimeException;
-use Ttree\JsonApi\Mvc\Controller\EncodingParametersParser;
+use Flowpack\JsonApi\Adapter\AbstractAdapter;
+use Flowpack\JsonApi\Adapter\DefaultAdapter;
+use Flowpack\JsonApi\Exception;
+use Flowpack\JsonApi\Exception\ConfigurationException;
+use Flowpack\JsonApi\Exception\RuntimeException;
+use Flowpack\JsonApi\Mvc\Controller\EncodingParametersParser;
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
 use Neomerx\JsonApi\Contracts\Factories\FactoryInterface;
 use Neomerx\JsonApi\Schema\Link;
 use Neomerx\JsonApi\Schema\BaseSchema;
-use Ttree\JsonApi\Domain\Model\PaginationParameters;
-use Ttree\JsonApi\Mvc\ValidatedRequest;
-use Ttree\JsonApi\View\JsonApiView;
+use Flowpack\JsonApi\Domain\Model\PaginationParameters;
+use Flowpack\JsonApi\Mvc\ValidatedRequest;
+use Flowpack\JsonApi\View\JsonApiView;
 use Neos\Flow\Mvc\ActionRequest;
 use Neos\Flow\Mvc\Controller\ActionController;
 use Neos\Flow\Mvc\Exception\UnsupportedRequestTypeException;
@@ -27,7 +27,7 @@ use Neos\Utility\Arrays;
 
 /**
  * Class JsonApiController
- * @package Ttree\JsonApi\Controller
+ * @package Flowpack\JsonApi\Controller
  * @Flow\Scope("singleton")
  */
 class JsonApiController extends ActionController
@@ -35,7 +35,7 @@ class JsonApiController extends ActionController
     /**
      * @var string
      */
-    protected $defaultViewObjectName = 'Ttree\JsonApi\View\JsonApiView';
+    protected $defaultViewObjectName = 'Flowpack\JsonApi\View\JsonApiView';
 
     /**
      * @var array
@@ -199,7 +199,7 @@ class JsonApiController extends ActionController
     /**
      * @param ViewInterface $view
      * @throws \Neos\Flow\Mvc\Exception\NoSuchArgumentException
-     * @throws \Ttree\JsonApi\Exception\ConfigurationException
+     * @throws \Flowpack\JsonApi\Exception\ConfigurationException
      */
     protected function initializeView(ViewInterface $view)
     {

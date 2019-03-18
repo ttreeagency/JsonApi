@@ -1,6 +1,6 @@
 <?php
 
-namespace Ttree\JsonApi\Contract\Document;
+namespace Flowpack\JsonApi\Contract\Document;
 
 use Neomerx\JsonApi\Contracts\Schema\DocumentInterface;
 use Neomerx\JsonApi\Contracts\Schema\ErrorInterface;
@@ -9,7 +9,7 @@ use Neomerx\JsonApi\Contracts\Schema\LinkInterface;
 /**
  * Interface MutableErrorInterface
  *
- * @package Ttree\JsonApi
+ * @package Flowpack\JsonApi
  */
 interface MutableErrorInterface extends ErrorInterface
 {

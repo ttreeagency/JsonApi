@@ -1,17 +1,17 @@
 <?php
 
-namespace Ttree\JsonApi\Adapter;
+namespace Flowpack\JsonApi\Adapter;
 
 use Neos\Flow\Annotations\Entity;
-use Ttree\JsonApi\Contract\Adapter\RelationshipAdapterInterface;
-use Ttree\JsonApi\Contract\Adapter\ResourceAdapterInterface;
-use Ttree\JsonApi\Contract\Object\ResourceObjectInterface;
-use Ttree\JsonApi\Contract\Object\StandardObjectInterface;
-use Ttree\JsonApi\Contract\Object\RelationshipInterface;
-use Ttree\JsonApi\Contract\Object\RelationshipsInterface;
-use Ttree\JsonApi\Exception\RuntimeException;
-use Ttree\JsonApi\Mvc\Controller\EncodingParametersParser;
-use Ttree\JsonApi\Utility\StringUtility as Str;
+use Flowpack\JsonApi\Contract\Adapter\RelationshipAdapterInterface;
+use Flowpack\JsonApi\Contract\Adapter\ResourceAdapterInterface;
+use Flowpack\JsonApi\Contract\Object\ResourceObjectInterface;
+use Flowpack\JsonApi\Contract\Object\StandardObjectInterface;
+use Flowpack\JsonApi\Contract\Object\RelationshipInterface;
+use Flowpack\JsonApi\Contract\Object\RelationshipsInterface;
+use Flowpack\JsonApi\Exception\RuntimeException;
+use Flowpack\JsonApi\Mvc\Controller\EncodingParametersParser;
+use Flowpack\JsonApi\Utility\StringUtility as Str;
 
 /**
  * Class AbstractResourceAdaptor

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ttree\JsonApi\Domain\Repository;
+namespace Flowpack\JsonApi\Domain\Repository;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Persistence\Repository;
@@ -9,7 +9,7 @@ use Neos\Flow\Persistence\Repository;
  * @Flow\Scope("singleton")
  *
  * Class DefaultRepository
- * @package Ttree\JsonApi\Domain\Repository
+ * @package Flowpack\JsonApi\Domain\Repository
  */
 class DefaultRepository extends Repository
 {

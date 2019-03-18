@@ -1,6 +1,6 @@
 <?php
 
-namespace Ttree\JsonApi;
+namespace Flowpack\JsonApi;
 
 use Neos\Flow\Configuration\ConfigurationManager;
 use Neos\Flow\Core\Bootstrap;
@@ -10,7 +10,7 @@ use Neos\Flow\Package\Package as BasePackage;
 
 /**
  * Class Package
- * @package Ttree\JsonApi
+ * @package Flowpack\JsonApi
  */
 class Package extends BasePackage
 {
@@ -43,7 +43,7 @@ class Package extends BasePackage
         if (!$context->isProduction()) {
             $dispatcher->connect('Neos\Flow\Core\Booting\Sequence', 'afterInvokeStep', function ($step) use ($bootstrap) {
                 if ($step->getIdentifier() === 'neos.flow:systemfilemonitor') {
-                    $nodeTypeConfigurationFileMonitor = FileMonitor::createFileMonitorAtBoot('TtreeJsonApi_JsonApiSchemaConfiguration', $bootstrap);
+                    $nodeTypeConfigurationFileMonitor = FileMonitor::createFileMonitorAtBoot('FlowpackJsonApi_JsonApiSchemaConfiguration', $bootstrap);
                     $packageManager = $bootstrap->getEarlyInstance('Neos\Flow\Package\PackageManagerInterface');
                     /**
                      * @var string $packageKey

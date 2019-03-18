@@ -1,13 +1,13 @@
 <?php
 
-namespace Ttree\JsonApi\Encoder;
+namespace Flowpack\JsonApi\Encoder;
 
 use Neos\Flow\Annotations as Flow;
 use Neomerx\JsonApi\Encoder\Encoder as BaseEncoder;
 
 /**
  * Class Encoder
- * @package Ttree\JsonApi\Encoder
+ * @package Flowpack\JsonApi\Encoder
  */
 class Encoder extends BaseEncoder
 {

@@ -1,16 +1,16 @@
 <?php
 
-namespace Ttree\JsonApi\View;
+namespace Flowpack\JsonApi\View;
 
 use Neos\Flow\Annotations as Flow;
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
-use Ttree\JsonApi\Domain\Model\ResourceSettingsDefinition;
+use Flowpack\JsonApi\Domain\Model\ResourceSettingsDefinition;
 use Neos\Flow\Mvc\View\AbstractView;
-use Ttree\JsonApi\Mvc\Controller\EncodingParametersParser;
+use Flowpack\JsonApi\Mvc\Controller\EncodingParametersParser;
 
 /**
  * Class JsonApiView
- * @package Ttree\JsonApi\View
+ * @package Flowpack\JsonApi\View
  */
 class JsonApiView extends AbstractView
 {

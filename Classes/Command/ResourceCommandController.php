@@ -1,17 +1,17 @@
 <?php
 
-namespace Ttree\JsonApi\Command;
+namespace Flowpack\JsonApi\Command;
 
 /*
- * This file is part of the Ttree.JsonApi package.
+ * This file is part of the Flowpack.JsonApi package.
  */
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\CommandController;
 use Neos\Flow\Package;
 use Neos\Flow\Reflection\ReflectionService;
-use Ttree\JsonApi\Service\GeneratorService;
-use Ttree\JsonApi\Utility\StringUtility as Str;
+use Flowpack\JsonApi\Service\GeneratorService;
+use Flowpack\JsonApi\Utility\StringUtility as Str;
 
 /**
  * @Flow\Scope("singleton")
@@ -32,7 +32,7 @@ class ResourceCommandController extends CommandController
     protected $generatorService;
 
     /**
-     * @Flow\InjectConfiguration(package="Ttree.JsonApi", path="endpoints")
+     * @Flow\InjectConfiguration(package="Flowpack.JsonApi", path="endpoints")
      * @var array
      */
     protected $endpoints;
@@ -98,7 +98,7 @@ class ResourceCommandController extends CommandController
         $this->outputLine();
         $this->outputLine('- Add configuration based on newly created/updated resource in Settings.yaml.');
         $this->outputLine();
-        $this->outputLine('Ttree:');
+        $this->outputLine('Flowpack:');
         $this->outputLine('  JsonApi:');
         $this->outputLine('    endpoints:');
         $this->outputLine('      \'' . $selectedEndpoint . '\':');

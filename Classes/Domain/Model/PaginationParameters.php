@@ -1,6 +1,6 @@
 <?php
 
-namespace Ttree\JsonApi\Domain\Model;
+namespace Flowpack\JsonApi\Domain\Model;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Exception;

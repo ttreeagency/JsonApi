@@ -1,6 +1,6 @@
 <?php
 
-namespace Ttree\JsonApi\Adapter;
+namespace Flowpack\JsonApi\Adapter;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\ObjectManagement\ObjectManagerInterface;
@@ -8,27 +8,27 @@ use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\Flow\Persistence\QueryInterface;
 use Neos\Utility\Arrays;
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
-use Ttree\JsonApi\Contract\JsonApiRepositoryInterface;
-use Ttree\JsonApi\Contract\Object\ResourceObjectInterface;
-use Ttree\JsonApi\Contract\Object\RelationshipInterface;
-use Ttree\JsonApi\Domain\BelongsTo;
-use Ttree\JsonApi\Domain\HasOne;
-use Ttree\JsonApi\Domain\HasMany;
-use Ttree\JsonApi\Domain\Model\Concern\DeserializesAttributeTrait;
-use Ttree\JsonApi\Domain\Model\Concern\ModelIncludesTrait;
-use Ttree\JsonApi\Domain\Model\PaginationParameters;
-use Ttree\JsonApi\Domain\Repository\DefaultRepository;
-use Ttree\JsonApi\Contract\Object\StandardObjectInterface;
-use Ttree\JsonApi\Encoder\Encoder;
-use Ttree\JsonApi\Exception;
-use Ttree\JsonApi\Exception\RuntimeException;
-use Ttree\JsonApi\Mvc\Controller\EncodingParametersParser;
-use Ttree\JsonApi\Utility\StringUtility as Str;
+use Flowpack\JsonApi\Contract\JsonApiRepositoryInterface;
+use Flowpack\JsonApi\Contract\Object\ResourceObjectInterface;
+use Flowpack\JsonApi\Contract\Object\RelationshipInterface;
+use Flowpack\JsonApi\Domain\BelongsTo;
+use Flowpack\JsonApi\Domain\HasOne;
+use Flowpack\JsonApi\Domain\HasMany;
+use Flowpack\JsonApi\Domain\Model\Concern\DeserializesAttributeTrait;
+use Flowpack\JsonApi\Domain\Model\Concern\ModelIncludesTrait;
+use Flowpack\JsonApi\Domain\Model\PaginationParameters;
+use Flowpack\JsonApi\Domain\Repository\DefaultRepository;
+use Flowpack\JsonApi\Contract\Object\StandardObjectInterface;
+use Flowpack\JsonApi\Encoder\Encoder;
+use Flowpack\JsonApi\Exception;
+use Flowpack\JsonApi\Exception\RuntimeException;
+use Flowpack\JsonApi\Mvc\Controller\EncodingParametersParser;
+use Flowpack\JsonApi\Utility\StringUtility as Str;
 
 /**
  * Class AbstractAdapter
  *
- * @package Ttree\JsonApi
+ * @package Flowpack\JsonApi
  *
  * @api
  */
@@ -229,7 +229,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     protected function registerRepository()
     {
-        $repository = $this->objectManager->get('Ttree\JsonApi\Domain\Repository\DefaultRepository');
+        $repository = $this->objectManager->get('Flowpack\JsonApi\Domain\Repository\DefaultRepository');
         if (isset($this->configuration['repository'])) {
             $repository = $this->objectManager->get($this->configuration['repository']);
         }

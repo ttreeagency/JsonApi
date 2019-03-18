@@ -1,7 +1,7 @@
 - name: 'Resource(s)'
   uriPattern: '{@endpoint}/{@version}/{@resource}(/{identifier})'
   defaults:
-    '@package':    'Ttree.JsonApi'
+    '@package':    'Flowpack.JsonApi'
     '@controller': 'JsonApi'
     '@action':     'index'
     '@format':     'json'
@@ -10,16 +10,16 @@
   appendExceedingArguments: TRUE
   routeParts:
     '@endpoint':
-      handler: 'Ttree\JsonApi\Mvc\Routing\EndpointRoutePartHandler'
+      handler: 'Flowpack\JsonApi\Mvc\Routing\EndpointRoutePartHandler'
     '@version':
-      handler: 'Ttree\JsonApi\Mvc\Routing\VersionRoutePartHandler'
+      handler: 'Flowpack\JsonApi\Mvc\Routing\VersionRoutePartHandler'
     '@resource':
-      handler: 'Ttree\JsonApi\Mvc\Routing\ResourceRoutePartHandler'
+      handler: 'Flowpack\JsonApi\Mvc\Routing\ResourceRoutePartHandler'
 
 - name: 'Related'
   uriPattern: '{@endpoint}/{@version}/{@resource}/{identifier}/{relationship}'
   defaults:
-    '@package':    'Ttree.JsonApi'
+    '@package':    'Flowpack.JsonApi'
     '@controller': 'JsonApi'
     '@action':     'index'
     '@format':     'json'
@@ -27,16 +27,16 @@
   appendExceedingArguments: TRUE
   routeParts:
     '@endpoint':
-      handler: 'Ttree\JsonApi\Mvc\Routing\EndpointRoutePartHandler'
+      handler: 'Flowpack\JsonApi\Mvc\Routing\EndpointRoutePartHandler'
     '@version':
-      handler: 'Ttree\JsonApi\Mvc\Routing\VersionRoutePartHandler'
+      handler: 'Flowpack\JsonApi\Mvc\Routing\VersionRoutePartHandler'
     '@resource':
-      handler: 'Ttree\JsonApi\Mvc\Routing\ResourceRoutePartHandler'
+      handler: 'Flowpack\JsonApi\Mvc\Routing\ResourceRoutePartHandler'
 
 - name: 'Self'
   uriPattern: '{@endpoint}/{@version}/{@resource}/{identifier}/relationships/{relationship}'
   defaults:
-    '@package': 'Ttree.JsonApi'
+    '@package': 'Flowpack.JsonApi'
     '@controller': 'JsonApi'
     '@action':     'index'
     '@format':     'json'
@@ -44,8 +44,8 @@
   appendExceedingArguments: TRUE
   routeParts:
     '@endpoint':
-      handler: 'Ttree\JsonApi\Mvc\Routing\EndpointRoutePartHandler'
+      handler: 'Flowpack\JsonApi\Mvc\Routing\EndpointRoutePartHandler'
     '@version':
-      handler: 'Ttree\JsonApi\Mvc\Routing\VersionRoutePartHandler'
+      handler: 'Flowpack\JsonApi\Mvc\Routing\VersionRoutePartHandler'
     '@resource':
-      handler: 'Ttree\JsonApi\Mvc\Routing\ResourceRoutePartHandler'
+      handler: 'Flowpack\JsonApi\Mvc\Routing\ResourceRoutePartHandler'

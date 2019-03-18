@@ -1,14 +1,14 @@
 <?php
 
-namespace Ttree\JsonApi\Contract\Object;
+namespace Flowpack\JsonApi\Contract\Object;
 
-use Ttree\JsonApi\Exception\RuntimeException;
+use Flowpack\JsonApi\Exception\RuntimeException;
 use Traversable;
 
 /**
  * Interface RelationshipsInterface
  *
- * @package Ttree\JsonApi
+ * @package Flowpack\JsonApi
  */
 interface RelationshipsInterface extends StandardObjectInterface
 {

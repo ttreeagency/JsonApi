@@ -1,14 +1,14 @@
 <?php
 
-namespace Ttree\JsonApi\Object;
+namespace Flowpack\JsonApi\Object;
 
-use Ttree\JsonApi\Contract\Object\RelationshipsInterface;
-use Ttree\JsonApi\Exception\RuntimeException;
+use Flowpack\JsonApi\Contract\Object\RelationshipsInterface;
+use Flowpack\JsonApi\Exception\RuntimeException;
 
 /**
  * Class Relationships
  *
- * @package Ttree\JsonApi
+ * @package Flowpack\JsonApi
  */
 class Relationships extends StandardObject implements RelationshipsInterface
 {

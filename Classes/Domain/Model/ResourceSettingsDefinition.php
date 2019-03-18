@@ -1,9 +1,9 @@
 <?php
-namespace Ttree\JsonApi\Domain\Model;
+namespace Flowpack\JsonApi\Domain\Model;
 
 use Neos\Flow\Annotations as Flow;
 use InvalidArgumentException;
-use Ttree\JsonApi\Exception\ConfigurationException;
+use Flowpack\JsonApi\Exception\ConfigurationException;
 use Neos\Utility\Arrays;
 
 /**

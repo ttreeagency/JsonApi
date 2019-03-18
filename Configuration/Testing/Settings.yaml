@@ -1,4 +1,4 @@
-Ttree:
+Flowpack:
   JsonApi:
     endpoints:
       'testing':
@@ -6,30 +6,30 @@ Ttree:
         version: 'v1'
         resources:
           'entities':
-            adapter: 'Ttree\JsonApi\Tests\Functional\Fixtures\Entities\Adapter'
+            adapter: 'Flowpack\JsonApi\Tests\Functional\Fixtures\Entities\Adapter'
             entity: 'Neos\Flow\Tests\Functional\Persistence\Fixtures\TestEntity'
-            schema: 'Ttree\JsonApi\Tests\Functional\Fixtures\Entities\Schema'
+            schema: 'Flowpack\JsonApi\Tests\Functional\Fixtures\Entities\Schema'
             allowedMethods: ['GET', 'POST', 'UPDATE', 'PATCH', 'DELETE']
             related: []
           'restricted-entities':
-            adapter: 'Ttree\JsonApi\Tests\Functional\Fixtures\Entities\Adapter'
+            adapter: 'Flowpack\JsonApi\Tests\Functional\Fixtures\Entities\Adapter'
             entity: 'Neos\Flow\Tests\Functional\Persistence\Fixtures\TestEntity'
-            schema: 'Ttree\JsonApi\Tests\Functional\Fixtures\Schema'
+            schema: 'Flowpack\JsonApi\Tests\Functional\Fixtures\Schema'
             related: []
             allowedMethods: []
           'entity-relations':
-            adapter: 'Ttree\JsonApi\Tests\Functional\Fixtures\RelatedEntities\Adapter'
+            adapter: 'Flowpack\JsonApi\Tests\Functional\Fixtures\RelatedEntities\Adapter'
             entity: 'Neos\Flow\Tests\Functional\Persistence\Fixtures\TestEntity'
-            schema: 'Ttree\JsonApi\Tests\Functional\Fixtures\RelatedEntities\Schema'
+            schema: 'Flowpack\JsonApi\Tests\Functional\Fixtures\RelatedEntities\Schema'
             allowedMethods: ['GET', 'POST', 'UPDATE', 'PATCH', 'DELETE']
             related:
               'entities':
-                'Neos\Flow\Tests\Functional\Persistence\Fixtures\TestEntity': 'Ttree\JsonApi\Tests\Functional\Fixtures\Entities\Schema'
+                'Neos\Flow\Tests\Functional\Persistence\Fixtures\TestEntity': 'Flowpack\JsonApi\Tests\Functional\Fixtures\Entities\Schema'
               'subentities':
-                'Neos\Flow\Tests\Functional\Persistence\Fixtures\TestEntity': 'Ttree\JsonApi\Tests\Functional\Fixtures\Entities\Schema'
+                'Neos\Flow\Tests\Functional\Persistence\Fixtures\TestEntity': 'Flowpack\JsonApi\Tests\Functional\Fixtures\Entities\Schema'
           'resources':
-            adapter: 'Ttree\JsonApi\JsonApi\PersistentResource\Adapter'
-            schema: 'Ttree\JsonApi\JsonApi\PersistentResource\Schema'
+            adapter: 'Flowpack\JsonApi\JsonApi\PersistentResource\Adapter'
+            schema: 'Flowpack\JsonApi\JsonApi\PersistentResource\Schema'
             entity: 'Neos\Flow\ResourceManagement\PersistentResource'
             allowedMethods: ['GET', 'DELETE', 'OPTIONS']
             related: []

@@ -1,9 +1,9 @@
 <?php
 
-namespace Ttree\JsonApi\Contract\Adapter;
+namespace Flowpack\JsonApi\Contract\Adapter;
 
-use Ttree\JsonApi\Contract\Object\RelationshipInterface;
-use Ttree\JsonApi\Contract\Parameters\EncodingParametersInterface;
+use Flowpack\JsonApi\Contract\Object\RelationshipInterface;
+use Flowpack\JsonApi\Contract\Parameters\EncodingParametersInterface;
 
 interface HasManyAdapterInterface extends RelationshipAdapterInterface
 {

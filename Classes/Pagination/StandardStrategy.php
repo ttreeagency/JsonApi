@@ -1,16 +1,16 @@
 <?php
 
-namespace Ttree\JsonApi\Pagination;
+namespace Flowpack\JsonApi\Pagination;
 
 //use Neomerx\JsonApi\Contracts\Encoder\Parameters\EncodingParametersInterface;
 //use Neomerx\JsonApi\Contracts\Http\Query\QueryParametersParserInterface;
-use Ttree\JsonApi\Contract\Pagination\PagingStrategyInterface;
-use Ttree\JsonApi\Mvc\Controller\EncodingParametersParser;
+use Flowpack\JsonApi\Contract\Pagination\PagingStrategyInterface;
+use Flowpack\JsonApi\Mvc\Controller\EncodingParametersParser;
 
 /**
  * Class StandardStrategy
  *
- * @package Ttree\JsonApi
+ * @package Flowpack\JsonApi
  */
 class StandardStrategy implements PagingStrategyInterface
 {

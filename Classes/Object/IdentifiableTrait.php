@@ -1,8 +1,8 @@
 <?php
 
-namespace Ttree\JsonApi\Object;
+namespace Flowpack\JsonApi\Object;
 
-use Ttree\JsonApi\Exception\RuntimeException;
+use Flowpack\JsonApi\Exception\RuntimeException;
 use Neomerx\JsonApi\Contracts\Schema\DocumentInterface;
 
 /**

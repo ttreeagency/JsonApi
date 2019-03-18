@@ -1,11 +1,11 @@
 roles:
-  'Ttree.JsonApi:Everybody':
+  'Flowpack.JsonApi:Everybody':
     abstract: true
 
-  'Ttree.JsonApi:Anonymous':
+  'Flowpack.JsonApi:Anonymous':
     abstract: true
 
-  'Ttree.JsonApi:AuthenticatedUser':
+  'Flowpack.JsonApi:AuthenticatedUser':
     abstract: true
 
 privilegeTargets: []

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ttree\JsonApi\Mvc;
+namespace Flowpack\JsonApi\Mvc;
 
 use Neos\Flow\Mvc\RequestInterface;
 

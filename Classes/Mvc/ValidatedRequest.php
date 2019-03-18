@@ -1,13 +1,13 @@
 <?php
 
-namespace Ttree\JsonApi\Mvc;
+namespace Flowpack\JsonApi\Mvc;
 
-use Ttree\JsonApi\Object\Document;
-use Ttree\JsonApi\Object\ResourceIdentifier;
-use Ttree\JsonApi\Exception\RuntimeException;
-use Ttree\JsonApi\Exception\InvalidJsonException;
+use Flowpack\JsonApi\Object\Document;
+use Flowpack\JsonApi\Object\ResourceIdentifier;
+use Flowpack\JsonApi\Exception\RuntimeException;
+use Flowpack\JsonApi\Exception\InvalidJsonException;
 
-use Ttree\JsonApi\Mvc\Controller\EncodingParametersParser;
+use Flowpack\JsonApi\Mvc\Controller\EncodingParametersParser;
 use Neomerx\JsonApi\Contracts\Schema\HttpFactoryInterface;
 use Neos\Flow\Http\Request as HttpRequest;
 use Neos\Flow\Mvc\ActionRequest;
@@ -16,7 +16,7 @@ use Neos\Flow\Mvc\RequestInterface;
 /**
  * Class ValidatedRequest
  *
- * @package Ttree\JsonApi
+ * @package Flowpack\JsonApi
  */
 class ValidatedRequest
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace Ttree\JsonApi\Exception;
+namespace Flowpack\JsonApi\Exception;
 
-use Ttree\JsonApi\Exception;
+use Flowpack\JsonApi\Exception;
 use Neos\Flow\Annotations as Flow;
 
 /**

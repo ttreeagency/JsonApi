@@ -1,14 +1,14 @@
 <?php
 
-namespace Ttree\JsonApi\Domain\Model\Concern;
+namespace Flowpack\JsonApi\Domain\Model\Concern;
 
 use Doctrine\Common\Collections\Collection;
 
-use Ttree\JsonApi\Utility\StringUtility as Str;
+use Flowpack\JsonApi\Utility\StringUtility as Str;
 
 /**
  * Trait ModelIncludesTrait
- * @package Ttree\JsonApi\Domain\Model\Concern
+ * @package Flowpack\JsonApi\Domain\Model\Concern
  */
 trait ModelIncludesTrait
 {

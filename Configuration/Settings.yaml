@@ -1,4 +1,4 @@
-Ttree:
+Flowpack:
   JsonApi:
     endpoints:
       'api':
@@ -30,4 +30,4 @@ Neos:
   Flow:
     mvc:
       routes:
-        'Ttree.JsonApi': TRUE
+        'Flowpack.JsonApi': TRUE

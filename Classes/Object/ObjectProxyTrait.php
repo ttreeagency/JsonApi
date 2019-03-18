@@ -1,10 +1,10 @@
 <?php
 
-namespace Ttree\JsonApi\Object;
+namespace Flowpack\JsonApi\Object;
 
 /**
  * Trait ObjectProxyTrait
- * @package Ttree\JsonApi\Object
+ * @package Flowpack\JsonApi\Object
  */
 trait ObjectProxyTrait
 {

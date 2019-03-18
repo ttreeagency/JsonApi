@@ -1,19 +1,19 @@
 <?php
 
-namespace Ttree\JsonApi\Object;
+namespace Flowpack\JsonApi\Object;
 
 use ArrayIterator;
-use Ttree\JsonApi\Contract\Object\ResourceIdentifierInterface;
-use Ttree\JsonApi\Contract\Object\ResourceObjectInterface;
-use Ttree\JsonApi\Contract\Object\ResourceObjectCollectionInterface;
+use Flowpack\JsonApi\Contract\Object\ResourceIdentifierInterface;
+use Flowpack\JsonApi\Contract\Object\ResourceObjectInterface;
+use Flowpack\JsonApi\Contract\Object\ResourceObjectCollectionInterface;
 
-use Ttree\JsonApi\Exception\RuntimeException;
+use Flowpack\JsonApi\Exception\RuntimeException;
 use InvalidArgumentException;
 
 /**
  * Class ResourceCollection
  *
- * @package Ttree\JsonApi
+ * @package Flowpack\JsonApi
  */
 class ResourceObjectCollection implements ResourceObjectCollectionInterface
 {

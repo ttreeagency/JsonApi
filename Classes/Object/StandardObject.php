@@ -1,8 +1,8 @@
 <?php
 
-namespace Ttree\JsonApi\Object;
+namespace Flowpack\JsonApi\Object;
 
-use Ttree\JsonApi\Contract\Object\StandardObjectInterface;
+use Flowpack\JsonApi\Contract\Object\StandardObjectInterface;
 use IteratorAggregate;
 use OutOfBoundsException;
 use stdClass;

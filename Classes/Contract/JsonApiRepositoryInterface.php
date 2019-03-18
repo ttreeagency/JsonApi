@@ -1,8 +1,8 @@
 <?php
-namespace Ttree\JsonApi\Contract;
+namespace Flowpack\JsonApi\Contract;
 
 use Neomerx\JsonApi\Contracts\Encoder\EncodingParametersInterface;
-use Ttree\JsonApi\Domain\Model\ResourceSettingsDefinition;
+use Flowpack\JsonApi\Domain\Model\ResourceSettingsDefinition;
 
 /**
  * JsonApiPaginate Interface

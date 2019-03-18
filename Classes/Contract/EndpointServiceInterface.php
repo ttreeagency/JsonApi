@@ -1,5 +1,5 @@
 <?php
-namespace Ttree\JsonApi\Contract;
+namespace Flowpack\JsonApi\Contract;
 
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
 

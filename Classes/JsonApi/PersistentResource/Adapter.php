@@ -1,13 +1,13 @@
 <?php
 
-namespace Ttree\JsonApi\JsonApi\PersistentResource;
+namespace Flowpack\JsonApi\JsonApi\PersistentResource;
 
 use Neos\Flow\Annotations as Flow;
-use Ttree\JsonApi\Adapter\AbstractAdapter;
+use Flowpack\JsonApi\Adapter\AbstractAdapter;
 
 /**
  * Class Adapter
- * @package Ttree\JsonApi\JsonApi\PersistentResource
+ * @package Flowpack\JsonApi\JsonApi\PersistentResource
  * @Flow\Scope("singleton")
  */
 class Adapter extends AbstractAdapter

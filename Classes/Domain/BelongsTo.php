@@ -1,9 +1,9 @@
 <?php
 
-namespace Ttree\JsonApi\Domain;
+namespace Flowpack\JsonApi\Domain;
 
-use Ttree\JsonApi\Contract\Object\RelationshipInterface;
-use Ttree\JsonApi\Contract\Parameters\EncodingParametersInterface;
+use Flowpack\JsonApi\Contract\Object\RelationshipInterface;
+use Flowpack\JsonApi\Contract\Parameters\EncodingParametersInterface;
 
 /**
  * Class HasOne
