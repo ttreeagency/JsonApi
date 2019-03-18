@@ -94,6 +94,7 @@ class GeneratorService
         $contextVariables = [];
         $contextVariables['packageKey'] = $packageKey;
         $contextVariables['namespace'] = $namespace;
+        $contextVariables['adapterClassName'] = $adapterClassName;
 
         $fileContent = $this->renderTemplate($templatePathAndFilename, $contextVariables);
 
