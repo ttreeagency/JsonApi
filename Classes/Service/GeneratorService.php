@@ -178,6 +178,7 @@ class GeneratorService
         $contextVariables['testName'] = $testName;
         $contextVariables['resource'] = $resource;
         $contextVariables['endpoint'] = $endpoint;
+        $contextVariables['lowerCaseEndpoint'] = strtolower($endpoint);
         $contextVariables['resourcePlural'] = $resourcePlural;
         $contextVariables['entity'] = $entity;
         $contextVariables['entityShortName'] = $entityShortName;

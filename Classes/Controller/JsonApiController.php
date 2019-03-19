@@ -399,7 +399,7 @@ class JsonApiController extends ActionController
         if (isset($this->resourceConfiguration['related'])) {
             if ($relation !== '') {
                 if (isset($this->resourceConfiguration['related'][$relation])) {
-                    $schemaClass = key($this->resourceConfiguration['related'][$relation]);
+                    $schemaClass = \key($this->resourceConfiguration['related'][$relation]);
                     if ($this->objectManager->isRegistered($schemaClass)) {
                         return new $schemaClass();
                     }

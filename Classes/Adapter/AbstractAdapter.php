@@ -55,7 +55,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     /**
      * @var array
      */
-    protected $related;
+    protected $related = [];
 
     /**
      * @var EncodingParametersParser
@@ -210,7 +210,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         ];
 
         foreach($this->related as $resource) {
-            $resources[$key = key($resource)] = $resource[$key];
+            $resources = \array_merge($resource, $resources);
         }
         return $resources;
     }
