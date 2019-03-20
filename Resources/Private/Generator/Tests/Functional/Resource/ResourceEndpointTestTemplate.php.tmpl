@@ -29,7 +29,7 @@ class {testName} extends FunctionalTestCase
     public function assertEndpointOptions()
     {
         $response = $this->browser->request('http://localhost/{lowerCaseEndpoint}/v1/{resourcePlural}', 'OPTIONS');
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals(204, $response->getStatusCode());
     }
 
     /**
