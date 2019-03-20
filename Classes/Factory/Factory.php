@@ -2,7 +2,8 @@
 
 namespace Flowpack\JsonApi\Factory;
 
-use Flowpack\JsonApi\Schema\Container;
+use Flowpack\JsonApi\Schema\SchemaContainer;
+use Neomerx\JsonApi\Contracts\Schema\SchemaContainerInterface;
 use Neos\Flow\Annotations as Flow;
 
 /**
@@ -10,8 +11,12 @@ use Neos\Flow\Annotations as Flow;
  */
 class Factory extends \Neomerx\JsonApi\Factories\Factory
 {
-    public function createContainer(array $providers = [])
+    /**
+     * @inheritdoc
+     */
+    public function createSchemaContainer(iterable $schemas): SchemaContainerInterface
     {
-        return new Container($this, $providers);
+        return new SchemaContainer($this, $schemas);
     }
+
 }
