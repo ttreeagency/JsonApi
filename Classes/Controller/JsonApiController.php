@@ -282,16 +282,15 @@ class JsonApiController extends ActionController
     }
 
     /**
-     * @param string $resource
      * @param string $relationship
      * @throws RuntimeException
      * @throws UnsupportedRequestTypeException
      * @throws \Neos\Flow\Mvc\Exception\StopActionException
      */
-    public function relatedAction(string $resource, string $relationship)
+    public function relatedAction(string $relationship)
     {
         /** @var BaseSchema $schema */
-        $schema = $this->getSchema($resource);
+        $schema = $this->getSchema($this->adapter->getResource());
         $relationships = $schema->getRelationships($this->record);
         if (!isset($relationships[$relationship])) {
             $this->throwStatus(404, \sprintf('Relationship "%s" not found', $relationship));

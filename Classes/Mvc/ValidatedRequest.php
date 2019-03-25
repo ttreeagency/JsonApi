@@ -83,7 +83,6 @@ class ValidatedRequest
     }
 
     /**
-     * @todo
      * @inheritdoc
      */
     public function getResourceIdentifier()
@@ -106,12 +105,11 @@ class ValidatedRequest
     }
 
     /**
-     * @todo
      * @inheritdoc
      */
     public function getRelationshipName()
     {
-//        return $this->request->route(ResourceRegistrar::PARAM_RELATIONSHIP_NAME);
+        return $this->serverRequest->getArgument('relationship');
     }
 
     /**
@@ -120,7 +118,7 @@ class ValidatedRequest
      */
     public function getInverseResourceType()
     {
-//        return $this->request->route(ResourceRegistrar::PARAM_RELATIONSHIP_INVERSE_TYPE);
+        return $this->serverRequest->route(ResourceRegistrar::PARAM_RELATIONSHIP_INVERSE_TYPE);
     }
 
     /**
@@ -149,82 +147,73 @@ class ValidatedRequest
     }
 
     /**
-     * @todo
      * @inheritdoc
      */
-    public function isIndex()
+    public function isIndex(): bool
     {
         return $this->isMethod('get') && !$this->isResource();
     }
 
     /**
-     * @todo
      * @inheritdoc
      */
-    public function isCreateResource()
+    public function isCreateResource(): bool
     {
         return $this->isMethod('post') && !$this->isResource();
     }
 
     /**
-     * @todo
      * @inheritdoc
      */
-    public function isReadResource()
+    public function isReadResource(): bool
     {
         return $this->isMethod('get') && $this->isResource() && !$this->isRelationship();
     }
 
     /**
-     * @todo
      * @inheritdoc
      */
-    public function isUpdateResource()
+    public function isUpdateResource(): bool
     {
         return $this->isMethod('patch') && $this->isResource() && !$this->isRelationship();
     }
 
     /**
-     * @todo
      * @inheritdoc
      */
-    public function isDeleteResource()
+    public function isDeleteResource(): bool
     {
         return $this->isMethod('delete') && $this->isResource() && !$this->isRelationship();
     }
 
     /**
-     * @todo
      * @inheritdoc
      */
-    public function isReadRelatedResource()
+    public function isReadRelatedResource(): bool
     {
         return $this->isRelationship() && !$this->hasRelationships();
     }
 
     /**
-     * @todo
      * @inheritdoc
      */
-    public function hasRelationships()
+    public function hasRelationships(): bool
     {
-        return $this->request->is('*/relationships/*');
+        return $this->serverRequest->hasArgument('relationship');
     }
 
     /**
-     * @todo
      * @inheritdoc
      */
-    public function isReadRelationship()
+    public function isReadRelationship(): bool
     {
         return $this->isMethod('get') && $this->hasRelationships();
     }
 
     /**
-     * @todo
      * @inheritdoc
      */
-    public function isModifyRelationship()
+    public function isModifyRelationship(): bool
     {
         return $this->isReplaceRelationship() ||
             $this->isAddToRelationship() ||
@@ -232,48 +221,35 @@ class ValidatedRequest
     }
 
     /**
-     * @todo
      * @inheritdoc
      */
-    public function isReplaceRelationship()
+    public function isReplaceRelationship(): bool
     {
         return $this->isMethod('patch') && $this->hasRelationships();
     }
 
     /**
-     * @todo
      * @inheritdoc
      */
-    public function isAddToRelationship()
+    public function isAddToRelationship(): bool
     {
         return $this->isMethod('post') && $this->hasRelationships();
     }
 
     /**
-     * @todo
      * @inheritdoc
      */
-    public function isRemoveFromRelationship()
+    public function isRemoveFromRelationship(): bool
     {
         return $this->isMethod('delete') && $this->hasRelationships();
     }
 
     /**
-     * @todo
      * @return bool
      */
-    protected function isResource()
+    protected function isResource(): bool
     {
         return !empty($this->getResourceId());
-    }
-
-    /**
-     * @todo
-     * @return bool
-     */
-    protected function isRelationship()
-    {
-        return !empty($this->getRelationshipName());
     }
 
     /**
@@ -282,9 +258,17 @@ class ValidatedRequest
      * @param string $method the expected method - case insensitive.
      * @return bool
      */
-    protected function isMethod($method)
+    protected function isMethod($method): bool
     {
         return \strtoupper($this->serverRequest->getHttpRequest()->getMethod()) === \strtoupper($method);
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isRelationship(): bool
+    {
+        return $this->serverRequest->hasArgument('relationship');
     }
 
     /**
