@@ -95,6 +95,7 @@ class JsonApiController extends ActionController
     {
         parent::initializeAction();
         $this->response->setHeader('Content-Type', 'application/vnd.api+json');
+        $this->response->setHeader('Access-Control-Allow-Origin', '*');
     }
 
     /**
