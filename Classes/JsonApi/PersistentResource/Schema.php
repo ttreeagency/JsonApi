@@ -5,6 +5,7 @@ namespace Flowpack\JsonApi\JsonApi\PersistentResource;
 use Neos\Flow\Annotations as Flow;
 use Neomerx\JsonApi\Schema\BaseSchema;
 use Neos\Flow\ResourceManagement\PersistentResource;
+use Neos\Flow\ResourceManagement\ResourceManager;
 use SZ\SocialSmartz\Domain\Model\Post;
 use Flowpack\JsonApi\Domain\Model\JsonApiSchemaDefinition;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
@@ -31,6 +32,12 @@ class Schema extends BaseSchema
      * @Flow\Inject
      */
     protected $persistenceManager;
+
+    /**
+     * @var ResourceManager
+     * @Flow\Inject
+     */
+    protected $resourceManager;
 
     /**
      * @var JsonApiSchemaDefinition
@@ -85,7 +92,7 @@ class Schema extends BaseSchema
             'file-extension' => $resource->getFileExtension(),
             'file-size' => $resource->getFileSize(),
             'media-type' => $resource->getMediaType(),
-            'url' => $resource->getRelativePublicationPath(),
+            'url' => $this->resourceManager->getPublicPersistentResourceUri($resource)
         ];
 
         return $attributes;
