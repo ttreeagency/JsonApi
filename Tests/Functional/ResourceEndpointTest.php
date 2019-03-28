@@ -49,8 +49,7 @@ class ResourceEndpointTest extends FunctionalTestCase
         $this->assertSame('fixture.txt', $jsonResponse->data->attributes->filename);
         $this->assertSame('txt', $jsonResponse->data->attributes->{'file-extension'});
         $this->assertSame(7, $jsonResponse->data->attributes->{'file-size'});
-
-        // TODO: Add url check
+        $this->assertSame($this->resourceManager->getPublicPersistentResourceUri($resource), $jsonResponse->data->attributes->{'url'});
 
         $this->assertSame('http://localhost/testing/v1/resources/' . $entityIdentifier, $jsonResponse->data->links->self);
     }
