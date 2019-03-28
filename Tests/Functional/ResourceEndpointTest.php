@@ -35,19 +35,10 @@ class ResourceEndpointTest extends FunctionalTestCase
     /**
      * @test
      */
-    public function assertEndpointOptions()
-    {
-        $response = $this->browser->request('http://localhost/testing/v1/resources', 'OPTIONS');
-        $this->assertEquals(204, $response->getStatusCode());
-    }
-
-    /**
-     * @test
-     */
     public function fetchResource()
     {
         $resource = $this->resourceManager->importResourceFromContent('fixture', 'fixture.txt');
-        $this->assertEquals('fixture', file_get_contents('resource://' . $resource->getSha1()));
+        $this->assertEquals('fixture', \file_get_contents('resource://' . $resource->getSha1()));
 
         $entityIdentifier = $this->persistenceManager->getIdentifierByObject($resource);
         $response = $this->browser->request('http://localhost/testing/v1/resources/' . $entityIdentifier, 'GET');

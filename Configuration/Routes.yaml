@@ -1,12 +1,11 @@
-- name: 'Resource(s)'
-  uriPattern: '{@endpoint}/{@version}/{@resource}(/{identifier})'
+- name: 'Self'
+  uriPattern: '{@endpoint}/{@version}/{@resource}/{identifier}/relationships/{relationship}'
   defaults:
-    '@package':    'Flowpack.JsonApi'
+    '@package': 'Flowpack.JsonApi'
     '@controller': 'JsonApi'
-    '@action':     'index'
+    '@action':     'related'
     '@format':     'json'
-    'identifier':  ''
-  httpMethods: ['GET', 'POST', 'PATCH', 'UPDATE', 'DELETE', 'OPTIONS']
+  httpMethods: ['GET', 'POST', 'PATCH', 'UPDATE', 'DELETE']
   appendExceedingArguments: TRUE
   routeParts:
     '@endpoint':
@@ -21,9 +20,9 @@
   defaults:
     '@package':    'Flowpack.JsonApi'
     '@controller': 'JsonApi'
-    '@action':     'index'
+    '@action':     'related'
     '@format':     'json'
-  httpMethods: ['GET', 'OPTIONS']
+  httpMethods: ['GET', 'POST', 'PATCH', 'UPDATE', 'DELETE']
   appendExceedingArguments: TRUE
   routeParts:
     '@endpoint':
@@ -33,14 +32,33 @@
     '@resource':
       handler: 'Flowpack\JsonApi\Mvc\Routing\ResourceRoutePartHandler'
 
-- name: 'Self'
-  uriPattern: '{@endpoint}/{@version}/{@resource}/{identifier}/relationships/{relationship}'
+- name: 'Resource'
+  uriPattern: '{@endpoint}/{@version}/{@resource}/{identifier}'
   defaults:
-    '@package': 'Flowpack.JsonApi'
+    '@package':    'Flowpack.JsonApi'
     '@controller': 'JsonApi'
-    '@action':     'index'
+    '@action':     'read'
     '@format':     'json'
-  httpMethods: ['GET', 'OPTIONS']
+    'identifier':  ''
+  httpMethods: ['GET', 'POST', 'PATCH', 'UPDATE', 'DELETE']
+  appendExceedingArguments: TRUE
+  routeParts:
+    '@endpoint':
+      handler: 'Flowpack\JsonApi\Mvc\Routing\EndpointRoutePartHandler'
+    '@version':
+      handler: 'Flowpack\JsonApi\Mvc\Routing\VersionRoutePartHandler'
+    '@resource':
+      handler: 'Flowpack\JsonApi\Mvc\Routing\ResourceRoutePartHandler'
+
+- name: 'Resource(s)'
+  uriPattern: '{@endpoint}/{@version}/{@resource}'
+  defaults:
+    '@package':    'Flowpack.JsonApi'
+    '@controller': 'JsonApi'
+    '@action':     'list'
+    '@format':     'json'
+    'identifier':  ''
+  httpMethods: ['GET', 'POST', 'PATCH', 'UPDATE', 'DELETE']
   appendExceedingArguments: TRUE
   routeParts:
     '@endpoint':

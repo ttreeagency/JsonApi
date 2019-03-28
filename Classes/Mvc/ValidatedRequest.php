@@ -4,11 +4,9 @@ namespace Flowpack\JsonApi\Mvc;
 
 use Flowpack\JsonApi\Object\Document;
 use Flowpack\JsonApi\Object\ResourceIdentifier;
-use Flowpack\JsonApi\Exception\RuntimeException;
 use Flowpack\JsonApi\Exception\InvalidJsonException;
-
 use Flowpack\JsonApi\Mvc\Controller\EncodingParametersParser;
-use Neomerx\JsonApi\Contracts\Schema\HttpFactoryInterface;
+use Neomerx\JsonApi\Contracts\Factories\FactoryInterface;
 use Neos\Flow\Http\Request as HttpRequest;
 use Neos\Flow\Mvc\ActionRequest;
 use Neos\Flow\Mvc\RequestInterface;
@@ -26,10 +24,9 @@ class ValidatedRequest
     protected $serverRequest;
 
     /**
-     * @var HttpFactoryInterface
+     * @var FactoryInterface
      */
     protected $factory;
-
 
     /**
      * @var string|null
@@ -61,7 +58,6 @@ class ValidatedRequest
     }
 
     /**
-     * @todo
      * @inheritdoc
      */
     public function getResourceType()
@@ -118,7 +114,7 @@ class ValidatedRequest
      */
     public function getInverseResourceType()
     {
-        return $this->serverRequest->route(ResourceRegistrar::PARAM_RELATIONSHIP_INVERSE_TYPE);
+//        return $this->serverRequest->route(ResourceRegistrar::PARAM_RELATIONSHIP_INVERSE_TYPE);
     }
 
     /**

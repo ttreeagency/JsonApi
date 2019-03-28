@@ -76,10 +76,11 @@ class BasicEndpointControllerTest extends FunctionalTestCase
         $this->persistenceManager->clearState();
 
         $response = $this->browser->request('http://localhost/testing/v1/entities', 'GET');
-        $jsonResponse = \json_decode($response->getBody());
+        $jsonResponse = \json_decode($response->getBody()->getContents());
+        \Neos\Flow\var_dump($jsonResponse, 'Dum');
 
         $entityIdentifier1 = $this->persistenceManager->getIdentifierByObject($entity1);
-        $this->isJson($response->getBody());
+        $this->isJson($response->getBody()->getContents());
         $this->assertSame('entities', $jsonResponse->data[0]->type);
         $this->assertSame($entityIdentifier1, $jsonResponse->data[0]->id);
         $this->assertSame('Some Name', $jsonResponse->data[0]->attributes->name);

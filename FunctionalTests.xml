@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<phpunit
+        beStrictAboutChangesToGlobalState="true"
+        beStrictAboutOutputDuringTests="true"
+        bootstrap="../../../Build/BuildEssentials/PhpUnit/FunctionalTestBootstrap.php"
+        convertErrorsToExceptions="true"
+        convertNoticesToExceptions="true"
+        convertWarningsToExceptions="true"
+        timeoutForSmallTests="0">
+    <testsuites>
+        <testsuite name="Framework tests">
+            <directory>../../../Packages/Framework/Flowpack.JsonApi/Tests/Functional</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist addUncoveredFilesFromWhitelist="true">
+            <directory>../../../Data/Temporary/Testing/Cache/Flow_Object_Classes</directory>
+        </whitelist>
+    </filter>
+    <logging>
+        <log type="junit" target="../../../Build/Reports/FunctionalTests.xml" logIncompleteSkipped="false"/>
+        <log type="testdox-text" target="../../../Build/Reports/FunctionalTestDox.txt"/>
+    </logging>
+    <php>
+        <ini name="date.timezone" value="Africa/Tunis"/>
+        <env name="FLOW_REWRITEURLS" value="1"/>
+    </php>
+</phpunit>

@@ -1,4 +1,7 @@
 # JSON-API Web Service based on Flow Framework
+[![Code Climate](https://codeclimate.com/github/rfyio/JsonApi/badges/gpa.svg)](https://codeclimate.com/github/rfyio/JsonApi)
+[![Test Coverage](https://codeclimate.com/github/rfyio/JsonApi/badges/coverage.svg)](https://codeclimate.com/github/rfyio/JsonApi/coverage)
+[![Build Status](https://travis-ci.org/rfyio/JsonApi.svg?branch=master)](https://travis-ci.org/rfyio/JsonApi)
 
 This package can help you build JSON-API Web Service is a few minutes with Flow Framework.
 

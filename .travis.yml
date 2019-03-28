@@ -1,0 +1,32 @@
+language: php
+php:
+  - 7.0
+  - 7.1
+  - 7.2
+  - 7.3
+  - hhvm
+matrix:
+  allow_failures:
+    - php:
+      - hhvm
+      - 7.3
+
+addons:
+  code_climate:
+    repo_token: fccfe91d5ccd044b18f67fe21ce26760aa29979e969779358e75a7e43df57b5e
+
+before_install:
+  - cd ..
+  - git clone https://github.com/neos/flow-base-distribution.git
+  - cd flow-base-distribution
+  - git checkout 5.2
+  - composer update
+  - composer require codeclimate/php-test-reporter:dev-master --dev
+install:
+  - mkdir -p Packages/Application/Flowpack.JsonApi
+  - mv ../JsonApi/* Packages/Application/Flowpack.JsonApi
+script:
+  - bin/phpunit -c Packages/Framework/Flowpack.JsonApi/FunctionalTests.xml --coverage-clover build/logs/clover.xml
+  - bin/phpunit --stop-on-failure -c Packages/Framework/Flowpack.JsonApi/UnitTests.xml --testsuite "RFY.JWT tests"
+  - cd Packages/Framework/Flowpack.JsonApi
+  - ../../../bin/test-reporter

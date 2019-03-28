@@ -2,6 +2,7 @@
 
 namespace Flowpack\JsonApi\Controller;
 
+use Neomerx\JsonApi\Exceptions\JsonApiException;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\Exception\NoSuchActionException;
 use Flowpack\JsonApi\Adapter\AbstractAdapter;
@@ -51,6 +52,12 @@ class JsonApiController extends ActionController
      * @var array
      */
     protected $resourceConfiguration;
+
+    /**
+     * Allowed methods default deny all
+     * @var array
+     */
+    protected $allowedMethods = [];
 
     /**
      * @var JsonApiView
@@ -130,19 +137,8 @@ class JsonApiController extends ActionController
 
         $this->resourceConfiguration = $availableResources[$resource];
 
-        // Default deny all
-        $allowedMethods = [];
         if (isset($this->resourceConfiguration['allowedMethods'])) {
-            $allowedMethods = $this->resourceConfiguration['allowedMethods'];
-        }
-
-        if (isset($this->resourceConfiguration['disallowedMethods'])) {
-            foreach ($this->resourceConfiguration['disallowedMethods'] as $method) {
-                unset($allowedMethods[$method]);
-            }
-        }
-        if (!\in_array($this->request->getHttpRequest()->getMethod(), $allowedMethods)) {
-            $this->throwStatus(403);
+            $this->allowedMethods = $this->resourceConfiguration['allowedMethods'];
         }
 
         $this->validatedRequest = new ValidatedRequest($request);
@@ -162,13 +158,11 @@ class JsonApiController extends ActionController
      */
     protected function resolveActionMethodName()
     {
-        if ($this->request->getHttpRequest()->getMethod() === 'OPTIONS') {
-            return 'optionsAction';
-        }
-
         if ($this->validatedRequest->isIndex()) {
+            $this->assertAllowedMethod('list');
             return 'listAction';
         } elseif ($this->validatedRequest->isCreateResource()) {
+            $this->assertAllowedMethod('create');
             return 'createAction';
         }
 
@@ -178,18 +172,18 @@ class JsonApiController extends ActionController
         }
 
         if ($this->validatedRequest->isReadResource()) {
-            return 'showAction';
+            $this->assertAllowedMethod('read');
+            return 'readAction';
         } elseif ($this->validatedRequest->isUpdateResource()) {
+            $this->assertAllowedMethod('update');
             return 'updateAction';
         } elseif ($this->validatedRequest->isDeleteResource()) {
+            $this->assertAllowedMethod('delete');
             return 'deleteAction';
         }
 
-        $relationship = $this->validatedRequest->getRelationshipName();
-
         /** Relationships */
         if ($this->validatedRequest->isReadRelatedResource() || $this->validatedRequest->isReadRelationship()) {
-//            $this->validatedRequest->readRelationship($record, $field, $request);
             return 'relatedAction';
         } else {
 //            $this->validatedRequest->modifyRelationship($record, $field, $request);
@@ -270,33 +264,6 @@ class JsonApiController extends ActionController
         $this->view->setData($data);
     }
 
-    /**
-     * @param string $identifier
-     * @return void
-     */
-    public function showAction($identifier)
-    {
-        $data = $this->adapter->read($identifier, $this->encodedParameters);
-
-        $this->view->setData($data);
-    }
-
-    /**
-     * @param string $relationship
-     * @throws RuntimeException
-     * @throws UnsupportedRequestTypeException
-     * @throws \Neos\Flow\Mvc\Exception\StopActionException
-     */
-    public function relatedAction(string $relationship)
-    {
-        /** @var BaseSchema $schema */
-        $schema = $this->getSchema($this->adapter->getResource());
-        $relationships = $schema->getRelationships($this->record);
-        if (!isset($relationships[$relationship])) {
-            $this->throwStatus(404, \sprintf('Relationship "%s" not found', $relationship));
-        }
-        $this->view->setData($relationships[$relationship][BaseSchema::RELATIONSHIP_DATA]);
-    }
 
     /**
      * @throws RuntimeException
@@ -312,6 +279,17 @@ class JsonApiController extends ActionController
         }
 
         $this->response->setStatus(201);
+        $this->view->setData($data);
+    }
+
+    /**
+     * @param string $identifier
+     * @return void
+     */
+    public function readAction($identifier)
+    {
+        $data = $this->adapter->read($identifier, $this->encodedParameters);
+
         $this->view->setData($data);
     }
 
@@ -346,25 +324,29 @@ class JsonApiController extends ActionController
     }
 
     /**
-     * Returns the supported request methods for a single and set the "Allow" header accordingly
-     *
-     * @return string
+     * @param string $relationship
+     * @throws RuntimeException
      * @throws UnsupportedRequestTypeException
-     * @throws \Neos\Flow\Mvc\Exception\NoSuchArgumentException
      * @throws \Neos\Flow\Mvc\Exception\StopActionException
      */
-    public function optionsAction()
+    public function relatedAction(string $relationship)
     {
-        $allowedMethods = array(
-            'GET',
-            'POST',
-            'PATCH',
-            'DELETE'
-        );
+        /** @var BaseSchema $schema */
+        $schema = $this->getSchema($this->adapter->getResource());
+        $relationships = $schema->getRelationships($this->record);
+        if (!isset($relationships[$relationship])) {
+            $this->throwStatus(404, \sprintf('Relationship "%s" not found', $relationship));
+        }
+        $this->view->setData($relationships[$relationship][BaseSchema::RELATIONSHIP_DATA]);
+    }
 
-        $this->response->setHeader('Access-Control-Allow-Methods', \implode(', ', \array_unique($allowedMethods)));
-        $this->response->setStatus(204);
-        return '';
+    /**
+     * To be implemented
+     * @param string $relationship
+     */
+    public function updateRelationshipAction(string $relationship)
+    {
+
     }
 
     /**
@@ -431,4 +413,13 @@ class JsonApiController extends ActionController
         return \rtrim($request->getMainRequest()->getHttpRequest()->getBaseUri() . $suffix, '/');
     }
 
+    /**
+     * @param $expected
+     */
+    protected function assertAllowedMethod($expected)
+    {
+        if (!\in_array($expected, $this->allowedMethods)) {
+            throw new JsonApiException([], JsonApiException::HTTP_CODE_FORBIDDEN);
+        }
+    }
 }

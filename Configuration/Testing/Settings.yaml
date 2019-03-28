@@ -9,7 +9,12 @@ Flowpack:
             adapter: 'Flowpack\JsonApi\Tests\Functional\Fixtures\Entities\Adapter'
             entity: 'Neos\Flow\Tests\Functional\Persistence\Fixtures\TestEntity'
             schema: 'Flowpack\JsonApi\Tests\Functional\Fixtures\Entities\Schema'
-            allowedMethods: ['GET', 'POST', 'UPDATE', 'PATCH', 'DELETE']
+            allowedMethods:
+            - 'list'
+            - 'read'
+            - 'create'
+            - 'update'
+            - 'delete'
             related: []
           'restricted-entities':
             adapter: 'Flowpack\JsonApi\Tests\Functional\Fixtures\Entities\Adapter'
@@ -21,7 +26,12 @@ Flowpack:
             adapter: 'Flowpack\JsonApi\Tests\Functional\Fixtures\RelatedEntities\Adapter'
             entity: 'Neos\Flow\Tests\Functional\Persistence\Fixtures\TestEntity'
             schema: 'Flowpack\JsonApi\Tests\Functional\Fixtures\RelatedEntities\Schema'
-            allowedMethods: ['GET', 'POST', 'UPDATE', 'PATCH', 'DELETE']
+            allowedMethods:
+            - 'list'
+            - 'read'
+            - 'create'
+            - 'update'
+            - 'delete'
             related:
               'entities':
                 'Neos\Flow\Tests\Functional\Persistence\Fixtures\TestEntity': 'Flowpack\JsonApi\Tests\Functional\Fixtures\Entities\Schema'
@@ -31,5 +41,8 @@ Flowpack:
             adapter: 'Flowpack\JsonApi\JsonApi\PersistentResource\Adapter'
             schema: 'Flowpack\JsonApi\JsonApi\PersistentResource\Schema'
             entity: 'Neos\Flow\ResourceManagement\PersistentResource'
-            allowedMethods: ['GET', 'DELETE', 'OPTIONS']
+            allowedMethods:
+            - 'list'
+            - 'read'
+            - 'delete'
             related: []
