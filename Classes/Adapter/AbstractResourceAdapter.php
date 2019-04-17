@@ -43,9 +43,33 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
      * Persist changes to the record.
      *
      * @param $record
-     * @return object|void
+     * @return object
      */
     abstract protected function persist($record);
+
+    /**
+     * @param $propertyMappedResource
+     * @param ResourceObjectInterface $resourceObject
+     * @param EncodingParametersInterface $parameters
+     * @return object
+     */
+    public function createEntity($propertyMappedResource, ResourceObjectInterface $resourceObject, EncodingParametersInterface $parameters)
+    {
+        // Do other stuff?
+        return $this->persist($propertyMappedResource);
+    }
+
+    /**
+     * @param $propertyMappedResource
+     * @param ResourceObjectInterface $resourceObject
+     * @param EncodingParametersInterface $parameters
+     * @return object
+     */
+    public function updateEntity($propertyMappedResource, ResourceObjectInterface $resourceObject, EncodingParametersInterface $parameters)
+    {
+        // Do other stuff?
+        return $this->persist($propertyMappedResource);
+    }
 
     /**
      * @param ResourceObjectInterface $resource

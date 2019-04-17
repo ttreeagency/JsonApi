@@ -4,6 +4,7 @@ namespace Flowpack\JsonApi\Object;
 
 use Flowpack\JsonApi\Contract\Object\RelationshipInterface;
 use Flowpack\JsonApi\Exception\RuntimeException;
+use Ttree\JsonApi\Object\RelationshipObjectCollection;
 
 /**
  * Class Relationship
@@ -28,7 +29,6 @@ class Relationship extends StandardObject implements RelationshipInterface
 
         return $this->hasIdentifier() ? $this->getIdentifier() : null;
     }
-
 
     /**
      * @inheritdoc
@@ -88,5 +88,18 @@ class Relationship extends StandardObject implements RelationshipInterface
     public function isHasMany()
     {
         return \is_array($this->{self::DATA});
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getRelationCollection()
+    {
+        $data = $this->get(self::DATA);
+        if (!\is_array($data)) {
+            return [];
+        }
+
+        return RelationshipObjectCollection::create($data);
     }
 }

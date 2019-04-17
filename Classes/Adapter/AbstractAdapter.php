@@ -2,6 +2,7 @@
 
 namespace Flowpack\JsonApi\Adapter;
 
+use Flowpack\JsonApi\Contract\Object\RelationshipsInterface;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\ObjectManagement\ObjectManagerInterface;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
@@ -14,7 +15,6 @@ use Flowpack\JsonApi\Contract\Object\RelationshipInterface;
 use Flowpack\JsonApi\Domain\BelongsTo;
 use Flowpack\JsonApi\Domain\HasOne;
 use Flowpack\JsonApi\Domain\HasMany;
-use Flowpack\JsonApi\Domain\Model\Concern\DeserializesAttributeTrait;
 use Flowpack\JsonApi\Domain\Model\Concern\ModelIncludesTrait;
 use Flowpack\JsonApi\Domain\Model\PaginationParameters;
 use Flowpack\JsonApi\Domain\Repository\DefaultRepository;
@@ -24,6 +24,7 @@ use Flowpack\JsonApi\Exception;
 use Flowpack\JsonApi\Exception\RuntimeException;
 use Flowpack\JsonApi\Mvc\Controller\EncodingParametersParser;
 use Flowpack\JsonApi\Utility\StringUtility as Str;
+use Neos\Flow\Mvc\Controller\MvcPropertyMappingConfiguration;
 
 /**
  * Class AbstractAdapter
@@ -34,8 +35,7 @@ use Flowpack\JsonApi\Utility\StringUtility as Str;
  */
 abstract class AbstractAdapter extends AbstractResourceAdapter
 {
-    use DeserializesAttributeTrait,
-        ModelIncludesTrait;
+    use ModelIncludesTrait;
 
     /**
      * @var string
@@ -43,6 +43,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     protected $resource;
 
     /**
+     * Short resource name
      * @var string
      */
     protected $entity;
@@ -86,7 +87,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     protected $configuration;
 
     /**
-     * @var Object
+     * @var string
      */
     protected $model;
 
@@ -94,6 +95,11 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      * @var PaginationParameters|null
      */
     protected $paging;
+
+    /**
+     * @var array
+     */
+    protected $mapAttributeToProperty = [];
 
     /**
      * The model key that is the primary key for the resource id.
@@ -209,7 +215,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
             $this->entity => $this->schema
         ];
 
-        foreach($this->related as $resource) {
+        foreach ($this->related as $resource) {
             $resources = \array_merge($resource, $resources);
         }
         return $resources;
@@ -221,6 +227,15 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     public function getResource()
     {
         return $this->resource;
+    }
+
+    /**
+     * Returns the Object Model based on resource configuration
+     * @return string
+     */
+    public function getModel()
+    {
+        return $this->model;
     }
 
     /**
@@ -241,6 +256,62 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         $repository->setEntityClassName($this->configuration['entity']);
         $this->model = $repository->getEntityClassName();
         $this->repository = $repository;
+    }
+
+    /**
+     * @param \Neos\Flow\Mvc\Controller\MvcPropertyMappingConfiguration $propertyMappingConfiguration
+     */
+    public function setPropertyMappingConfiguration(\Neos\Flow\Mvc\Controller\MvcPropertyMappingConfiguration $propertyMappingConfiguration, ResourceObjectInterface $resource)
+    {
+        $propertyMappingConfiguration->setTypeConverterOption('Neos\Flow\Property\TypeConverter\PersistentObjectConverter', \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, true);
+        $propertyMappingConfiguration->setTypeConverterOption('Neos\Flow\Property\TypeConverter\PersistentObjectConverter', \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_MODIFICATION_ALLOWED, true);
+        $propertyMappingConfiguration->allowAllProperties();
+
+        if ($resource->hasRelationships()) {
+            /** @var RelationshipInterface $relationship */
+            foreach ($resource->getRelationships()->getAll() as $field => $value) {
+
+                if (!$this->isRelation($field)) {
+                    continue;
+                }
+
+
+                if (!$method = $this->methodForRelation($field)) {
+                    throw new RuntimeException("No relationship method implemented for field {$field}.");
+                }
+
+                $relation = $this->{$method}();
+
+                if ($relation instanceof AbstractManyRelation) {
+                    $propertyMappingConfiguration->forProperty($field . '.*')
+                        ->setTypeConverterOption(
+                            \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::class,
+                            \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED,
+                            true
+                        )
+                        ->setTypeConverterOption(
+                            \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::class,
+                            \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_MODIFICATION_ALLOWED,
+                            true
+                        )
+                        ->allowAllProperties();
+                    continue;
+                }
+
+                $propertyMappingConfiguration->forProperty($field)
+                    ->setTypeConverterOption(
+                        \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::class,
+                        \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED,
+                        true
+                    )
+                    ->setTypeConverterOption(
+                        \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::class,
+                        \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_MODIFICATION_ALLOWED,
+                        true
+                    )
+                    ->allowAllProperties();
+            }
+        }
     }
 
     /**
@@ -441,24 +512,76 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     protected function createRecord(ResourceObjectInterface $resource)
     {
-        return $this->model = new $this->model();
+        return (new $this->model());
     }
 
     /**
      * @todo
      * @inheritDoc
      */
-    protected function hydrateAttributes($record, StandardObjectInterface $attributes)
+    public function hydrateAttributes($record, StandardObjectInterface $attributes)
     {
-        foreach ($attributes as $attribute => $value) {
-            /** TODO: Skip any JSON API fields that are not to be filled. */
+        $arguments = [];
 
-            $property = $this->attributeToProperty($attribute);
+        foreach ($attributes->toArray() as $propertyName => $propertyValue) {
+            if (\array_key_exists($propertyName, $this->mapAttributeToProperty)) {
+                $arguments[$this->mapAttributeToProperty[$propertyName]] = $propertyValue;
+                continue;
+            }
 
-            if (\method_exists($record, $methodName = 'set' . \ucfirst($property))) {
-                $record->$methodName($this->deserializeAttribute($value, $property, $record));
+            $arguments[Str::camelize($propertyName)] = $propertyValue;
+        }
+
+        if ($record->hasId()) {
+            $arguments['__identity'] = $record->getId();
+        }
+
+        return $arguments;
+    }
+
+    /**
+     * @param $record
+     * @param RelationshipsInterface $relationships
+     * @return array
+     * @throws RuntimeException
+     */
+    public function hydrateRelations($record, RelationshipsInterface $relationships)
+    {
+        $arguments = [];
+
+        if ($relationships !== null) {
+            foreach ($relationships->getAll() as $field => $value) {
+                if (!$this->isRelation($field)) {
+                    continue;
+                }
+
+                $relation = $this->related($field);
+                $relationship = $relationships->getRelationship($field);
+                $key = $relation->getKey();
+
+                $relationshipObjectCollection = $relationship->getRelationCollection();
+                if (!empty($relationshipObjectCollection)) {
+
+                    /** @var RelationshipObject $relationshipObject */
+                    foreach ($relationshipObjectCollection as $relationshipObject) {
+                        $entry = [];
+                        if ($relationshipObject->hasAttributes()) {
+                            $entry = $relationshipObject->getAttributes()->toArray();
+                        }
+                        if ($relationship->hasIdentifier() && $relationship->getIdentifier()->hasId()) {
+                            $entry['__identity'] = (string)$relationship->getIdentifier()->getId();
+                        }
+                        $arguments[$key][] = $entry;
+                    }
+                } else {
+                    if ($relationship->hasIdentifier() && $relationship->getIdentifier()->hasId()) {
+                        $arguments[$key]['__identity'] = (string)$relationship->getIdentifier()->getId();
+                    }
+                }
+                // TODO: $this->requiresPrimaryRecordPersistence($relation)
             }
         }
+        return $arguments;
     }
 
     /**
@@ -475,19 +598,6 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         if (!$this->requiresPrimaryRecordPersistence($relation)) {
             $relation->update($record, $relationship, $parameters);
         }
-
-//
-//        if ($this->persistenceManager->isNewObject($relation)) {
-//            $this->persistenceManager->add($relation);
-//            $relation->add($record, $relationship, $parameters);
-//        } else {
-//            $this->persistenceManager->update($relation);
-//
-//        }
-//        if (!$this->requiresPrimaryRecordPersistence($relation)) {
-//            $this->persistenceManager->update($relation);
-////            $relation->update($record, $relationship, $parameters);
-//        }
     }
 
     /**
@@ -508,6 +618,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         $changed = false;
 
         if ($relationships !== null) {
+
             foreach ($relationships->getAll() as $field => $value) {
 //            /** Skip any fields that are not fillable. */
 //            if ($this->isNotFillable($field, $record)) {
@@ -560,6 +671,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
             $this->repository->update($record);
         }
 
+        $this->persistenceManager->persistAll();
         return $record;
     }
 
@@ -814,5 +926,19 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         list($one, $two, $caller) = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
 
         return $caller['function'];
+    }
+
+    /**
+     * Return the Property Mapping Configuration used for this argument; can be used by the initialize*action to modify the Property Mapping.
+     *
+     * @return MvcPropertyMappingConfiguration
+     * @api
+     */
+    public function getPropertyMappingConfiguration()
+    {
+        if ($this->propertyMappingConfiguration === null) {
+            $this->propertyMappingConfiguration = new MvcPropertyMappingConfiguration();
+        }
+        return $this->propertyMappingConfiguration;
     }
 }

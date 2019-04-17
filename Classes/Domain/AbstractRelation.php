@@ -21,7 +21,7 @@ abstract class AbstractRelation implements RelationshipAdapterInterface
     protected $persistenceManager;
 
     /**
-     * @var Entity
+     * @var object
      */
     protected $model;
 
@@ -58,6 +58,30 @@ abstract class AbstractRelation implements RelationshipAdapterInterface
     }
 
     /**
+     * @return object
+     */
+    public function getModel(): object
+    {
+        return $this->model;
+    }
+
+    /**
+     * @return string
+     */
+    public function getKey(): string
+    {
+        return $this->key;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getField(): ?string
+    {
+        return $this->field;
+    }
+
+    /**
      * @inheritdoc
      */
     public function withFieldName($name)
@@ -76,7 +100,6 @@ abstract class AbstractRelation implements RelationshipAdapterInterface
      */
     protected function getRelation($record)
     {
-        \Neos\Flow\var_dump([$this->key, $record], 'get relation');
         $relation = $record->{$this->key}();
 
         if (!$this->acceptRelation($relation)) {

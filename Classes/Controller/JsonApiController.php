@@ -2,29 +2,30 @@
 
 namespace Flowpack\JsonApi\Controller;
 
-use Neomerx\JsonApi\Exceptions\JsonApiException;
-use Neos\Flow\Annotations as Flow;
-use Neos\Flow\Mvc\Exception\NoSuchActionException;
-use Flowpack\JsonApi\Adapter\AbstractAdapter;
 use Flowpack\JsonApi\Adapter\DefaultAdapter;
-use Flowpack\JsonApi\Exception;
+use Flowpack\JsonApi\Contract\Object\ResourceObjectInterface;
+use Flowpack\JsonApi\Domain\Model\PaginationParameters;
+use Neomerx\JsonApi\Exceptions\JsonApiException;
+use Neomerx\JsonApi\Schema\BaseSchema;
+use Neomerx\JsonApi\Schema\Link;
+use Neos\Flow\Annotations as Flow;
+use Flowpack\JsonApi\Adapter\AbstractAdapter;
 use Flowpack\JsonApi\Exception\ConfigurationException;
 use Flowpack\JsonApi\Exception\RuntimeException;
 use Flowpack\JsonApi\Mvc\Controller\EncodingParametersParser;
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
 use Neomerx\JsonApi\Contracts\Factories\FactoryInterface;
-use Neomerx\JsonApi\Schema\Link;
-use Neomerx\JsonApi\Schema\BaseSchema;
-use Flowpack\JsonApi\Domain\Model\PaginationParameters;
 use Flowpack\JsonApi\Mvc\ValidatedRequest;
 use Flowpack\JsonApi\View\JsonApiView;
 use Neos\Flow\Mvc\ActionRequest;
 use Neos\Flow\Mvc\Controller\ActionController;
+use Neos\Flow\Mvc\Exception\InvalidArgumentTypeException;
 use Neos\Flow\Mvc\Exception\UnsupportedRequestTypeException;
 use Neos\Flow\Mvc\RequestInterface;
 use Neos\Flow\Mvc\ResponseInterface;
 use Neos\Flow\Mvc\View\ViewInterface;
 use Neos\Utility\Arrays;
+use Neos\Utility\TypeHandling;
 
 /**
  * Class JsonApiController
@@ -196,6 +197,86 @@ class JsonApiController extends ActionController
     }
 
     /**
+     * Implementation of the arguments initialization in the action controller:
+     * Automatically registers arguments of the current action
+     *
+     * Don't override this method - use initializeAction() instead.
+     *
+     * @return void
+     * @throws InvalidArgumentTypeException
+     * @see initializeArguments()
+     */
+    protected function initializeActionMethodArguments()
+    {
+        $actionMethodParameters = static::getActionMethodParameters($this->objectManager);
+        if (isset($actionMethodParameters[$this->actionMethodName])) {
+            $methodParameters = $actionMethodParameters[$this->actionMethodName];
+        } else {
+            $methodParameters = [];
+        }
+
+        $this->arguments->removeAll();
+        foreach ($methodParameters as $parameterName => $parameterInfo) {
+            $dataType = null;
+            if (isset($parameterInfo['type'])) {
+                $dataType = $parameterInfo['type'];
+            } elseif ($parameterInfo['array']) {
+                $dataType = 'array';
+            }
+            if ($dataType === null) {
+                throw new InvalidArgumentTypeException('The argument type for parameter $' . $parameterName . ' of method ' . get_class($this) . '->' . $this->actionMethodName . '() could not be detected.', 1253175643);
+            }
+            $defaultValue = (isset($parameterInfo['defaultValue']) ? $parameterInfo['defaultValue'] : null);
+            if ($parameterInfo['optional'] === true && $defaultValue === null) {
+                $dataType = TypeHandling::stripNullableType($dataType);
+            }
+
+            // Custom behaviour to get passed validation
+            if ($parameterName === 'resource') {
+                $dataType = $this->adapter->getModel();
+            }
+
+            $this->arguments->addNewArgument($parameterName, $dataType, ($parameterInfo['optional'] === false), $defaultValue);
+        }
+    }
+
+    /**
+     * Maps arguments delivered by the request object to the local controller arguments.
+     *
+     * @api
+     * @throws \Neos\Flow\Mvc\Exception\NoSuchArgumentException
+     * @throws \Neos\Flow\Mvc\Exception\RequiredArgumentMissingException
+     * @return void
+     */
+    protected function mapRequestArgumentsToControllerArguments()
+    {
+        if (!\in_array($this->request->getHttpRequest()->getMethod(), ['POST', 'PUT', 'PATCH'])) {
+            parent::mapRequestArgumentsToControllerArguments();
+            return;
+        }
+
+        /** @var ResourceObjectInterface $resource */
+        $resource = $this->validatedRequest->getDocument()->getResource();
+
+        /** @var \Neos\Flow\Mvc\Controller\MvcPropertyMappingConfiguration $propertyMappingConfiguration */
+        $propertyMappingConfiguration = $this->arguments['resource']->getPropertyMappingConfiguration();
+        $this->adapter->setPropertyMappingConfiguration($propertyMappingConfiguration, $resource);
+
+        /** @var Argument $argument */
+        foreach ($this->arguments as $argument) {
+            $argumentName = $argument->getName();
+            if ($this->request->hasArgument($argumentName)) {
+                $arguments = $this->adapter->hydrateAttributes($resource, $resource->getAttributes());
+                $relationshipArguments = $this->adapter->hydrateRelations($resource, $resource->getRelationships());
+                $arguments = \array_merge($arguments, $relationshipArguments);
+                $argument->setValue($arguments);
+            } elseif ($argument->isRequired()) {
+                throw new \Neos\Flow\Mvc\Exception\RequiredArgumentMissingException('Required argument "' . $argumentName . '" is not set.', 1298012500);
+            }
+        }
+    }
+
+    /**
      * @param ViewInterface $view
      * @throws \Neos\Flow\Mvc\Exception\NoSuchArgumentException
      * @throws \Flowpack\JsonApi\Exception\ConfigurationException
@@ -283,6 +364,13 @@ class JsonApiController extends ActionController
             return;
         }
 
+        /** @var BaseSchema $schema */
+        $schema = $this->getSchema($resource);
+        $relationships = $schema->getRelationships($this->record);
+        if (!isset($relationships[$relationship])) {
+            $this->throwStatus(404, \sprintf('Relationship "%s" not found', $relationship));
+        }
+
         $this->response->withStatus(201);
         $this->view->setData($data);
     }
@@ -299,10 +387,11 @@ class JsonApiController extends ActionController
     }
 
     /**
+     * @param $resource
      * @throws RuntimeException
      * @throws \Neos\Flow\Http\Exception
      */
-    public function updateAction()
+    public function updateAction($resource)
     {
         try {
             $data = $this->adapter->update($this->record, $this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
@@ -382,6 +471,7 @@ class JsonApiController extends ActionController
      */
     public function errorAction()
     {
+        $this->response->withStatus(422);
 //        $this->handleTargetNotFoundError();
 //        $this->addErrorFlashMessage();
 //        $this->forwardToReferringRequest();
@@ -392,7 +482,30 @@ class JsonApiController extends ActionController
     }
 
     /**
-     * @param array $configuration
+     * Returns a json object containing all validation errors.
+     *
+     * @return string
+     */
+    protected function getFlattenedValidationErrorMessage()
+    {
+        $errorMessages = [];
+        foreach ($this->arguments->getValidationResults()->getFlattenedErrors() as $propertyPath => $errors) {
+            foreach ($errors as $key => $error) {
+                $errorObject = [];
+                $errorObject['status'] = '422';
+                $errorObject['detail'] = $error->render();
+
+                $properties = \explode('.', $propertyPath);
+                $errorObject['source']['pointer'] = '/data/attributes/' . \array_pop($properties);
+
+                $errorMessages['errors'][] = $errorObject;
+            }
+        }
+        return \json_encode((object)$errorMessages);
+    }
+
+    /**
+     * @param string $endpoint
      * @param string $resource
      * @return void
      * @throws RuntimeException
