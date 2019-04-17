@@ -5,7 +5,7 @@
     '@controller': 'JsonApi'
     '@action':     'related'
     '@format':     'json'
-  httpMethods: ['GET', 'POST', 'PATCH', 'UPDATE', 'DELETE']
+  httpMethods: ['GET', 'POST', 'PATCH', 'UPDATE', 'DELETE', 'OPTIONS']
   appendExceedingArguments: TRUE
   routeParts:
     '@endpoint':
@@ -22,7 +22,7 @@
     '@controller': 'JsonApi'
     '@action':     'related'
     '@format':     'json'
-  httpMethods: ['GET', 'POST', 'PATCH', 'UPDATE', 'DELETE']
+  httpMethods: ['GET', 'POST', 'PATCH', 'UPDATE', 'DELETE', 'OPTIONS']
   appendExceedingArguments: TRUE
   routeParts:
     '@endpoint':
@@ -40,7 +40,7 @@
     '@action':     'read'
     '@format':     'json'
     'identifier':  ''
-  httpMethods: ['GET', 'POST', 'PATCH', 'UPDATE', 'DELETE']
+  httpMethods: ['GET', 'POST', 'PATCH', 'UPDATE', 'DELETE', 'OPTIONS']
   appendExceedingArguments: TRUE
   routeParts:
     '@endpoint':
@@ -51,14 +51,14 @@
       handler: 'Flowpack\JsonApi\Mvc\Routing\ResourceRoutePartHandler'
 
 - name: 'Resource(s)'
-  uriPattern: '{@endpoint}/{@version}/{@resource}'
+  uriPattern: '{@endpoint}/{@version}/{@resource}(.{@format})'
   defaults:
     '@package':    'Flowpack.JsonApi'
     '@controller': 'JsonApi'
     '@action':     'list'
     '@format':     'json'
     'identifier':  ''
-  httpMethods: ['GET', 'POST', 'PATCH', 'UPDATE', 'DELETE']
+  httpMethods: ['GET', 'POST', 'PATCH', 'UPDATE', 'DELETE', 'OPTIONS']
   appendExceedingArguments: TRUE
   routeParts:
     '@endpoint':

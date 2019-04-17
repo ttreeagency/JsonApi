@@ -158,6 +158,10 @@ class JsonApiController extends ActionController
      */
     protected function resolveActionMethodName()
     {
+        if ($this->validatedRequest->isOptions()) {
+            return 'optionsAction';
+        }
+
         if ($this->validatedRequest->isIndex()) {
             $this->assertAllowedMethod('list');
             return 'listAction';
@@ -274,11 +278,12 @@ class JsonApiController extends ActionController
         try {
             $data = $this->adapter->create($this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
         } catch (Exception\InvalidJsonException $e) {
-            $this->response->setStatus(406);
+
+            $this->response->withStatus(406);
             return;
         }
 
-        $this->response->setStatus(201);
+        $this->response->withStatus(201);
         $this->view->setData($data);
     }
 
@@ -302,12 +307,12 @@ class JsonApiController extends ActionController
         try {
             $data = $this->adapter->update($this->record, $this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
         } catch (Exception\InvalidJsonException $e) {
-            $this->response->setStatus(406);
+            $this->response->withStatus(406);
             return;
         }
 
         $this->persistenceManager->persistAll();
-        $this->response->setStatus(200);
+        $this->response->withStatus(200);
         $this->view->setData($data);
     }
 
@@ -319,7 +324,7 @@ class JsonApiController extends ActionController
     {
         $this->adapter->delete($this->record, $this->encodedParameters);
 
-        $this->response->setStatus(204);
+        $this->response->withStatus(204);
         return '';
     }
 
@@ -347,6 +352,43 @@ class JsonApiController extends ActionController
     public function updateRelationshipAction(string $relationship)
     {
 
+    }
+
+    /**
+     * @return string
+     */
+    public function optionsAction()
+    {
+        $allowedMethods = $this->resourceConfiguration['allowedMethods'];
+
+        $allowedMethods = array(
+            'GET',
+            'POST',
+            'PATCH',
+            'DELETE'
+        );
+
+        $this->response->setHeader('Access-Control-Allow-Methods', \implode(', ', \array_unique($allowedMethods)));
+        $this->response->setHeader('Access-Control-Max-Age', '3600');
+        $this->response->setHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With');
+        $this->response->withStatus(204);
+        return '';
+    }
+
+    /**
+     * @return string
+     * @throws \Neos\Flow\Mvc\Exception\ForwardException
+     * @throws \Neos\Flow\Property\Exception\TargetNotFoundException
+     */
+    public function errorAction()
+    {
+//        $this->handleTargetNotFoundError();
+//        $this->addErrorFlashMessage();
+//        $this->forwardToReferringRequest();
+//
+//        return $this->getFlattenedValidationErrorMessage();
+
+        \Neos\Flow\var_dump('ERRROR!');
     }
 
     /**

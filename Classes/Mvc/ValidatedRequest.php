@@ -143,6 +143,14 @@ class ValidatedRequest
     }
 
     /**
+     * @return bool
+     */
+    public function isOptions(): bool
+    {
+        return $this->isMethod('options');
+    }
+
+    /**
      * @inheritdoc
      */
     public function isIndex(): bool
