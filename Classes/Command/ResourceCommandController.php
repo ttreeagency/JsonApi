@@ -108,7 +108,7 @@ class ResourceCommandController extends CommandController
         $this->outputLine('            schema: \'%s\'', [$this->generatorService->getNamespacesEntry('schema')]);
         $this->outputLine('            entity: \'%s\'', [$entity]);
         $this->outputLine('            related: []');
-        $this->outputLine('            allowedMethods: [\'GET\', \'POST\', \'PATCH\', \'DELETE\', \'OPTIONS\']');
+        $this->outputLine('            allowedMethods: [\'list\', \'create\', \'read\', \'update\', \'delete\']');
 
         $this->outputLine();
         $this->outputLine('<b>Resource creation completed!</b>');
