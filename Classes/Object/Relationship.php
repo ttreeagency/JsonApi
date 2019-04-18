@@ -4,7 +4,7 @@ namespace Flowpack\JsonApi\Object;
 
 use Flowpack\JsonApi\Contract\Object\RelationshipInterface;
 use Flowpack\JsonApi\Exception\RuntimeException;
-use Ttree\JsonApi\Object\RelationshipObjectCollection;
+use Flowpack\JsonApi\Object\RelationshipObjectCollection;
 
 /**
  * Class Relationship

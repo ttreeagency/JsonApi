@@ -5,6 +5,7 @@ namespace Flowpack\JsonApi\Controller;
 use Flowpack\JsonApi\Adapter\DefaultAdapter;
 use Flowpack\JsonApi\Contract\Object\ResourceObjectInterface;
 use Flowpack\JsonApi\Domain\Model\PaginationParameters;
+use Flowpack\JsonApi\Exception;
 use Neomerx\JsonApi\Exceptions\JsonApiException;
 use Neomerx\JsonApi\Schema\BaseSchema;
 use Neomerx\JsonApi\Schema\Link;
@@ -19,6 +20,7 @@ use Flowpack\JsonApi\Mvc\ValidatedRequest;
 use Flowpack\JsonApi\View\JsonApiView;
 use Neos\Flow\Mvc\ActionRequest;
 use Neos\Flow\Mvc\Controller\ActionController;
+use Neos\Flow\Mvc\Controller\Argument;
 use Neos\Flow\Mvc\Exception\InvalidArgumentTypeException;
 use Neos\Flow\Mvc\Exception\UnsupportedRequestTypeException;
 use Neos\Flow\Mvc\RequestInterface;
@@ -131,7 +133,7 @@ class JsonApiController extends ActionController
         $this->endpoint = $request->getArgument('@endpoint');
         $availableResources = $this->endpoint['resources'];
 
-        $resource = $request->getArgument('@resource');
+        $resource = $request->getArgument('resource');
         if (!\array_key_exists($resource, $availableResources)) {
             $this->throwStatus(404);
         }
@@ -200,7 +202,7 @@ class JsonApiController extends ActionController
      * Implementation of the arguments initialization in the action controller:
      * Automatically registers arguments of the current action
      *
-     * Don't override this method - use initializeAction() instead.
+     * Overwrite default behaviour
      *
      * @return void
      * @throws InvalidArgumentTypeException
@@ -224,7 +226,7 @@ class JsonApiController extends ActionController
                 $dataType = 'array';
             }
             if ($dataType === null) {
-                throw new InvalidArgumentTypeException('The argument type for parameter $' . $parameterName . ' of method ' . get_class($this) . '->' . $this->actionMethodName . '() could not be detected.', 1253175643);
+                throw new InvalidArgumentTypeException('The argument type for parameter $' . $parameterName . ' of method ' . \get_class($this) . '->' . $this->actionMethodName . '() could not be detected.', 1253175643);
             }
             $defaultValue = (isset($parameterInfo['defaultValue']) ? $parameterInfo['defaultValue'] : null);
             if ($parameterInfo['optional'] === true && $defaultValue === null) {
@@ -241,12 +243,10 @@ class JsonApiController extends ActionController
     }
 
     /**
-     * Maps arguments delivered by the request object to the local controller arguments.
-     *
-     * @api
-     * @throws \Neos\Flow\Mvc\Exception\NoSuchArgumentException
+     * Overwrite default behaviour
+     * @throws RuntimeException
+     * @throws \Neos\Flow\Http\Exception
      * @throws \Neos\Flow\Mvc\Exception\RequiredArgumentMissingException
-     * @return void
      */
     protected function mapRequestArgumentsToControllerArguments()
     {
@@ -269,7 +269,13 @@ class JsonApiController extends ActionController
                 $arguments = $this->adapter->hydrateAttributes($resource, $resource->getAttributes());
                 $relationshipArguments = $this->adapter->hydrateRelations($resource, $resource->getRelationships());
                 $arguments = \array_merge($arguments, $relationshipArguments);
-                $argument->setValue($arguments);
+
+//                try {
+                    $argument->setValue($arguments);
+//                } catch (\Exception $e) {
+//                    // todo: handle validation error
+//                }
+
             } elseif ($argument->isRequired()) {
                 throw new \Neos\Flow\Mvc\Exception\RequiredArgumentMissingException('Required argument "' . $argumentName . '" is not set.', 1298012500);
             }
@@ -285,7 +291,7 @@ class JsonApiController extends ActionController
     {
         /** @var JsonApiView $view */
         parent::initializeView($view);
-        $view->setResource($this->request->getArgument('@resource'));
+        $view->setResource($this->request->getArgument('resource'));
         $view->setEncoder($this->encoder);
         $view->setParameters($this->encodedParameters);
     }
@@ -349,29 +355,20 @@ class JsonApiController extends ActionController
         $this->view->setData($data);
     }
 
-
     /**
+     * @param $resource
      * @throws RuntimeException
      * @throws \Neos\Flow\Http\Exception
      */
-    public function createAction()
+    public function createAction($resource)
     {
         try {
-            $data = $this->adapter->create($this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
+            $data = $this->adapter->createEntity($resource, $this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
         } catch (Exception\InvalidJsonException $e) {
-
-            $this->response->withStatus(406);
+            $this->response = $this->response->withStatus(406);
             return;
         }
-
-        /** @var BaseSchema $schema */
-        $schema = $this->getSchema($resource);
-        $relationships = $schema->getRelationships($this->record);
-        if (!isset($relationships[$relationship])) {
-            $this->throwStatus(404, \sprintf('Relationship "%s" not found', $relationship));
-        }
-
-        $this->response->withStatus(201);
+        $this->response->setStatus(201);
         $this->view->setData($data);
     }
 
@@ -394,14 +391,14 @@ class JsonApiController extends ActionController
     public function updateAction($resource)
     {
         try {
-            $data = $this->adapter->update($this->record, $this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
+            $data = $this->adapter->update($resource, $this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
         } catch (Exception\InvalidJsonException $e) {
-            $this->response->withStatus(406);
+            $this->response = $this->response->withStatus(406);
             return;
         }
 
         $this->persistenceManager->persistAll();
-        $this->response->withStatus(200);
+        $this->response->setStatus(200);
         $this->view->setData($data);
     }
 
@@ -412,8 +409,7 @@ class JsonApiController extends ActionController
     public function deleteAction()
     {
         $this->adapter->delete($this->record, $this->encodedParameters);
-
-        $this->response->withStatus(204);
+        $this->response->setStatus(204);
         return '';
     }
 
@@ -448,7 +444,7 @@ class JsonApiController extends ActionController
      */
     public function optionsAction()
     {
-        $allowedMethods = $this->resourceConfiguration['allowedMethods'];
+        $allowed = $this->resourceConfiguration['allowedMethods'];
 
         $allowedMethods = array(
             'GET',
@@ -457,10 +453,26 @@ class JsonApiController extends ActionController
             'DELETE'
         );
 
-        $this->response->setHeader('Access-Control-Allow-Methods', \implode(', ', \array_unique($allowedMethods)));
-        $this->response->setHeader('Access-Control-Max-Age', '3600');
-        $this->response->setHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With');
-        $this->response->withStatus(204);
+        if (!\in_array('list', $allowed) && !\in_array('read', $allowed)) {
+            unset($allowedMethods[0]);
+        }
+
+        if (!\in_array('create', $allowed)) {
+            unset($allowedMethods[1]);
+        }
+
+        if (!\in_array('update', $allowed)) {
+            unset($allowedMethods[2]);
+        }
+
+        if (!\in_array('delete', $allowed)) {
+            unset($allowedMethods[3]);
+        }
+
+        $this->response = $this->response->setHeader('Access-Control-Allow-Methods', \implode(', ', \array_unique($allowedMethods)));
+        $this->response = $this->response->setHeader('Access-Control-Max-Age', '3600');
+        $this->response = $this->response->setHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With');
+        $this->response = $this->response->withStatus(204);
         return '';
     }
 
@@ -471,14 +483,12 @@ class JsonApiController extends ActionController
      */
     public function errorAction()
     {
-        $this->response->withStatus(422);
-//        $this->handleTargetNotFoundError();
-//        $this->addErrorFlashMessage();
-//        $this->forwardToReferringRequest();
-//
-//        return $this->getFlattenedValidationErrorMessage();
+        $this->response = $this->response->withStatus(422);
+        $this->handleTargetNotFoundError();
+        $this->addErrorFlashMessage();
+        $this->forwardToReferringRequest();
 
-        \Neos\Flow\var_dump('ERRROR!');
+        return $this->getFlattenedValidationErrorMessage();
     }
 
     /**

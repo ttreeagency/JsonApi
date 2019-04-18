@@ -1,5 +1,5 @@
 - name: 'Self'
-  uriPattern: '{@endpoint}/{@version}/{@resource}/{identifier}/relationships/{relationship}'
+  uriPattern: '{@endpoint}/{@version}/{resource}/{identifier}/relationships/{relationship}'
   defaults:
     '@package': 'Flowpack.JsonApi'
     '@controller': 'JsonApi'
@@ -12,11 +12,11 @@
       handler: 'Flowpack\JsonApi\Mvc\Routing\EndpointRoutePartHandler'
     '@version':
       handler: 'Flowpack\JsonApi\Mvc\Routing\VersionRoutePartHandler'
-    '@resource':
+    'resource':
       handler: 'Flowpack\JsonApi\Mvc\Routing\ResourceRoutePartHandler'
 
 - name: 'Related'
-  uriPattern: '{@endpoint}/{@version}/{@resource}/{identifier}/{relationship}'
+  uriPattern: '{@endpoint}/{@version}/{resource}/{identifier}/{relationship}'
   defaults:
     '@package':    'Flowpack.JsonApi'
     '@controller': 'JsonApi'
@@ -29,11 +29,11 @@
       handler: 'Flowpack\JsonApi\Mvc\Routing\EndpointRoutePartHandler'
     '@version':
       handler: 'Flowpack\JsonApi\Mvc\Routing\VersionRoutePartHandler'
-    '@resource':
+    'resource':
       handler: 'Flowpack\JsonApi\Mvc\Routing\ResourceRoutePartHandler'
 
 - name: 'Resource'
-  uriPattern: '{@endpoint}/{@version}/{@resource}/{identifier}'
+  uriPattern: '{@endpoint}/{@version}/{resource}/{identifier}'
   defaults:
     '@package':    'Flowpack.JsonApi'
     '@controller': 'JsonApi'
@@ -47,11 +47,11 @@
       handler: 'Flowpack\JsonApi\Mvc\Routing\EndpointRoutePartHandler'
     '@version':
       handler: 'Flowpack\JsonApi\Mvc\Routing\VersionRoutePartHandler'
-    '@resource':
+    'resource':
       handler: 'Flowpack\JsonApi\Mvc\Routing\ResourceRoutePartHandler'
 
 - name: 'Resource(s)'
-  uriPattern: '{@endpoint}/{@version}/{@resource}(.{@format})'
+  uriPattern: '{@endpoint}/{@version}/{resource}(.{@format})'
   defaults:
     '@package':    'Flowpack.JsonApi'
     '@controller': 'JsonApi'
@@ -65,5 +65,5 @@
       handler: 'Flowpack\JsonApi\Mvc\Routing\EndpointRoutePartHandler'
     '@version':
       handler: 'Flowpack\JsonApi\Mvc\Routing\VersionRoutePartHandler'
-    '@resource':
+    'resource':
       handler: 'Flowpack\JsonApi\Mvc\Routing\ResourceRoutePartHandler'

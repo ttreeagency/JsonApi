@@ -27,7 +27,7 @@ class ResourceRoutePartHandler extends AbstractRoutePartHandler
         if ($value === null || $value === '') {
             return false;
         }
-        if ($this->name === '@resource') {
+        if ($this->name === 'resource') {
             $this->value = $value[0];
             return true;
         }

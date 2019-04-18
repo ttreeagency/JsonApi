@@ -3,6 +3,7 @@
 namespace Flowpack\JsonApi\Adapter;
 
 use Flowpack\JsonApi\Contract\Object\RelationshipsInterface;
+use Flowpack\JsonApi\Domain\AbstractManyRelation;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\ObjectManagement\ObjectManagerInterface;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
@@ -259,9 +260,12 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
-     * @param \Neos\Flow\Mvc\Controller\MvcPropertyMappingConfiguration $propertyMappingConfiguration
+     * Set property mapper based on resource
+     * @param MvcPropertyMappingConfiguration $propertyMappingConfiguration
+     * @param ResourceObjectInterface $resource
+     * @throws RuntimeException
      */
-    public function setPropertyMappingConfiguration(\Neos\Flow\Mvc\Controller\MvcPropertyMappingConfiguration $propertyMappingConfiguration, ResourceObjectInterface $resource)
+    public function setPropertyMappingConfiguration(MvcPropertyMappingConfiguration $propertyMappingConfiguration, ResourceObjectInterface $resource)
     {
         $propertyMappingConfiguration->setTypeConverterOption('Neos\Flow\Property\TypeConverter\PersistentObjectConverter', \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, true);
         $propertyMappingConfiguration->setTypeConverterOption('Neos\Flow\Property\TypeConverter\PersistentObjectConverter', \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_MODIFICATION_ALLOWED, true);

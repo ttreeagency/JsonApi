@@ -50,10 +50,10 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
     /**
      * @param $propertyMappedResource
      * @param ResourceObjectInterface $resourceObject
-     * @param EncodingParametersInterface $parameters
+     * @param EncodingParametersParser $parameters
      * @return object
      */
-    public function createEntity($propertyMappedResource, ResourceObjectInterface $resourceObject, EncodingParametersInterface $parameters)
+    public function createEntity($propertyMappedResource, ResourceObjectInterface $resourceObject, EncodingParametersParser $parameters)
     {
         // Do other stuff?
         return $this->persist($propertyMappedResource);
@@ -62,10 +62,10 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
     /**
      * @param $propertyMappedResource
      * @param ResourceObjectInterface $resourceObject
-     * @param EncodingParametersInterface $parameters
+     * @param EncodingParametersParser $parameters
      * @return object
      */
-    public function updateEntity($propertyMappedResource, ResourceObjectInterface $resourceObject, EncodingParametersInterface $parameters)
+    public function updateEntity($propertyMappedResource, ResourceObjectInterface $resourceObject, EncodingParametersParser $parameters)
     {
         // Do other stuff?
         return $this->persist($propertyMappedResource);

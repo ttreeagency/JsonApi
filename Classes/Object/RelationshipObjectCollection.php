@@ -12,7 +12,7 @@ use InvalidArgumentException;
 /**
  * Class ResourceCollection
  *
- * @package Ttree\JsonApi
+ * @package Flowpack\JsonApi
  */
 class RelationshipObjectCollection implements ResourceObjectCollectionInterface
 {
