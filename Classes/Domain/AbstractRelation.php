@@ -92,24 +92,15 @@ abstract class AbstractRelation implements RelationshipAdapterInterface
     }
 
     /**
+     * @param $record
+     * @return Relation
      * @todo
      * Get the relation from the model.
      *
-     * @param $record
-     * @return Relation
      */
     protected function getRelation($record)
     {
-        $relation = $record->{$this->key}();
-
-        if (!$this->acceptRelation($relation)) {
-            throw new RuntimeException(sprintf(
-                'JSON API relation %s cannot be used for an Doctrine %s relation.',
-                \class_basename($this),
-                \class_basename($relation)
-            ));
-        }
-
+        $relation = $record->{'get' . \ucfirst($this->key)}();
         return $relation;
     }
 

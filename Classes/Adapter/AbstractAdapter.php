@@ -4,6 +4,7 @@ namespace Flowpack\JsonApi\Adapter;
 
 use Flowpack\JsonApi\Contract\Object\RelationshipsInterface;
 use Flowpack\JsonApi\Domain\AbstractManyRelation;
+use Flowpack\JsonApi\Object\RelationshipObject;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\ObjectManagement\ObjectManagerInterface;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
@@ -37,6 +38,11 @@ use Neos\Flow\Mvc\Controller\MvcPropertyMappingConfiguration;
 abstract class AbstractAdapter extends AbstractResourceAdapter
 {
     use ModelIncludesTrait;
+
+    /**
+     * @var Neomerx\JsonApi\Encoder\Encoder|null
+     */
+    protected $encoder = null;
 
     /**
      * @var string
@@ -101,6 +107,12 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      * @var array
      */
     protected $mapAttributeToProperty = [];
+
+    /**
+     * This value add the option to enable property mapping of related entities not mentioned in the resource->relationships
+     * @var array
+     */
+    protected $allowedPropertyMappingPaths = [];
 
     /**
      * The model key that is the primary key for the resource id.
@@ -201,7 +213,11 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     public function getEncoder($urlPrefix = null, $depth = 512)
     {
-        return Encoder::instance($this->getResources())
+        if ($this->encoder !== null) {
+            return $this->encoder;
+        }
+
+        return $this->encoder = Encoder::instance($this->getResources())
             ->withUrlPrefix($urlPrefix)
             ->withEncodeDepth($depth)
             ->withEncodeOptions(JSON_PRETTY_PRINT);
@@ -270,6 +286,22 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         $propertyMappingConfiguration->setTypeConverterOption('Neos\Flow\Property\TypeConverter\PersistentObjectConverter', \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, true);
         $propertyMappingConfiguration->setTypeConverterOption('Neos\Flow\Property\TypeConverter\PersistentObjectConverter', \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_MODIFICATION_ALLOWED, true);
         $propertyMappingConfiguration->allowAllProperties();
+
+        foreach ($this->allowedPropertyMappingPaths as $field) {
+            $propertyMappingConfiguration->forProperty($field)
+                ->setTypeConverterOption(
+                    \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::class,
+                    \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED,
+                    true
+                )
+                ->setTypeConverterOption(
+                    \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::class,
+                    \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_MODIFICATION_ALLOWED,
+                    true
+                )
+                ->allowAllProperties();
+        }
+
 
         if ($resource->hasRelationships()) {
             /** @var RelationshipInterface $relationship */
@@ -352,6 +384,9 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
 //            throw new RuntimeException('Paging parameters exist but paging is not supported.');
 //        }
 
+        // Let Encoder know what to include in response
+        $this->getEncoder()->withIncludedPaths($this->extractIncludePaths($parameters));
+
         return $this->all($query);
 //        return $pagination->isEmpty() ?
 //            $this->all($query) :
@@ -415,6 +450,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         if ($record = parent::read($resourceId, $parameters)) {
             $this->load($record, $parameters);
         }
+        $this->getEncoder()->withIncludedPaths($this->extractIncludePaths($parameters));
 
         return $record;
     }
@@ -426,9 +462,8 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     {
         /** @var object $record */
         $record = parent::update($record, $resource, $parameters);
-
         $this->load($record, $parameters);
-
+        $this->getEncoder()->withIncludedPaths($this->extractIncludePaths($parameters));
         return $record;
     }
 
@@ -481,13 +516,13 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
-     * @todo Optimalization for better performance
-     * Add eager loading to the query.
-     *
      * @param QueryInterface $query
      * @param array $includePaths
      *      the paths for resources that will be included.
      * @return void
+     * @todo Optimalization for better performance
+     * Add eager loading to the query.
+     *
      */
     protected function with($query, $includePaths)
     {
@@ -520,27 +555,52 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
-     * @todo
      * @inheritDoc
      */
-    public function hydrateAttributes($record, StandardObjectInterface $attributes)
+    public function hydrateAttributes($record, StandardObjectInterface $attributes, $id = null)
     {
         $arguments = [];
 
-        foreach ($attributes->toArray() as $propertyName => $propertyValue) {
-            if (\array_key_exists($propertyName, $this->mapAttributeToProperty)) {
-                $arguments[$this->mapAttributeToProperty[$propertyName]] = $propertyValue;
+        foreach ($attributes->toArray() as $attributeName => $attributeValue) {
+            if (\array_key_exists($attributeName, $this->mapAttributeToProperty)) {
+                $this->convertPathsToArray($arguments, $this->mapAttributeToProperty[$attributeName], $attributeValue);
                 continue;
             }
 
-            $arguments[Str::camelize($propertyName)] = $propertyValue;
+            $camelizedAttributeName = Str::camelize($attributeName);
+
+            if (\array_key_exists($camelizedAttributeName, $this->mapAttributeToProperty)) {
+                $this->convertPathsToArray($arguments, $this->mapAttributeToProperty[$camelizedAttributeName], $attributeValue);
+                continue;
+            }
+
+            $this->convertPathsToArray($arguments, Str::camelize($attributeName), $attributeValue);
         }
 
-        if ($record->hasId()) {
-            $arguments['__identity'] = $record->getId();
+        if ($id !== null) {
+            $arguments['__identity'] = $id;
         }
 
         return $arguments;
+    }
+
+    /**
+     * Convert dotted string into array path
+     *
+     * @param $arr
+     * @param $path
+     * @param $value
+     * @param string $separator
+     */
+    protected function convertPathsToArray(&$arr, $path, $value, $separator = '.')
+    {
+        $keys = explode($separator, $path);
+
+        foreach ($keys as $key) {
+            $arr = &$arr[$key];
+        }
+
+        $arr = $value;
     }
 
     /**
@@ -565,15 +625,14 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
 
                 $relationshipObjectCollection = $relationship->getRelationCollection();
                 if (!empty($relationshipObjectCollection)) {
-
                     /** @var RelationshipObject $relationshipObject */
                     foreach ($relationshipObjectCollection as $relationshipObject) {
                         $entry = [];
                         if ($relationshipObject->hasAttributes()) {
                             $entry = $relationshipObject->getAttributes()->toArray();
                         }
-                        if ($relationship->hasIdentifier() && $relationship->getIdentifier()->hasId()) {
-                            $entry['__identity'] = (string)$relationship->getIdentifier()->getId();
+                        if ($relationshipObject->getIdentifier()->get('id')) {
+                            $entry['__identity'] = (string)$relationshipObject->getIdentifier()->get('id');
                         }
                         $arguments[$key][] = $entry;
                     }
@@ -582,7 +641,6 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
                         $arguments[$key]['__identity'] = (string)$relationship->getIdentifier()->getId();
                     }
                 }
-                // TODO: $this->requiresPrimaryRecordPersistence($relation)
             }
         }
         return $arguments;
@@ -605,12 +663,12 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
-     * @todo
-     * Hydrate related models after the primary record has been persisted.
-     *
      * @param object $record
      * @param ResourceObjectInterface $resource
      * @param EncodingParametersParser $parameters
+     * @todo
+     * Hydrate related models after the primary record has been persisted.
+     *
      */
     protected function hydrateRelated(
         $record,
@@ -651,11 +709,11 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
+     * @param RelationshipAdapterInterface $relation
+     * @return bool
      * @todo
      * Does the relationship need to be hydrated after the primary record has been persisted?
      *
-     * @param RelationshipAdapterInterface $relation
-     * @return bool
      */
     protected function requiresPrimaryRecordPersistence($relation)
     {
@@ -680,10 +738,10 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
-     * @todo
      * @param QueryInterface $query
      * @param Collection $filters
      * @return mixed
+     * @todo
      */
     protected function findByIds($query, $filters)
     {
@@ -725,12 +783,12 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
-     * @todo
-     * Return the result for a paginated query.
-     *
      * @param QueryInterface $query
      * @param EncodingParametersParser $parameters
      * @return PageInterface
+     * @todo
+     * Return the result for a paginated query.
+     *
      */
     protected function paginate($query, EncodingParametersParser $parameters)
     {
@@ -738,10 +796,10 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
+     * @return string
      * @todo
      * Get the key that is used for the resource ID.
      *
-     * @return string
      */
     protected function getKeyName()
     {
@@ -749,8 +807,8 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
-     * @todo
      * @return string
+     * @todo
      */
     protected function getQualifiedKeyName()
     {
@@ -763,7 +821,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     protected function extractIncludePaths(EncodingParametersParser $parameters)
     {
-        return $parameters->getIncludes();
+        return \array_keys(\iterator_to_array($parameters->getIncludes()));
     }
 
     /**
@@ -772,7 +830,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     protected function extractFilters(EncodingParametersParser $parameters)
     {
-        return $parameters->getFilters();
+        return \iterator_to_array($parameters->getFilters());
     }
 
     /**
@@ -863,12 +921,12 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
-     * @todo
-     * Get the table column to use for the specified search field.
-     *
      * @param string $field
      * @param string $entity
      * @return string
+     * @todo
+     * Get the table column to use for the specified search field.
+     *
      */
     protected function columnForField($field, $entity)
     {

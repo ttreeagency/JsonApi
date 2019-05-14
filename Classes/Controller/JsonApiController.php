@@ -4,10 +4,13 @@ namespace Flowpack\JsonApi\Controller;
 
 use Flowpack\JsonApi\Adapter\DefaultAdapter;
 use Flowpack\JsonApi\Contract\Object\ResourceObjectInterface;
+use Flowpack\JsonApi\Document\Error;
 use Flowpack\JsonApi\Domain\Model\PaginationParameters;
 use Flowpack\JsonApi\Exception;
+use Flowpack\JsonApi\Object\Document;
 use Neomerx\JsonApi\Exceptions\JsonApiException;
 use Neomerx\JsonApi\Schema\BaseSchema;
+use Neomerx\JsonApi\Schema\ErrorCollection;
 use Neomerx\JsonApi\Schema\Link;
 use Neos\Flow\Annotations as Flow;
 use Flowpack\JsonApi\Adapter\AbstractAdapter;
@@ -124,7 +127,6 @@ class JsonApiController extends ActionController
     protected function initializeController(RequestInterface $request, ResponseInterface $response)
     {
         parent::initializeController($request, $response);
-
         /** @var ActionRequest $request */
         if ($request->hasArgument('@endpoint' === false)) {
             throw new ConfigurationException('Endpoint should be set');
@@ -266,16 +268,16 @@ class JsonApiController extends ActionController
         foreach ($this->arguments as $argument) {
             $argumentName = $argument->getName();
             if ($this->request->hasArgument($argumentName)) {
-                $arguments = $this->adapter->hydrateAttributes($resource, $resource->getAttributes());
+                $arguments = $this->adapter->hydrateAttributes($resource, $resource->getAttributes(), $resource->getId());
                 $relationshipArguments = $this->adapter->hydrateRelations($resource, $resource->getRelationships());
                 $arguments = \array_merge($arguments, $relationshipArguments);
 
-//                try {
+                try {
                     $argument->setValue($arguments);
-//                } catch (\Exception $e) {
-//                    // todo: handle validation error
-//                }
-
+                } catch (\Exception $e) {
+//                     todo: handle validation error
+                    throw $e;
+                }
             } elseif ($argument->isRequired()) {
                 throw new \Neos\Flow\Mvc\Exception\RequiredArgumentMissingException('Required argument "' . $argumentName . '" is not set.', 1298012500);
             }
@@ -391,7 +393,7 @@ class JsonApiController extends ActionController
     public function updateAction($resource)
     {
         try {
-            $data = $this->adapter->update($resource, $this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
+            $data = $this->adapter->updateEntity($resource, $this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
         } catch (Exception\InvalidJsonException $e) {
             $this->response = $this->response->withStatus(406);
             return;
@@ -477,6 +479,7 @@ class JsonApiController extends ActionController
     }
 
     /**
+     * @todo resolve errors with Document error
      * @return string
      * @throws \Neos\Flow\Mvc\Exception\ForwardException
      * @throws \Neos\Flow\Property\Exception\TargetNotFoundException
@@ -485,10 +488,9 @@ class JsonApiController extends ActionController
     {
         $this->response = $this->response->withStatus(422);
         $this->handleTargetNotFoundError();
-        $this->addErrorFlashMessage();
-        $this->forwardToReferringRequest();
 
-        return $this->getFlattenedValidationErrorMessage();
+        \Neos\Flow\var_dump(\json_encode((object)$this->getFlattenedValidationErrorMessage()),'??');
+        $this->response->setContent(\json_encode((object)$this->getFlattenedValidationErrorMessage()));
     }
 
     /**
@@ -498,20 +500,24 @@ class JsonApiController extends ActionController
      */
     protected function getFlattenedValidationErrorMessage()
     {
-        $errorMessages = [];
+//        $errorCollection = new ErrorCollection();
+        $errorCollection = [];
         foreach ($this->arguments->getValidationResults()->getFlattenedErrors() as $propertyPath => $errors) {
             foreach ($errors as $key => $error) {
+                $properties = \explode('.', $propertyPath);
+//                $errorObject = new Error($key, null, 422, null, $error->render(), $error->render(), $properties);
+
                 $errorObject = [];
                 $errorObject['status'] = '422';
                 $errorObject['detail'] = $error->render();
-
-                $properties = \explode('.', $propertyPath);
                 $errorObject['source']['pointer'] = '/data/attributes/' . \array_pop($properties);
+                $errorCollection['errors'][] = $errorObject;
 
-                $errorMessages['errors'][] = $errorObject;
+                // Should assign to document
+//                $errorCollection->add($errorObject);
             }
         }
-        return \json_encode((object)$errorMessages);
+        return $errorCollection;
     }
 
     /**

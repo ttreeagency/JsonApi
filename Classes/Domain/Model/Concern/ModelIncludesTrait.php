@@ -5,6 +5,8 @@ namespace Flowpack\JsonApi\Domain\Model\Concern;
 use Doctrine\Common\Collections\Collection;
 
 use Flowpack\JsonApi\Utility\StringUtility as Str;
+use Neos\Eel\Helper\ArrayHelper;
+use Neos\Eel\Utility;
 
 /**
  * Trait ModelIncludesTrait
@@ -61,10 +63,7 @@ trait ModelIncludesTrait
      */
     protected function getRelationshipPaths($includePaths)
     {
-        return $this->convertIncludePaths($includePaths);
-//            ->merge($this->defaultWith)
-//            ->unique()
-//            ->all();
+        return \array_unique(\array_merge($this->convertIncludePaths($includePaths), $this->defaultWith));
     }
 
     /**
@@ -73,12 +72,11 @@ trait ModelIncludesTrait
      */
     protected function convertIncludePaths($includePaths)
     {
-        return $includePaths;
-
-//        $new = new \Neos\Flow\ResourceManagement\Collection()
-//        return (new \Doctrine\Common\Collections\Collection($includePaths))->map(function ($path) {
-//            return $this->convertIncludePath($path);
-//        })->filter()->values();
+        $convertedIncludedPaths = [];
+        foreach($includePaths as $path) {
+            $convertedIncludedPaths[] = $this->convertIncludePath($path);
+        }
+        return $convertedIncludedPaths;
     }
 
     /**
@@ -93,8 +91,6 @@ trait ModelIncludesTrait
             return $this->includePaths[$path] ?: null;
         }
 
-        return collect(\explode('.', $path))->map(function ($segment) {
-            return Str::camelize($segment);
-        })->implode('.');
+        // TODO explode path and camelize string
     }
 }

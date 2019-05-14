@@ -9,4 +9,4 @@ Neos:
   Flow:
     mvc:
       routes:
-        'Flowpack.JsonApi': TRUE
+        'Flowpack.JsonApi': true

@@ -5,6 +5,7 @@ namespace Flowpack\JsonApi\Domain;
 use Flowpack\JsonApi\Contract\Object\RelationshipInterface;
 use Flowpack\JsonApi\Contract\Parameters\EncodingParametersInterface;
 /**
+ * @todo this does important stuff in laravel but for Doctrine this part seems not interesting so far.
  * Class HasMany
  *
  * @package CloudCreativity\LaravelJsonApi
@@ -22,14 +23,6 @@ class HasMany extends AbstractManyRelation
     {
         $related = $this->findRelated($record, $relationship);
         $relation = $this->getRelation($record);
-
-        if ($relation instanceof Relations\BelongsToMany) {
-            $relation->sync($related);
-            return;
-        } else {
-            $this->sync($relation, $record->{$this->key}, $related);
-        }
-
         // do not refresh as we expect the resource adapter to refresh the record.
     }
 
@@ -146,14 +139,7 @@ class HasMany extends AbstractManyRelation
      */
     protected function findRelated($record, RelationshipInterface $relationship)
     {
-        $inverse = $this->getRelation($record)->getRelated();
-        $related = $this->store()->findMany($relationship->getIdentifiers());
-
-        $related = collect($related)->filter(function ($model) use ($inverse) {
-            return $model instanceof $inverse;
-        });
-
-        return new Collection($related);
+        return $record->{'get' . \ucfirst($this->key)}();
     }
 
 }

@@ -35,9 +35,10 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
     /**
      * @param $record
      * @param StandardObjectInterface $attributes
+     * @param null $id
      * @return void
      */
-    abstract protected function hydrateAttributes($record, StandardObjectInterface $attributes);
+    abstract protected function hydrateAttributes($record, StandardObjectInterface $attributes, $id = null);
 
     /**
      * Persist changes to the record.
@@ -67,7 +68,6 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
      */
     public function updateEntity($propertyMappedResource, ResourceObjectInterface $resourceObject, EncodingParametersParser $parameters)
     {
-        // Do other stuff?
         return $this->persist($propertyMappedResource);
     }
 
@@ -110,7 +110,7 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
      */
     public function update($record, ResourceObjectInterface $resource, EncodingParametersParser $parameters)
     {
-        $this->hydrateAttributes($record, $resource->getAttributes());
+        $this->hydrateAttributes($record, $resource->getAttributes(), $resource->getId());
         $this->fillRelationships($record, $resource->getRelationships(), $parameters);
         $record = $this->persist($record) ?: $record;
 
