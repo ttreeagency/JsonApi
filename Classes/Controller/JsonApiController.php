@@ -268,7 +268,11 @@ class JsonApiController extends ActionController
         foreach ($this->arguments as $argument) {
             $argumentName = $argument->getName();
             if ($this->request->hasArgument($argumentName)) {
-                $arguments = $this->adapter->hydrateAttributes($resource, $resource->getAttributes(), $resource->getId());
+                if ($resource->hasId()) {
+                    $arguments = $this->adapter->hydrateAttributes($resource, $resource->getAttributes(), $resource->getId());
+                } else {
+                    $arguments = $this->adapter->hydrateAttributes($resource, $resource->getAttributes());
+                }
                 $relationshipArguments = $this->adapter->hydrateRelations($resource, $resource->getRelationships());
                 $arguments = \array_merge($arguments, $relationshipArguments);
 

@@ -170,7 +170,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      * @param string $resource
      * @param EncodingParametersParser $parameters
      */
-    public function __construct($configuration, $resource, EncodingParametersParser $parameters)
+    public function __construct($configuration, $resource, EncodingParametersParser $parameters = null)
     {
         $this->configuration = $configuration;
         $this->resource = $resource;
@@ -563,6 +563,9 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
 
         foreach ($attributes->toArray() as $attributeName => $attributeValue) {
             if (\array_key_exists($attributeName, $this->mapAttributeToProperty)) {
+                if ($this->mapAttributeToProperty[$attributeName] === null) {
+                    continue;
+                }
                 $this->convertPathsToArray($arguments, $this->mapAttributeToProperty[$attributeName], $attributeValue);
                 continue;
             }
@@ -570,6 +573,9 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
             $camelizedAttributeName = Str::camelize($attributeName);
 
             if (\array_key_exists($camelizedAttributeName, $this->mapAttributeToProperty)) {
+                if ($this->mapAttributeToProperty[$camelizedAttributeName] === null) {
+                    continue;
+                }
                 $this->convertPathsToArray($arguments, $this->mapAttributeToProperty[$camelizedAttributeName], $attributeValue);
                 continue;
             }
@@ -612,9 +618,9 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     public function hydrateRelations($record, RelationshipsInterface $relationships)
     {
         $arguments = [];
-
         if ($relationships !== null) {
             foreach ($relationships->getAll() as $field => $value) {
+
                 if (!$this->isRelation($field)) {
                     continue;
                 }
