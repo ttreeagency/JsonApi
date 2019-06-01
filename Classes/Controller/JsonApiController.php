@@ -275,7 +275,6 @@ class JsonApiController extends ActionController
                 }
                 $relationshipArguments = $this->adapter->hydrateRelations($resource, $resource->getRelationships());
                 $arguments = \array_merge($arguments, $relationshipArguments);
-
                 try {
                     $argument->setValue($arguments);
                 } catch (\Exception $e) {

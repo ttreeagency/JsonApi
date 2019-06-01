@@ -60,7 +60,7 @@ class EncodingParametersParser implements EncodingParametersInterface
     public function getFilters(): iterable
     {
         if (\array_key_exists(P::PARAM_FILTER, $this->parameters) === true) {
-            $fields = $this->parameters[P::PARAM_FIELDS];
+            $fields = $this->parameters[P::PARAM_FILTER];
             foreach ($fields as $type => $fieldList) {
                 yield $type => $this->splitCommaSeparatedStringAndCheckNoEmpties(
                     $type,
