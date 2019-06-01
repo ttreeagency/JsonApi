@@ -9,6 +9,7 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Flow\ObjectManagement\ObjectManagerInterface;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\Flow\Persistence\QueryInterface;
+use Neos\Flow\Property\TypeConverter\PersistentObjectConverter;
 use Neos\Utility\Arrays;
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
 use Flowpack\JsonApi\Contract\JsonApiRepositoryInterface;
@@ -283,34 +284,58 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     public function setPropertyMappingConfiguration(MvcPropertyMappingConfiguration $propertyMappingConfiguration, ResourceObjectInterface $resource)
     {
-        $propertyMappingConfiguration->setTypeConverterOption('Neos\Flow\Property\TypeConverter\PersistentObjectConverter', \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, true);
-        $propertyMappingConfiguration->setTypeConverterOption('Neos\Flow\Property\TypeConverter\PersistentObjectConverter', \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_MODIFICATION_ALLOWED, true);
-        $propertyMappingConfiguration->allowAllProperties();
+        $propertyMappingConfiguration
+            ->setTypeConverterOption(
+                PersistentObjectConverter::class,
+                PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED,
+                true)
+            ->setTypeConverterOption(
+                PersistentObjectConverter::class,
+                PersistentObjectConverter::CONFIGURATION_IDENTITY_CREATION_ALLOWED,
+                true
+            )
+            ->setTypeConverterOption(
+                PersistentObjectConverter::class,
+                PersistentObjectConverter::CONFIGURATION_MODIFICATION_ALLOWED,
+                true
+            )
+            ->allowAllProperties();
+
+        $skipProperties = [];
+        foreach ($this->mapAttributeToProperty as $attribute => $property) {
+            if ($property === null) {
+                $skipProperties[] = $attribute;
+            }
+            $propertyMappingConfiguration->setMapping($attribute, $property);
+        }
+        $propertyMappingConfiguration->skipProperties(\implode(',', $skipProperties));
 
         foreach ($this->allowedPropertyMappingPaths as $field) {
             $propertyMappingConfiguration->forProperty($field)
                 ->setTypeConverterOption(
-                    \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::class,
-                    \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED,
+                    PersistentObjectConverter::class,
+                    PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED,
                     true
                 )
                 ->setTypeConverterOption(
-                    \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::class,
-                    \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_MODIFICATION_ALLOWED,
+                    PersistentObjectConverter::class,
+                    PersistentObjectConverter::CONFIGURATION_IDENTITY_CREATION_ALLOWED,
+                    true
+                )
+                ->setTypeConverterOption(
+                    PersistentObjectConverter::class,
+                    PersistentObjectConverter::CONFIGURATION_MODIFICATION_ALLOWED,
                     true
                 )
                 ->allowAllProperties();
         }
 
-
         if ($resource->hasRelationships()) {
             /** @var RelationshipInterface $relationship */
             foreach ($resource->getRelationships()->getAll() as $field => $value) {
-
                 if (!$this->isRelation($field)) {
                     continue;
                 }
-
 
                 if (!$method = $this->methodForRelation($field)) {
                     throw new RuntimeException("No relationship method implemented for field {$field}.");
@@ -320,9 +345,15 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
 
                 if ($relation instanceof AbstractManyRelation) {
                     $propertyMappingConfiguration->forProperty($field . '.*')
+                        ->setTypeConverter(new PersistentObjectConverter())
                         ->setTypeConverterOption(
                             \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::class,
                             \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED,
+                            true
+                        )
+                        ->setTypeConverterOption(
+                            PersistentObjectConverter::class,
+                            PersistentObjectConverter::CONFIGURATION_IDENTITY_CREATION_ALLOWED,
                             true
                         )
                         ->setTypeConverterOption(
@@ -335,9 +366,15 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
                 }
 
                 $propertyMappingConfiguration->forProperty($field)
+                    ->setTypeConverter(new PersistentObjectConverter())
                     ->setTypeConverterOption(
                         \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::class,
                         \Neos\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED,
+                        true
+                    )
+                    ->setTypeConverterOption(
+                        PersistentObjectConverter::class,
+                        PersistentObjectConverter::CONFIGURATION_IDENTITY_CREATION_ALLOWED,
                         true
                     )
                     ->setTypeConverterOption(
@@ -562,24 +599,6 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         $arguments = [];
 
         foreach ($attributes->toArray() as $attributeName => $attributeValue) {
-            if (\array_key_exists($attributeName, $this->mapAttributeToProperty)) {
-                if ($this->mapAttributeToProperty[$attributeName] === null) {
-                    continue;
-                }
-                $this->convertPathsToArray($arguments, $this->mapAttributeToProperty[$attributeName], $attributeValue);
-                continue;
-            }
-
-            $camelizedAttributeName = Str::camelize($attributeName);
-
-            if (\array_key_exists($camelizedAttributeName, $this->mapAttributeToProperty)) {
-                if ($this->mapAttributeToProperty[$camelizedAttributeName] === null) {
-                    continue;
-                }
-                $this->convertPathsToArray($arguments, $this->mapAttributeToProperty[$camelizedAttributeName], $attributeValue);
-                continue;
-            }
-
             $this->convertPathsToArray($arguments, Str::camelize($attributeName), $attributeValue);
         }
 
