@@ -301,27 +301,37 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
             )
             ->allowAllProperties();
 
+        $allowProperties = [];
         $skipProperties = [];
+
         foreach ($this->mapAttributeToProperty as $attribute => $property) {
             if ($property === null) {
                 $skipProperties[] = $attribute;
                 continue;
             }
             $propertyMappingConfiguration->setMapping($attribute, $property);
-        }
+            $allowProperties[] = $property;
 
-        $propertyMappingConfiguration->skipProperties(...$skipProperties);
+            $propertyPath = explode('.', $property);
+            if ($propertyPath > 1) {
+                $propertyMappingConfiguration->forProperty($propertyPath[0])
+                    ->setTypeConverterOption(
+                        PersistentObjectConverter::class,
+                        PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED,
+                        true
+                    )
+                    ->setTypeConverterOption(
+                        PersistentObjectConverter::class,
+                        PersistentObjectConverter::CONFIGURATION_MODIFICATION_ALLOWED,
+                        true
+                    )
+                    ->allowAllProperties();
+            }
 
-        foreach ($this->allowedPropertyMappingPaths as $field) {
-            $propertyMappingConfiguration->forProperty($field)
+            $propertyMappingDefinition = $propertyMappingConfiguration->forProperty($property)
                 ->setTypeConverterOption(
                     PersistentObjectConverter::class,
                     PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED,
-                    true
-                )
-                ->setTypeConverterOption(
-                    PersistentObjectConverter::class,
-                    PersistentObjectConverter::CONFIGURATION_IDENTITY_CREATION_ALLOWED,
                     true
                 )
                 ->setTypeConverterOption(
@@ -331,6 +341,9 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
                 )
                 ->allowAllProperties();
         }
+
+        $propertyMappingConfiguration->allowProperties(...$allowProperties);
+        $propertyMappingConfiguration->skipProperties(...$skipProperties);
 
         if ($resource->hasRelationships()) {
             /** @var RelationshipInterface $relationship */
@@ -601,6 +614,24 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         $arguments = [];
 
         foreach ($attributes->toArray() as $attributeName => $attributeValue) {
+            if (\array_key_exists($attributeName, $this->mapAttributeToProperty)) {
+                if ($this->mapAttributeToProperty[$attributeName] === null) {
+                    continue;
+                }
+                $this->convertPathsToArray($arguments, $this->mapAttributeToProperty[$attributeName], $attributeValue);
+                continue;
+            }
+
+            $camelizedAttributeName = Str::camelize($attributeName);
+
+            if (\array_key_exists($camelizedAttributeName, $this->mapAttributeToProperty)) {
+                if ($this->mapAttributeToProperty[$camelizedAttributeName] === null) {
+                    continue;
+                }
+                $this->convertPathsToArray($arguments, $this->mapAttributeToProperty[$camelizedAttributeName], $attributeValue);
+                continue;
+            }
+
             $this->convertPathsToArray($arguments, Str::camelize($attributeName), $attributeValue);
         }
 
