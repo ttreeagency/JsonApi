@@ -305,10 +305,12 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         foreach ($this->mapAttributeToProperty as $attribute => $property) {
             if ($property === null) {
                 $skipProperties[] = $attribute;
+                continue;
             }
             $propertyMappingConfiguration->setMapping($attribute, $property);
         }
-        $propertyMappingConfiguration->skipProperties(\implode(',', $skipProperties));
+
+        $propertyMappingConfiguration->skipProperties(...$skipProperties);
 
         foreach ($this->allowedPropertyMappingPaths as $field) {
             $propertyMappingConfiguration->forProperty($field)
@@ -707,11 +709,6 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         if ($relationships !== null) {
 
             foreach ($relationships->getAll() as $field => $value) {
-//            /** Skip any fields that are not fillable. */
-//            if ($this->isNotFillable($field, $record)) {
-//                continue;
-//            }
-
                 /** Skip any fields that are not relations */
                 if (!$this->isRelation($field)) {
                     continue;
