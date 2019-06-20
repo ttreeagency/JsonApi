@@ -51,6 +51,12 @@ class JsonApiController extends ActionController
 
     /**
      * @var array
+     * @Flow\InjectConfiguration(package="Flowpack.JsonApi", path="response.headers")
+     */
+    protected $responseHeaders;
+
+    /**
+     * @var array
      */
     protected $endpoint;
 
@@ -108,7 +114,7 @@ class JsonApiController extends ActionController
     {
         parent::initializeAction();
         $this->response->setHeader('Content-Type', 'application/vnd.api+json');
-        $this->response->setHeader('Access-Control-Allow-Origin', '*');
+        $this->response->setHeader('Access-Control-Allow-Origin', $this->responseHeaders['Access-Control-Allow-Origin']);
     }
 
     /**

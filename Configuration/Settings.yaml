@@ -1,5 +1,8 @@
 Flowpack:
   JsonApi:
+    response:
+      headers:
+        'Access-Control-Allow-Origin': '*'
     endpoints:
       'api':
         baseUrl: 'api'
