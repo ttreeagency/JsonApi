@@ -27,4 +27,13 @@ class {adapterClassName} extends AbstractAdapter
     {
         // Add filters here
     }
+
+    /**
+     * Force paths to be included
+     * @return array
+     */
+    protected function getIncludePaths()
+    {
+        return [];
+    }
 }

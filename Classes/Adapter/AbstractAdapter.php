@@ -41,7 +41,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     use ModelIncludesTrait;
 
     /**
-     * @var Neomerx\JsonApi\Encoder\Encoder|null
+     * @var Encoder|null
      */
     protected $encoder = null;
 
@@ -212,17 +212,23 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      * @param integer $depth
      * @return EncoderInterface
      */
-    public function getEncoder($urlPrefix = null, $depth = 512)
+    public function setEncoder($urlPrefix = null, $parameters = null, $depth = 512): void
     {
-        if ($this->encoder !== null) {
-            return $this->encoder;
-        }
-
-        return $this->encoder = Encoder::instance($this->getResources())
+        $this->encoder = Encoder::instance($this->getResources())
             ->withUrlPrefix($urlPrefix)
             ->withEncodeDepth($depth)
-            ->withEncodeOptions(JSON_PRETTY_PRINT);
+            ->withEncodeOptions(JSON_PRETTY_PRINT)
+            ->withIncludedPaths($this->extractIncludePaths($parameters));
     }
+
+    /**
+     * @return Encoder|null
+     */
+    public function getEncoder(): EncoderInterface
+    {
+        return $this->encoder;
+    }
+
 
     /**
      * Get definition from this resource by combining entity and schema for both top level and sublevel related resources
@@ -232,11 +238,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         $resources = [
             $this->entity => $this->schema
         ];
-
-        foreach ($this->related as $resource) {
-            $resources = \array_merge($resource, $resources);
-        }
-        return $resources;
+        return \array_merge($resources, $this->related);
     }
 
     /**
@@ -421,9 +423,6 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         $filters = $this->extractFilters($parameters);
         $query = $this->newQuery();
 
-        /** Apply eager loading */
-        $this->with($query, $this->extractIncludePaths($parameters));
-
         /** Filter and sort */
         $this->filter($query, $filters);
 
@@ -435,9 +434,6 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
 //        if (!$pagination->isEmpty() && !$this->hasPaging()) {
 //            throw new RuntimeException('Paging parameters exist but paging is not supported.');
 //        }
-
-        // Let Encoder know what to include in response
-        $this->getEncoder()->withIncludedPaths($this->extractIncludePaths($parameters));
 
         return $this->all($query);
 //        return $pagination->isEmpty() ?
@@ -475,9 +471,6 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     {
         $query = $relation->newQuery();
 
-        /** Apply eager loading */
-        $this->with($query, $this->extractIncludePaths($parameters));
-
         /** Filter and sort */
         $this->filter($query, $this->extractFilters($parameters));
         $this->sort($query, (array)$parameters->getSorts());
@@ -502,7 +495,6 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         if ($record = parent::read($resourceId, $parameters)) {
             $this->load($record, $parameters);
         }
-        $this->getEncoder()->withIncludedPaths($this->extractIncludePaths($parameters));
 
         return $record;
     }
@@ -515,7 +507,6 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         /** @var object $record */
         $record = parent::update($record, $resource, $parameters);
         $this->load($record, $parameters);
-        $this->getEncoder()->withIncludedPaths($this->extractIncludePaths($parameters));
         return $record;
     }
 
@@ -565,21 +556,6 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     protected function newQuery()
     {
         return $this->repository->createQuery();
-    }
-
-    /**
-     * @param QueryInterface $query
-     * @param array $includePaths
-     *      the paths for resources that will be included.
-     * @return void
-     * @todo Optimalization for better performance
-     * Add eager loading to the query.
-     *
-     */
-    protected function with($query, $includePaths)
-    {
-//        $query->setFetchMode($this->getRelationshipPaths($includePaths));
-        return;
     }
 
     /**
@@ -874,7 +850,7 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     protected function extractIncludePaths(EncodingParametersParser $parameters)
     {
-        return \array_keys(\iterator_to_array($parameters->getIncludes()));
+        return \array_unique(\array_merge(\array_keys(\iterator_to_array($parameters->getIncludes())), $this->getIncludePaths()));
     }
 
     /**
@@ -1041,6 +1017,15 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         list($one, $two, $caller) = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
 
         return $caller['function'];
+    }
+
+    /**
+     * Force paths to be included
+     * @return array
+     */
+    protected function getIncludePaths()
+    {
+        return [];
     }
 
     /**

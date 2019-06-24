@@ -108,6 +108,7 @@ class ResourceCommandController extends CommandController
         $this->outputLine('            schema: \'%s\'', [$this->generatorService->getNamespacesEntry('schema')]);
         $this->outputLine('            entity: \'%s\'', [$entity]);
         $this->outputLine('            related: []');
+        $this->outputLine('              # list of Object\'s: Schema\s');
         $this->outputLine('            allowedMethods: [\'list\', \'create\', \'read\', \'update\', \'delete\']');
 
         $this->outputLine();

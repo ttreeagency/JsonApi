@@ -157,7 +157,8 @@ class JsonApiController extends ActionController
         $this->registerAdapter($this->resourceConfiguration, $resource);
 
         $urlPrefix = $this->getUrlPrefix($request);
-        $this->encoder = $this->adapter->getEncoder($urlPrefix);
+        $this->adapter->setEncoder($urlPrefix, $this->encodedParameters);
+        $this->encoder = $this->adapter->getEncoder();
     }
 
     /**
@@ -304,7 +305,7 @@ class JsonApiController extends ActionController
         /** @var JsonApiView $view */
         parent::initializeView($view);
         $view->setResource($this->request->getArgument('resource'));
-        $view->setEncoder($this->encoder);
+        $view->setEncoder($this->adapter->getEncoder());
         $view->setParameters($this->encodedParameters);
     }
 
