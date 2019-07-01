@@ -20,19 +20,6 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
 {
 
     /**
-     * Create a new record.
-     *
-     * Implementing classes need only implement the logic to transfer the minimum
-     * amount of data from the resource that is required to construct a new record
-     * instance. The adapter will then hydrate the object after it has been
-     * created.
-     *
-     * @param ResourceObjectInterface $resource
-     * @return object
-     */
-    abstract protected function createRecord(ResourceObjectInterface $resource);
-
-    /**
      * @param $record
      * @param StandardObjectInterface $attributes
      * @param null $id
@@ -54,10 +41,33 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
      * @param EncodingParametersParser $parameters
      * @return object
      */
-    public function createEntity($propertyMappedResource, ResourceObjectInterface $resourceObject, EncodingParametersParser $parameters)
+    public function create($propertyMappedResource, ResourceObjectInterface $resourceObject, EncodingParametersParser $parameters)
     {
-        // Do other stuff?
-        return $this->persist($propertyMappedResource);
+        $this->beforeCreate($propertyMappedResource, $resourceObject, $parameters);
+
+        $persistedResource = $this->persist($propertyMappedResource);
+
+        $this->beforeCreate($persistedResource, $resourceObject, $parameters);
+
+        return $persistedResource;
+    }
+
+    /**
+     * @param $propertyMappedResource
+     * @param ResourceObjectInterface $resourceObject
+     * @param EncodingParametersParser $parameters
+     */
+    protected function beforeCreate($propertyMappedResource, ResourceObjectInterface $resourceObject, EncodingParametersParser $parameters)
+    {
+    }
+
+    /**
+     * @param $persistedResource
+     * @param ResourceObjectInterface $resourceObject
+     * @param EncodingParametersParser $parameters
+     */
+    protected function afterCreate($persistedResource, ResourceObjectInterface $resourceObject, EncodingParametersParser $parameters)
+    {
     }
 
     /**
@@ -66,29 +76,33 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
      * @param EncodingParametersParser $parameters
      * @return object
      */
-    public function updateEntity($propertyMappedResource, ResourceObjectInterface $resourceObject, EncodingParametersParser $parameters)
+    public function update($propertyMappedResource, ResourceObjectInterface $resourceObject, EncodingParametersParser $parameters)
     {
-        return $this->persist($propertyMappedResource);
+        $this->beforeUpdate($propertyMappedResource, $resourceObject, $parameters);
+
+        $persistedResource = $this->persist($propertyMappedResource);
+
+        $this->beforeUpdate($persistedResource, $resourceObject, $parameters);
+
+        return $persistedResource;
     }
 
     /**
-     * @param ResourceObjectInterface $resource
+     * @param $propertyMappedResource
+     * @param ResourceObjectInterface $resourceObject
      * @param EncodingParametersParser $parameters
-     * @return object
-     * @throws RuntimeException
      */
-    public function create(ResourceObjectInterface $resource, EncodingParametersParser $parameters)
+    protected function beforeUpdate($propertyMappedResource, ResourceObjectInterface $resourceObject, EncodingParametersParser $parameters)
     {
-        $record = $this->createRecord($resource);
-        $this->hydrateAttributes($record, $resource->getAttributes());
-        $this->fillRelationships($record, $resource->getRelationships(), $parameters);
-        $record = $this->persist($record) ?: $record;
+    }
 
-        if (\method_exists($this, 'hydrateRelated')) {
-            $record = $this->hydrateRelated($record, $resource, $parameters) ?: $record;
-        }
-
-        return $record;
+    /**
+     * @param $persistedResource
+     * @param ResourceObjectInterface $resourceObject
+     * @param EncodingParametersParser $parameters
+     */
+    protected function afterUpdate($persistedResource, ResourceObjectInterface $resourceObject, EncodingParametersParser $parameters)
+    {
     }
 
     /**
@@ -102,23 +116,19 @@ abstract class AbstractResourceAdapter implements ResourceAdapterInterface
     }
 
     /**
-     * @param object $record
-     * @param ResourceObjectInterface $resource
+     * @param $propertyMappedResource
      * @param EncodingParametersParser $parameters
-     * @return object
-     * @throws RuntimeException
      */
-    public function update($record, ResourceObjectInterface $resource, EncodingParametersParser $parameters)
+    protected function beforeDelete($propertyMappedResource, EncodingParametersParser $parameters)
     {
-        $this->hydrateAttributes($record, $resource->getAttributes(), $resource->getId());
-        $this->fillRelationships($record, $resource->getRelationships(), $parameters);
-        $record = $this->persist($record) ?: $record;
+    }
 
-        if (\method_exists($this, 'hydrateRelated')) {
-            $record = $this->hydrateRelated($record, $resource, $parameters) ?: $record;
-        }
-
-        return $record;
+    /**
+     * @param $persistedResource
+     * @param EncodingParametersParser $parameters
+     */
+    protected function afterDelete($persistedResource, EncodingParametersParser $parameters)
+    {
     }
 
     /**

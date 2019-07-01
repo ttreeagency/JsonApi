@@ -29,11 +29,12 @@ interface ResourceAdapterInterface
     /**
      * Create a domain record using data from the supplied resource object.
      *
-     * @param ResourceObjectInterface $resource
+     * @param $propertyMappedResource
+     * @param ResourceObjectInterface $resourceObject
      * @param EncodingParametersParser $parameters
-     * @return object the created domain record.
+     * @return object
      */
-    public function create(ResourceObjectInterface $resource, EncodingParametersParser $parameters);
+    public function create($propertyMappedResource, ResourceObjectInterface $resourceObject, EncodingParametersParser $parameters);
 
     /**
      * Query a single domain record.

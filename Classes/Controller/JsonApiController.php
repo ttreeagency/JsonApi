@@ -376,7 +376,7 @@ class JsonApiController extends ActionController
     public function createAction($resource)
     {
         try {
-            $data = $this->adapter->createEntity($resource, $this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
+            $data = $this->adapter->create($resource, $this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
         } catch (Exception\InvalidJsonException $e) {
             $this->response = $this->response->withStatus(406);
             return;
@@ -404,7 +404,7 @@ class JsonApiController extends ActionController
     public function updateAction($resource)
     {
         try {
-            $data = $this->adapter->updateEntity($resource, $this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
+            $data = $this->adapter->update($resource, $this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
         } catch (Exception\InvalidJsonException $e) {
             $this->response = $this->response->withStatus(406);
             return;

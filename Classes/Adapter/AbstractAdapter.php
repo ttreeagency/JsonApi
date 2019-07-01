@@ -78,7 +78,6 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     protected $persistenceManager;
 
     /**
-     * @Flow\Inject()
      * @var DefaultRepository
      */
     protected $repository;
@@ -204,6 +203,15 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         $this->related = Arrays::getValueByPath($this->configuration, 'related');
         if (!\is_array($this->related)) {
             throw new Exception(\sprintf('Resource "%s" related not configured', $this->resource), 1447947503);
+        }
+        $repository = Arrays::getValueByPath($this->configuration, 'repository');
+        if (\is_string($repository)) {
+            if (!$this->objectManager->has($repository)) {
+                throw new Exception(\sprintf('Given repository class "%s" does not exist.', $repository));
+            }
+            $this->repository = $this->objectManager->get($repository);
+        } else {
+            $this->repository = $this->objectManager->get('Flowpack\JsonApi\Domain\Repository\DefaultRepository');
         }
     }
 
@@ -518,7 +526,9 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      */
     public function delete($record, EncodingParametersParser $params)
     {
+        $this->beforeDelete($record, $params);
         $this->repository->remove($record);
+        $this->afterDelete($record, $params);
     }
 
     /**
@@ -572,14 +582,6 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         if (\method_exists($record, 'loadMissing')) {
             $record->loadMissing($relationshipPaths);
         }
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function createRecord(ResourceObjectInterface $resource)
-    {
-        return (new $this->model());
     }
 
     /**
