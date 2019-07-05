@@ -110,7 +110,7 @@ class JsonApiController extends ActionController
     /**
      * Initialize Action
      */
-    protected function initializeAction()
+    protected function initializeAction(): void
     {
         parent::initializeAction();
         $this->response->setHeader('Content-Type', 'application/vnd.api+json');
@@ -130,7 +130,7 @@ class JsonApiController extends ActionController
      * @throws RuntimeException
      * @throws ConfigurationException
      */
-    protected function initializeController(RequestInterface $request, ResponseInterface $response)
+    protected function initializeController(RequestInterface $request, ResponseInterface $response): void
     {
         parent::initializeController($request, $response);
         /** @var ActionRequest $request */
@@ -168,7 +168,7 @@ class JsonApiController extends ActionController
      * @throws \Neos\Flow\Mvc\Exception\NoSuchArgumentException
      * @throws \Neos\Flow\Mvc\Exception\StopActionException
      */
-    protected function resolveActionMethodName()
+    protected function resolveActionMethodName(): string
     {
         if ($this->validatedRequest->isOptions()) {
             return 'optionsAction';
@@ -217,7 +217,7 @@ class JsonApiController extends ActionController
      * @throws InvalidArgumentTypeException
      * @see initializeArguments()
      */
-    protected function initializeActionMethodArguments()
+    protected function initializeActionMethodArguments(): void
     {
         $actionMethodParameters = static::getActionMethodParameters($this->objectManager);
         if (isset($actionMethodParameters[$this->actionMethodName])) {
@@ -257,7 +257,7 @@ class JsonApiController extends ActionController
      * @throws \Neos\Flow\Http\Exception
      * @throws \Neos\Flow\Mvc\Exception\RequiredArgumentMissingException
      */
-    protected function mapRequestArgumentsToControllerArguments()
+    protected function mapRequestArgumentsToControllerArguments(): void
     {
         if (!\in_array($this->request->getHttpRequest()->getMethod(), ['POST', 'PUT', 'PATCH'])) {
             parent::mapRequestArgumentsToControllerArguments();
@@ -300,7 +300,7 @@ class JsonApiController extends ActionController
      * @throws \Neos\Flow\Mvc\Exception\NoSuchArgumentException
      * @throws \Flowpack\JsonApi\Exception\ConfigurationException
      */
-    protected function initializeView(ViewInterface $view)
+    protected function initializeView(ViewInterface $view): void
     {
         /** @var JsonApiView $view */
         parent::initializeView($view);
@@ -310,10 +310,10 @@ class JsonApiController extends ActionController
     }
 
     /**
-     * @throws \Neos\Flow\Exception
      * @return void
+     * @throws \Neos\Flow\Exception
      */
-    public function listAction()
+    public function listAction(): void
     {
         $isSubUrl = true;
         $hasMeta = false;
@@ -329,6 +329,10 @@ class JsonApiController extends ActionController
         } else {
             $self = new Link($isSubUrl, \sprintf('/%s', $this->adapter->getResource()), $hasMeta);
         }
+
+        $meta = [
+            'total' => $count,
+        ];
 
         $links = [
             Link::SELF => $self
@@ -359,13 +363,10 @@ class JsonApiController extends ActionController
                 $links[Link::LAST] = new Link($isSubUrl, \sprintf('/%s?%s', $this->adapter->getResource(), $query), $hasMeta);
             }
 
-            $meta = [
-                'total' => $count,
-                'size' => count($data),
-                'offset' => $pagination->getOffset(),
-                'limit' => $pagination->getLimit(),
-                'current' => $pagination->current(),
-            ];
+            $meta['size'] = count($data);
+            $meta['offset'] = $pagination->getOffset();
+            $meta['limit'] = $pagination->getLimit();
+            $meta['current'] = $pagination->current();
         }
         $this->encoder->withLinks($links)->withMeta($meta);
         $this->view->setData($data);
@@ -376,7 +377,7 @@ class JsonApiController extends ActionController
      * @throws RuntimeException
      * @throws \Neos\Flow\Http\Exception
      */
-    public function createAction($resource)
+    public function createAction($resource): void
     {
         try {
             $data = $this->adapter->create($resource, $this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
@@ -392,7 +393,7 @@ class JsonApiController extends ActionController
      * @param string $identifier
      * @return void
      */
-    public function readAction($identifier)
+    public function readAction($identifier): void
     {
         $data = $this->adapter->read($identifier, $this->encodedParameters);
 
@@ -404,7 +405,7 @@ class JsonApiController extends ActionController
      * @throws RuntimeException
      * @throws \Neos\Flow\Http\Exception
      */
-    public function updateAction($resource)
+    public function updateAction($resource): void
     {
         try {
             $data = $this->adapter->update($resource, $this->validatedRequest->getDocument()->getResource(), $this->encodedParameters);
@@ -421,7 +422,7 @@ class JsonApiController extends ActionController
      * @return string
      * @throws \Neos\Flow\Persistence\Exception\IllegalObjectTypeException
      */
-    public function deleteAction()
+    public function deleteAction(): string
     {
         $this->adapter->delete($this->record, $this->encodedParameters);
         $this->response->setStatus(204);
@@ -434,7 +435,7 @@ class JsonApiController extends ActionController
      * @throws UnsupportedRequestTypeException
      * @throws \Neos\Flow\Mvc\Exception\StopActionException
      */
-    public function relatedAction(string $relationship)
+    public function relatedAction(string $relationship): void
     {
         /** @var BaseSchema $schema */
         $schema = $this->getSchema($this->adapter->getResource());
@@ -449,7 +450,7 @@ class JsonApiController extends ActionController
      * To be implemented
      * @param string $relationship
      */
-    public function updateRelationshipAction(string $relationship)
+    public function updateRelationshipAction(string $relationship): string
     {
 
     }
@@ -457,7 +458,7 @@ class JsonApiController extends ActionController
     /**
      * @return string
      */
-    public function optionsAction()
+    public function optionsAction(): string
     {
         $allowed = $this->resourceConfiguration['allowedMethods'];
 
@@ -492,10 +493,10 @@ class JsonApiController extends ActionController
     }
 
     /**
-     * @todo resolve errors with Document error
      * @return string
      * @throws \Neos\Flow\Mvc\Exception\ForwardException
      * @throws \Neos\Flow\Property\Exception\TargetNotFoundException
+     * @todo resolve errors with Document error
      */
     public function errorAction()
     {
@@ -589,19 +590,22 @@ class JsonApiController extends ActionController
      * @param RequestInterface $request
      * @return string
      */
-    protected function getUrlPrefix(RequestInterface $request)
+    protected function getUrlPrefix(RequestInterface $request): string
     {
         $suffix = isset($this->endpoint['baseUrl']) && isset($this->endpoint['version']) ? $this->endpoint['baseUrl'] . '/' . $this->endpoint['version'] : '/';
         return \rtrim($request->getMainRequest()->getHttpRequest()->getBaseUri() . $suffix, '/');
     }
 
     /**
-     * @param $expected
+     * @param string $expected
+     * @throws UnsupportedRequestTypeException
+     * @throws \Neos\Flow\Mvc\Exception\StopActionException
      */
-    protected function assertAllowedMethod($expected)
+    protected function assertAllowedMethod(string $expected): void
     {
         if (!\in_array($expected, $this->allowedMethods)) {
-            throw new JsonApiException([], JsonApiException::HTTP_CODE_FORBIDDEN);
+            // throw new JsonApiException([], JsonApiException::HTTP_CODE_FORBIDDEN);
+            $this->throwStatus(403);
         }
     }
 }

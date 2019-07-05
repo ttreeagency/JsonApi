@@ -25,6 +25,9 @@ class Adapter extends AbstractAdapter
      */
     public function filter($query, $filters)
     {
+        if (isset($filters['name'])) {
+            $query->matching($query->equals('name', $filters['name']->current()));
+        }
     }
 
     /**

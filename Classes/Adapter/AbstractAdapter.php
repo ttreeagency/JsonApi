@@ -433,10 +433,6 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     {
         $filters = $this->extractFilters($parameters);
         $query = $this->newQuery();
-
-        /** Filter and sort */
-        $this->filter($query, $filters);
-
         return $this->countAll($query);
     }
 

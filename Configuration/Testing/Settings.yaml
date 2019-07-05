@@ -19,7 +19,7 @@ Flowpack:
           'restricted-entities':
             adapter: 'Flowpack\JsonApi\Tests\Functional\Fixtures\Entities\Adapter'
             entity: 'Neos\Flow\Tests\Functional\Persistence\Fixtures\TestEntity'
-            schema: 'Flowpack\JsonApi\Tests\Functional\Fixtures\Schema'
+            schema: 'Flowpack\JsonApi\Tests\Functional\Fixtures\Entities\Schema'
             related: []
             allowedMethods: []
           'entity-relations':

@@ -159,7 +159,7 @@ class EncodingParametersParser implements EncodingParametersInterface
             return new PaginationParameters($parameters);
         }
 
-        return [];
+        return new PaginationParameters();
     }
 
     /**
