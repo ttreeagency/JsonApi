@@ -50,7 +50,6 @@ class ValidatedRequest
      */
     public function __construct(RequestInterface $serverRequest)
     {
-
         if (!$serverRequest instanceof HttpRequest && !$serverRequest instanceof ActionRequest) {
             throw new \InvalidArgumentException('The parent request passed to ActionRequest::__construct() must be either an HTTP request or another ActionRequest', 1327846149);
         }

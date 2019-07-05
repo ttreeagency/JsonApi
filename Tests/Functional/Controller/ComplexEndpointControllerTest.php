@@ -129,7 +129,6 @@ class ComplexEndpointControllerTest extends FunctionalTestCase
         $relatedEntityIdentifier = $this->persistenceManager->getIdentifierByObject($relatedEntity);
         $this->isJson($response->getBody());
 
-        \Neos\Flow\var_dump($jsonResponse);
         $this->assertSame('entities', $jsonResponse->data->type);
         $this->assertSame($relatedEntityIdentifier, $jsonResponse->data->id);
         $this->assertSame('Robert', $jsonResponse->data->attributes->name);
@@ -163,8 +162,6 @@ class ComplexEndpointControllerTest extends FunctionalTestCase
         $entityIdentifier = $this->persistenceManager->getIdentifierByObject($testEntity);
         $response = $this->browser->request('http://localhost/testing/v1/entity-relations/' . $entityIdentifier . '/relationships/subentities', 'GET');
         $jsonResponse = \json_decode($response->getBody());
-
-        \Neos\Flow\var_dump($jsonResponse);
 
     }
 

@@ -1,5 +1,8 @@
 Flowpack:
   JsonApi:
+    pagination:
+      defaultPageSize: 25
+      maximumPageSize: 100
     response:
       headers:
         'Access-Control-Allow-Origin': '*'

@@ -2,6 +2,7 @@
 
 namespace Flowpack\JsonApi\Mvc\Controller;
 
+use Flowpack\JsonApi\Domain\Model\PaginationParameters;
 use Neomerx\JsonApi\Contracts\Schema\ErrorInterface;
 use Neomerx\JsonApi\Exceptions\JsonApiException;
 use Neomerx\JsonApi\Contracts\Http\Query\BaseQueryParserInterface as P;
@@ -149,18 +150,13 @@ class EncodingParametersParser implements EncodingParametersInterface
     }
 
     /**
-     * @return array
+     * @return PaginationParameters
      */
-    public function getPagination(): array
+    public function getPagination(): PaginationParameters
     {
         if (\array_key_exists(P::PARAM_PAGE, $this->parameters) === true) {
-            $encodedUrls = $this->parameters[P::PARAM_PAGE];
-            $decodedUrls = \urldecode($encodedUrls);
-            return $this->splitSpaceSeparatedStringAndCheckNoEmpties(
-                P::PARAM_PAGE,
-                $decodedUrls,
-                self::MSG_ERR_INVALID_PARAMETER
-            );
+            $parameters = $this->parameters[P::PARAM_PAGE];
+            return new PaginationParameters($parameters);
         }
 
         return [];

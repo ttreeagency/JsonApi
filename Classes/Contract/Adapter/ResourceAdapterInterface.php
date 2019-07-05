@@ -3,6 +3,7 @@
 namespace Flowpack\JsonApi\Contract\Adapter;
 
 use Flowpack\JsonApi\Contract\Object\ResourceObjectInterface;
+use Flowpack\JsonApi\Domain\Model\PaginationParameters;
 use Flowpack\JsonApi\Mvc\Controller\EncodingParametersParser;
 
 /**
@@ -22,9 +23,10 @@ interface ResourceAdapterInterface
      * Query many domain records.
      *
      * @param EncodingParametersParser $parameters
+     * @param PaginationParameters $paginationParameters
      * @return mixed
      */
-    public function query(EncodingParametersParser $parameters);
+    public function query(EncodingParametersParser $parameters, PaginationParameters $paginationParameters);
 
     /**
      * Create a domain record using data from the supplied resource object.

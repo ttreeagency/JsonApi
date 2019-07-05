@@ -40,7 +40,7 @@ class BasicEndpointControllerTest extends FunctionalTestCase
     public function assertClientRequests()
     {
         $response = $this->browser->request('http://localhost/testing/v1/entities', 'GET');
-        $this->assertEquals(415, $response->getStatusCode());
+        $this->assertEquals(200, $response->getStatusCode());
     }
 
     /**
@@ -77,7 +77,6 @@ class BasicEndpointControllerTest extends FunctionalTestCase
 
         $response = $this->browser->request('http://localhost/testing/v1/entities', 'GET');
         $jsonResponse = \json_decode($response->getBody()->getContents());
-        \Neos\Flow\var_dump($jsonResponse, 'Dum');
 
         $entityIdentifier1 = $this->persistenceManager->getIdentifierByObject($entity1);
         $this->isJson($response->getBody()->getContents());
@@ -151,7 +150,36 @@ class BasicEndpointControllerTest extends FunctionalTestCase
      */
     public function fetchResourceListWithPagination()
     {
-        $this->markTestSkipped('pagination');
+        for ($i = 0; $i < 100; $i++) {
+            $entity = new TestEntity();
+            $entity->setName('Entity #' . $i);
+            $this->testEntityRepository->add($entity);
+        }
+        $this->persistenceManager->persistAll();
+        $this->persistenceManager->clearState();
+
+        // Page / limit / page_limit
+        $response = $this->browser->request('http://localhost/testing/v1/entities?page[number]=1&page[size]=10', 'GET');
+        $jsonResponse = \json_decode($response->getBody());
+
+        $this->isJson($response->getBody());
+        $this->assertSame(100, $jsonResponse->meta->total);
+        $this->assertSame(10, $jsonResponse->meta->size);
+        
+        $this->assertSame('http://localhost/testing/v1/entities?page%5Bnumber%5D=1&page%5Bsize%5D=10', $jsonResponse->links->self);
+        $this->assertSame('http://localhost/testing/v1/entities?page%5Bnumber%5D=1&page%5Bsize%5D=10', $jsonResponse->links->first);
+        $this->assertSame('http://localhost/testing/v1/entities?page%5Bnumber%5D=10&page%5Bsize%5D=10', $jsonResponse->links->last);
+        $this->assertSame(10, \count($jsonResponse->data));
+
+        for($i = 1; $i < 10; $i++) {
+            $response = $this->browser->request($jsonResponse->links->next, 'GET');
+            $jsonResponse = \json_decode($response->getBody());
+            $this->isJson($response->getBody());
+            $this->assertSame(10, \count($jsonResponse->data));
+            $this->assertSame(100, $jsonResponse->meta->total);
+            $this->assertSame(10, $jsonResponse->meta->size);
+            $this->assertSame(10 * $i, $jsonResponse->meta->offset);
+        }
     }
 
     /**
@@ -285,7 +313,6 @@ class BasicEndpointControllerTest extends FunctionalTestCase
         $request = [];
         $response = $this->browser->request('http://localhost/testing/v1/entities/' . $entityIdentifier, 'UPDATE', [], [], [], \json_encode($request));
 
-//        \Neos\Flow\var_dump($response->getContent());
         $this->markTestSkipped('BUGFIX: Currently not handling the case of a empty body with a actual resource Id');
         $this->assertEquals(406, $response->getStatusCode());
     }

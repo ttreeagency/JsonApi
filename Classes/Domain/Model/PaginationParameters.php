@@ -83,6 +83,14 @@ class PaginationParameters
     }
 
     /**
+     * @return integer
+     */
+    public function current()
+    {
+        return (int)$this->parameters['number'];
+    }
+
+    /**
      * @return array
      * @throws Exception
      */

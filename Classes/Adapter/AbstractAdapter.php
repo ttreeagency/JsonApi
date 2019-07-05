@@ -9,6 +9,7 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Flow\ObjectManagement\ObjectManagerInterface;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\Flow\Persistence\QueryInterface;
+use Neos\Flow\Persistence\QueryResultInterface;
 use Neos\Flow\Property\TypeConverter\PersistentObjectConverter;
 use Neos\Utility\Arrays;
 use Neomerx\JsonApi\Contracts\Encoder\EncoderInterface;
@@ -115,22 +116,10 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     protected $allowedPropertyMappingPaths = [];
 
     /**
-     * The model key that is the primary key for the resource id.
-     *
-     * If empty, defaults to `Model::getKeyName()`.
-     *
-     * @var string|null
+     * @var array
+     * @Flow\InjectConfiguration(path="pagination")
      */
-    protected $primaryKey;
-
-    /**
-     * The filter param for a find-many request.
-     *
-     * If null, defaults to the JSON API keyword `id`.
-     *
-     * @var string|null
-     */
-    protected $findManyFilter = null;
+    protected $settings;
 
     /**
      * The default pagination to use if no page parameters have been provided.
@@ -145,14 +134,6 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      * @var array|null
      */
     protected $defaultPagination = null;
-
-    /**
-     * The model relationships to eager load on every query.
-     *
-     * @var string[]|null
-     * @deprecated use `$defaultWith` instead.
-     */
-    protected $with = null;
 
     /**
      * A mapping of sort parameters to columns.
@@ -423,10 +404,11 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
 
     /**
      * @param EncodingParametersParser $parameters
-     * @return mixed|PageInterface
+     * @param PaginationParameters $paginationParameters
+     * @return mixed
      * @throws RuntimeException
      */
-    public function query(EncodingParametersParser $parameters)
+    public function query(EncodingParametersParser $parameters, PaginationParameters $paginationParameters)
     {
         $filters = $this->extractFilters($parameters);
         $query = $this->newQuery();
@@ -437,16 +419,9 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         $this->sort($query, $parameters->getSorts());
 
         /** Paginate results if needed. */
-        $pagination = $this->extractPagination($parameters);
-
-//        if (!$pagination->isEmpty() && !$this->hasPaging()) {
-//            throw new RuntimeException('Paging parameters exist but paging is not supported.');
-//        }
-
-        return $this->all($query);
-//        return $pagination->isEmpty() ?
-//            $this->all($query) :
-//            $this->paginate($query, $this->normalizeParameters($parameters, $pagination));
+        return $paginationParameters->hasPagination() ?
+            $this->paginate($query, $paginationParameters) :
+            $this->all($query);
     }
 
     /**
@@ -473,9 +448,10 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
      *
      * @param Relations\BelongsToMany|Relations\HasMany|Relations\HasManyThrough $relation
      * @param EncodingParametersParser $parameters
+     * @param PaginationParameters $paginationParameters
      * @return mixed
      */
-    public function queryRelation($relation, EncodingParametersParser $parameters)
+    public function queryRelation($relation, EncodingParametersParser $parameters, PaginationParameters $paginationParameters)
     {
         $query = $relation->newQuery();
 
@@ -484,15 +460,9 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         $this->sort($query, (array)$parameters->getSorts());
 
         /** Paginate results if needed. */
-        $pagination = $parameters->getPagination();
-
-        if (!$pagination->isEmpty() && !$this->hasPaging()) {
-            throw new RuntimeException('Paging parameters exist but paging is not supported.');
-        }
-
-        return $pagination->isEmpty() ?
-            $this->all($query) :
-            $this->paginate($query, $parameters);
+        return $paginationParameters->hasPagination() ?
+            $this->paginate($query, $paginationParameters) :
+            $this->all($query);
     }
 
     /**
@@ -815,15 +785,17 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
 
     /**
      * @param QueryInterface $query
-     * @param EncodingParametersParser $parameters
-     * @return PageInterface
+     * @param PaginationParameters $paginationParameters
+     * @return QueryResultInterface
      * @todo
      * Return the result for a paginated query.
      *
      */
-    protected function paginate($query, EncodingParametersParser $parameters)
+    protected function paginate($query, PaginationParameters $paginationParameters)
     {
-        return $this->paging->paginate($query, $parameters);
+        $query->setOffset($paginationParameters->getOffset());
+        $query->setLimit($paginationParameters->getLimit());
+        return $query->execute();
     }
 
     /**
@@ -865,30 +837,22 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
     }
 
     /**
-     * @param EncodingParametersParser $parameters
+     * @param PaginationParameters $paginationParameters
      * @return array
      */
-    protected function extractPagination(EncodingParametersParser $parameters)
+    protected function extractPagination(PaginationParameters $paginationParameters)
     {
-        $pagination = (array)$parameters->getPagination();
-
-        return $pagination ?: $this->defaultPagination();
+//        $pagination = (array)$parameters->getPagination();
+//        return $pagination ?: $this->defaultPagination();
+        return $paginationParameters;
     }
 
     /**
      * @return array
      */
-    protected function defaultPagination()
+    public function defaultPagination()
     {
         return (array)$this->defaultPagination;
-    }
-
-    /**
-     * @return bool
-     */
-    protected function hasPaging()
-    {
-        return $this->paging instanceof PaginationParameters;
     }
 
     /**
@@ -965,21 +929,6 @@ abstract class AbstractAdapter extends AbstractResourceAdapter
         if (isset($this->sortColumns[$field])) {
             return $this->sortColumns[$field];
         }
-
-//        if (\strpos($field, '.')) {
-//            $relation = \strtok($field, '.');
-//
-//            if (\method_exists($entity, $relation)) {
-//                /** @var Relations\Relation $relationShip */
-//                $relationShip = $model->$relation();
-//                $table = $relationShip->getRelated()->getTable();
-//
-//                if (($position = \strpos($field, '.')) !== false) {
-//                    $tableWithField = $table . \substr($field, $position);
-//                    return $model::$snakeAttributes ? Str::underscore($tableWithField) : Str::camelize($tableWithField);
-//                }
-//            }
-//        }
 
         return Str::camelize($field);
     }

@@ -315,14 +315,13 @@ class JsonApiController extends ActionController
      */
     public function listAction()
     {
-        $isSubUrl = false;
+        $isSubUrl = true;
         $hasMeta = false;
 
-        $data = $this->adapter->query($this->encodedParameters);
         $count = $this->adapter->count($this->encodedParameters);
-
-        $parameters = new PaginationParameters($this->encodedParameters->getPagination() ?: []);
         $arguments = $this->request->getHttpRequest()->getArguments();
+        $pagination = $this->encodedParameters->getPagination();
+        $data = $this->adapter->query($this->encodedParameters, $pagination);
 
         if ($arguments !== []) {
             $query = \http_build_query($arguments);
@@ -335,36 +334,40 @@ class JsonApiController extends ActionController
             Link::SELF => $self
         ];
 
-        if ($count > $parameters->getLimit()) {
-            $prev = $parameters->prev();
+        if ($count > $pagination->getLimit()) {
+            $prev = $pagination->prev();
             if ($prev !== null) {
                 $query = \http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $prev));
                 $links[Link::PREV] = new Link($isSubUrl, \sprintf('/%s?%s', $this->adapter->getResource(), $query), $hasMeta);
             }
 
-            $next = $parameters->next($count);
+            $next = $pagination->next($count);
             if ($next !== null) {
                 $query = \http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $next));
                 $links[Link::NEXT] = new Link($isSubUrl, \sprintf('/%s?%s', $this->adapter->getResource(), $query), $hasMeta);
             }
 
-            $first = $parameters->first();
+            $first = $pagination->first();
             if ($first !== null) {
                 $query = \http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $first));
                 $links[Link::FIRST] = new Link($isSubUrl, \sprintf('/%s?%s', $this->adapter->getResource(), $query), $hasMeta);
             }
 
-            $last = $parameters->last($count);
+            $last = $pagination->last($count);
             if ($last !== null) {
                 $query = \http_build_query(Arrays::arrayMergeRecursiveOverrule($arguments, $last));
                 $links[Link::LAST] = new Link($isSubUrl, \sprintf('/%s?%s', $this->adapter->getResource(), $query), $hasMeta);
             }
+
+            $meta = [
+                'total' => $count,
+                'size' => count($data),
+                'offset' => $pagination->getOffset(),
+                'limit' => $pagination->getLimit(),
+                'current' => $pagination->current(),
+            ];
         }
-
-        $this->encoder->withLinks($links)->withMeta([
-            'total' => $count
-        ]);
-
+        $this->encoder->withLinks($links)->withMeta($meta);
         $this->view->setData($data);
     }
 
@@ -409,7 +412,6 @@ class JsonApiController extends ActionController
             $this->response = $this->response->withStatus(406);
             return;
         }
-
         $this->persistenceManager->persistAll();
         $this->response->setStatus(200);
         $this->view->setData($data);
@@ -499,8 +501,6 @@ class JsonApiController extends ActionController
     {
         $this->response = $this->response->withStatus(422);
         $this->handleTargetNotFoundError();
-
-        \Neos\Flow\var_dump(\json_encode((object)$this->getFlattenedValidationErrorMessage()),'??');
         $this->response->setContent(\json_encode((object)$this->getFlattenedValidationErrorMessage()));
     }
 
